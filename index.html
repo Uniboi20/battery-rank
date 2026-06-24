@@ -223,7 +223,7 @@
   }
   thead {
     position: sticky;
-    /* top: 60px; */
+    /* top: 10px; */
     /* z-index: 0; */
   }
   th {
@@ -496,6 +496,7 @@ async function loadBatteries() {
   BATTERIES = await res.json();
   document.getElementById('headerMeta').textContent =
     `${BATTERIES.length} stations · prices live from database`;
+    renderTable();
 }
 
 loadBatteries();
@@ -561,11 +562,11 @@ function renderTable() {
   const sortSel = document.getElementById('sortCol').value;
 
   // Sync sort key from dropdown
-  if (sortSel === 'score') { sortKey = 'score'; sortDir = -1; }
-  else if (sortSel === 'price') { sortKey = 'price'; sortDir = 1; }
-  else if (sortSel === 'price_desc') { sortKey = 'price'; sortDir = -1; }
-  else if (sortSel === 'capacity_wh') { sortKey = 'capacity_wh'; sortDir = -1; }
-  else if (sortSel === 'peak_power_w') { sortKey = 'peak_power_w'; sortDir = -1; }
+  if (sortSel === 'score') { sortKey = 'score'; sortDir = 1; }
+  else if (sortSel === 'price') { sortKey = 'price'; sortDir = -1; }
+  else if (sortSel === 'price_desc') { sortKey = 'price'; sortDir = 1; }
+  else if (sortSel === 'capacity_wh') { sortKey = 'capacity_wh'; sortDir = 1; }
+  else if (sortSel === 'peak_power_w') { sortKey = 'peak_power_w'; sortDir = 1; }
   else if (sortSel === 'dollar_per_wh') { sortKey = 'dollar_per_wh'; sortDir = 1; }
 
   let data = BATTERIES.map(b => ({
