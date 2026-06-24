@@ -1,0 +1,16 @@
+# netlify.toml — drop this in the root of your project repo
+
+[build]
+  publish = "."       # serve index.html from root
+  functions = "netlify/functions"
+
+# Daily price scrape at 8:00 AM UTC
+[functions."scrape-prices"]
+  schedule = "0 8 * * *"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
