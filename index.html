@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PowerRank — Portable Battery Station Comparison</title>
 <style>
-  /* ── Reset & Base ── */
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
@@ -34,7 +33,6 @@
     line-height: 1.5;
   }
 
-  /* ── Google Fonts ── */
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
 
   /* ── Header ── */
@@ -87,10 +85,7 @@
     color: var(--text);
     line-height: 1.2;
   }
-  .hero-title em {
-    font-style: normal;
-    color: var(--accent);
-  }
+  .hero-title em { font-style: normal; color: var(--accent); }
   .hero-sub {
     font-size: 0.85rem;
     color: var(--sub);
@@ -98,44 +93,198 @@
     max-width: 520px;
   }
 
-  /* ── Power Slider ── */
-  .power-panel {
+  /* ── Filter Panel (slider group) ── */
+  .filter-panel {
     background: var(--surface);
-    border: 1px solid var(--border);
+    border: 1px solid var(--brand);
     border-radius: var(--radius-lg);
     padding: 1.25rem 1.5rem;
-    min-width: 280px;
+    min-width: 320px;
+    position: relative;
   }
-  .power-label {
-    font-size: 0.72rem;
+  .filter-panel::before {
+    content: 'FILTERS';
+    position: absolute;
+    top: -9px;
+    left: 1rem;
+    background: var(--surface);
+    padding: 0 6px;
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    font-weight: 600;
+    color: var(--brand);
+    letter-spacing: 0.1em;
+  }
+  .filter-sliders {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .slider-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0.5rem;
+    align-items: center;
+  }
+  .slider-label {
+    font-size: 0.68rem;
     font-family: var(--font-mono);
     color: var(--sub);
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.3rem;
   }
-  .power-value {
+  .slider-value {
     font-family: var(--font-mono);
-    font-size: 1.8rem;
+    font-size: 1rem;
     font-weight: 600;
     color: var(--accent);
-    line-height: 1;
-    margin-bottom: 0.75rem;
+    text-align: right;
+    white-space: nowrap;
+    min-width: 80px;
   }
-  .power-value span { font-size: 0.9rem; color: var(--sub); }
+  .slider-value.power-val { font-size: 1.4rem; }
   input[type=range] {
     width: 100%;
     accent-color: var(--accent);
     height: 4px;
     cursor: pointer;
   }
-  .power-hints {
+  .slider-hints {
     display: flex;
     justify-content: space-between;
-    font-size: 0.7rem;
+    font-size: 0.65rem;
     color: var(--muted);
-    margin-top: 0.4rem;
+    margin-top: 0.2rem;
     font-family: var(--font-mono);
+  }
+  .slider-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 0.25rem 0;
+  }
+
+  /* ── Top 5 ── */
+  .top5-section {
+    margin-bottom: 2rem;
+  }
+  .top5-label {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: var(--sub);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .top5-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+  .top5-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0.75rem;
+  }
+  .top5-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1rem 1.1rem 1.1rem;
+    position: relative;
+    transition: border-color 0.15s, transform 0.15s;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+  }
+  .top5-card:hover {
+    border-color: var(--brand);
+    transform: translateY(-2px);
+  }
+  .top5-card.rank-1 { border-color: rgba(245,197,66,0.4); background: linear-gradient(135deg, #151820 0%, #1c1a10 100%); }
+  .top5-card.rank-2 { border-color: rgba(176,190,197,0.3); }
+  .top5-card.rank-3 { border-color: rgba(205,127,50,0.3); }
+
+  .top5-rank {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    margin-bottom: 0.6rem;
+  }
+  .rank-1 .top5-rank { color: #f5c542; }
+  .rank-2 .top5-rank { color: #b0bec5; }
+  .rank-3 .top5-rank { color: #cd7f32; }
+  .rank-4 .top5-rank, .rank-5 .top5-rank { color: var(--muted); }
+
+  .top5-brand {
+    font-size: 0.72rem;
+    color: var(--sub);
+    margin-bottom: 0.1rem;
+  }
+  .top5-model {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.2;
+    margin-bottom: 0.75rem;
+  }
+  .top5-card:hover .top5-model { color: var(--brand); }
+
+  .top5-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+  .top5-stat {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 0.5rem;
+  }
+  .top5-stat-label {
+    font-size: 0.68rem;
+    color: var(--sub);
+    font-family: var(--font-mono);
+  }
+  .top5-stat-val {
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text);
+    text-align: right;
+  }
+  .top5-score {
+    margin-top: 0.75rem;
+    padding-top: 0.65rem;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .top5-score-label {
+    font-size: 0.65rem;
+    font-family: var(--font-mono);
+    color: var(--sub);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .top5-score-val {
+    font-family: var(--font-mono);
+    font-size: 1rem;
+    font-weight: 700;
+  }
+  .top5-link-hint {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.85rem;
+    font-size: 0.65rem;
+    color: var(--muted);
   }
 
   /* ── Controls bar ── */
@@ -171,15 +320,12 @@
     outline: none;
     transition: border-color 0.15s;
   }
-  input[type=search] {
-    padding-left: 2.2rem;
-    width: 100%;
-  }
+  input[type=search] { padding-left: 2.2rem; width: 100%; }
   input[type=search]:focus, select:focus { border-color: var(--brand); }
   select { cursor: pointer; min-width: 140px; }
   select option { background: var(--surface); }
 
-  .filter-group {
+  .chip-group {
     display: flex;
     gap: 0.5rem;
     flex-wrap: wrap;
@@ -216,16 +362,7 @@
     border-radius: var(--radius-lg);
     background: var(--surface);
   }
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.83rem;
-  }
-  thead {
-    position: sticky;
-    /* top: 10px; */
-    /* z-index: 0; */
-  }
+  table { width: 100%; border-collapse: collapse; font-size: 0.83rem; }
   th {
     background: #1a1d2b;
     color: var(--sub);
@@ -246,7 +383,6 @@
   th.sorted { color: var(--accent); }
   th .sort-arrow { margin-left: 4px; opacity: 0.6; }
   th.sorted .sort-arrow { opacity: 1; }
-
   td {
     padding: 0.8rem 1rem;
     border-bottom: 1px solid var(--border);
@@ -256,99 +392,51 @@
   tr:hover td { background: rgba(124,110,245,0.04); }
 
   .td-brand { color: var(--sub); font-size: 0.75rem; }
-  .td-model {
-    font-weight: 600;
-    color: var(--text);
-  }
-  .td-model a {
-    color: inherit;
-    text-decoration: none;
-  }
+  .td-model { font-weight: 600; color: var(--text); }
+  .td-model a { color: inherit; text-decoration: none; }
   .td-model a:hover { color: var(--brand); }
-  .model-link-icon {
-    color: var(--muted);
-    font-size: 0.65rem;
-    margin-left: 4px;
-    vertical-align: middle;
-  }
-  .td-num {
-    font-family: var(--font-mono);
-    text-align: right;
-    color: var(--text);
-  }
-  .td-price {
-    font-family: var(--font-mono);
-    font-weight: 600;
-    color: var(--text);
-    text-align: right;
-  }
-  .td-score {
-    font-family: var(--font-mono);
-    font-weight: 600;
-    text-align: right;
-  }
+  .model-link-icon { color: var(--muted); font-size: 0.65rem; margin-left: 4px; vertical-align: middle; }
+  .td-num { font-family: var(--font-mono); text-align: right; color: var(--text); }
+  .td-price { font-family: var(--font-mono); font-weight: 600; color: var(--text); text-align: right; }
+  .td-score { font-family: var(--font-mono); font-weight: 600; text-align: right; }
   .score-pos { color: var(--positive); }
   .score-neg { color: var(--negative); }
   .score-zero { color: var(--sub); }
 
-  .badge-row {
-    display: flex;
-    gap: 4px;
-    flex-wrap: wrap;
-  }
-  .badge {
-    font-size: 0.65rem;
-    font-family: var(--font-mono);
-    padding: 2px 6px;
-    border-radius: 4px;
-    white-space: nowrap;
-  }
+  .badge-row { display: flex; gap: 4px; flex-wrap: wrap; }
+  .badge { font-size: 0.65rem; font-family: var(--font-mono); padding: 2px 6px; border-radius: 4px; white-space: nowrap; }
   .badge-exp { background: rgba(124,110,245,0.15); color: #a89af5; border: 1px solid rgba(124,110,245,0.3); }
   .badge-app { background: rgba(61,214,140,0.1); color: #3dd68c; border: 1px solid rgba(61,214,140,0.25); }
   .badge-jump { background: rgba(245,166,35,0.1); color: var(--accent); border: 1px solid rgba(245,166,35,0.25); }
 
-  .rank-num {
-    font-family: var(--font-mono);
-    font-size: 0.75rem;
-    color: var(--muted);
-    text-align: center;
-    width: 36px;
-  }
+  .rank-num { font-family: var(--font-mono); font-size: 0.75rem; color: var(--muted); text-align: center; width: 36px; }
   tr:nth-child(1) .rank-num { color: #f5c542; font-weight: 700; }
   tr:nth-child(2) .rank-num { color: #b0bec5; font-weight: 600; }
   tr:nth-child(3) .rank-num { color: #cd7f32; font-weight: 600; }
 
-  .score-bar-wrap {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    min-width: 120px;
-  }
-  .score-bar {
-    flex: 1;
-    height: 4px;
-    background: var(--border);
-    border-radius: 2px;
-    overflow: hidden;
-  }
-  .score-bar-fill {
-    height: 100%;
-    border-radius: 2px;
-    transition: width 0.3s ease;
-  }
+  .score-bar-wrap { display: flex; align-items: center; gap: 8px; min-width: 120px; }
+  .score-bar { flex: 1; height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+  .score-bar-fill { height: 100%; border-radius: 2px; transition: width 0.3s ease; }
   .fill-pos { background: var(--positive); }
   .fill-neg { background: var(--negative); }
 
-  .notes-cell {
-    color: var(--sub);
-    font-size: 0.75rem;
-    max-width: 160px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
+  .notes-cell { color: var(--sub); font-size: 0.75rem; max-width: 160px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-  /* ── Footer ── */
+  /* ── Section label above table ── */
+  .table-section-label {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: var(--sub);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .table-section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
   footer {
     margin-top: 3rem;
     padding: 1.5rem 2rem;
@@ -359,20 +447,21 @@
     text-align: center;
   }
 
-  /* ── Empty state ── */
-  .empty {
-    padding: 4rem 2rem;
-    text-align: center;
-    color: var(--sub);
-  }
+  .empty { padding: 4rem 2rem; text-align: center; color: var(--sub); }
   .empty-icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
   .empty-title { font-weight: 600; color: var(--text); margin-bottom: 0.25rem; }
 
-  /* ── Responsive ── */
+  @media (max-width: 1100px) {
+    .top5-grid { grid-template-columns: repeat(3, 1fr); }
+  }
   @media (max-width: 900px) {
     .hero { grid-template-columns: 1fr; }
+    .top5-grid { grid-template-columns: repeat(2, 1fr); }
     main { padding: 1rem; }
     header { padding: 0 1rem; }
+  }
+  @media (max-width: 500px) {
+    .top5-grid { grid-template-columns: 1fr; }
   }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
@@ -381,28 +470,69 @@
 
 <header>
   <div class="logo">⚡ Power<span>Rank</span></div>
-  <div class="header-meta" id="headerMeta">80 stations · updated today</div>
+  <div class="header-meta" id="headerMeta">Loading…</div>
 </header>
 
 <main>
   <div class="hero">
     <div>
       <h1 class="hero-title">Find the <em>best value</em> portable power station</h1>
-      <p class="hero-sub">View popular batteries scored by capacity, outlets, and output relative to price. Adjust your power needs to recalculate rankings instantly.</p>
+      <p class="hero-sub">View popular batteries scored by capacity, outlets, and output relative to price. Adjust your filters to recalculate rankings instantly.</p>
     </div>
-    <div class="power-panel">
-      <div class="power-label">Max power needed</div>
-      <div class="power-value" id="powerDisplay">1800 <span>W</span></div>
-      <input type="range" id="powerSlider" min="100" max="7200" step="100" value="1800"
-             oninput="onPowerChange(this.value)">
-      <div class="power-hints">
-        <span>100W</span>
-        <span>1800W</span>
-        <span>7200W</span>
+
+    <!-- ── Unified Filter Panel ── -->
+    <div class="filter-panel">
+      <div class="filter-sliders">
+
+        <div>
+          <div class="slider-row">
+            <div>
+              <div class="slider-label">Max power needed</div>
+              <input type="range" id="powerSlider" min="100" max="7200" step="100" value="1800" oninput="onSliderChange()">
+              <div class="slider-hints"><span>100W</span><span>1800W</span><span>7200W</span></div>
+            </div>
+            <div class="slider-value power-val" id="powerDisplay">1800<br><span style="font-size:0.7rem;color:var(--sub);">W</span></div>
+          </div>
+        </div>
+
+        <hr class="slider-divider">
+
+        <div>
+          <div class="slider-row">
+            <div>
+              <div class="slider-label">Max price</div>
+              <input type="range" id="priceSlider" min="100" max="5000" step="50" value="5000" oninput="onSliderChange()">
+              <div class="slider-hints"><span>$100</span><span>$2,500</span><span>$5,000</span></div>
+            </div>
+            <div class="slider-value" id="priceDisplay">Any</div>
+          </div>
+        </div>
+
+        <hr class="slider-divider">
+
+        <div>
+          <div class="slider-row">
+            <div>
+              <div class="slider-label">Min capacity</div>
+              <input type="range" id="capacitySlider" min="0" max="4000" step="100" value="0" oninput="onSliderChange()">
+              <div class="slider-hints"><span>0 Wh</span><span>2,000 Wh</span><span>4,000 Wh</span></div>
+            </div>
+            <div class="slider-value" id="capacityDisplay">Any</div>
+          </div>
+        </div>
+
       </div>
     </div>
   </div>
 
+  <!-- ── Top 5 ── -->
+  <div class="top5-section">
+    <div class="top5-label">Top 5 by value score</div>
+    <div class="top5-grid" id="top5Grid"></div>
+  </div>
+
+  <!-- ── Full Table ── -->
+  <div class="table-section-label">All stations</div>
   <div class="controls">
     <div class="search-wrap">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -433,7 +563,7 @@
       <option value="dollar_per_wh">Sort: $/Wh</option>
     </select>
 
-    <div class="filter-group">
+    <div class="chip-group">
       <span style="font-size:0.72rem;color:var(--sub);font-family:var(--font-mono);">FEATURES:</span>
       <div class="chip" id="chip-expandable" onclick="toggleChip(this,'expandable')">Expandable</div>
       <div class="chip" id="chip-app" onclick="toggleChip(this,'app')">App Support</div>
@@ -466,19 +596,19 @@
     <div id="emptyState" class="empty" style="display:none">
       <div class="empty-icon">🔍</div>
       <div class="empty-title">No matches found</div>
-      <div>Try a different search or clear the filters.</div>
+      <div>Try adjusting your filters or clearing the search.</div>
     </div>
   </div>
 </main>
 
 <footer>
-  Value score is unitless: positive = perceived value exceeds price, negative = price exceeds perceived value. 
-  Scores recalculate in real time when you adjust the power slider. · Price data from Amazon.
+  Value score is unitless: positive = perceived value exceeds price, negative = price exceeds perceived value.
+  Scores recalculate in real time when you adjust filters. · Price data from Amazon.
 </footer>
 
 <script>
 const SUPABASE_URL = 'https://qeeotzunkyzivxjydiuw.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFlZW90enVua3l6aXZ4anlkaXV3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyNDcwOTYsImV4cCI6MjA5NzgyMzA5Nn0.YCcolPgRexsRm2rHR0vcWXNnF7eIbSMCmI8PCwhf2D4'; // paste from Supabase → Project Settings → API
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFlZW90enVua3l6aXZ4anlkaXV3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyNDcwOTYsImV4cCI6MjA5NzgyMzA5Nn0.YCcolPgRexsRm2rHR0vcWXNnF7eIbSMCmI8PCwhf2D4';
 
 let BATTERIES = [];
 
@@ -489,25 +619,24 @@ async function loadBatteries() {
       'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
     }
   });
-  if (!res.ok) {
-    console.error('Failed to load batteries:', res.status);
-    return;
-  }
+  if (!res.ok) { console.error('Failed to load batteries:', res.status); return; }
   BATTERIES = await res.json();
-  document.getElementById('headerMeta').textContent =
-    `${BATTERIES.length} stations · prices live from database`;
-    renderTable();
+  document.getElementById('headerMeta').textContent = `${BATTERIES.length} stations · prices live from database`;
+  renderAll();
 }
 
 loadBatteries();
+
 // Formula constants
 const B2 = 0.585, B3 = 7, B6 = 75, B7 = 30, B8 = 15;
 const B9 = 1.58, B12 = 300;
 const EXP_BONUS = 150, APP_BONUS = 75, JUMP_BONUS = 50;
 
 let maxPower = 1800;
+let maxPrice = 5000;
+let minCapacity = 0;
 let sortKey = 'score';
-let sortDir = -1; // -1 = desc
+let sortDir = -1;
 let activeChips = new Set();
 
 function calcScore(b, pw) {
@@ -523,30 +652,34 @@ function calcScore(b, pw) {
   return Math.round(cap + l2 + v120 + usb + output + exp + app + jump - b.price);
 }
 
-function onPowerChange(val) {
-  maxPower = parseInt(val);
-  document.getElementById('powerDisplay').innerHTML = `${maxPower.toLocaleString()} <span>W</span>`;
-  renderTable();
+function onSliderChange() {
+  maxPower    = parseInt(document.getElementById('powerSlider').value);
+  maxPrice    = parseInt(document.getElementById('priceSlider').value);
+  minCapacity = parseInt(document.getElementById('capacitySlider').value);
+
+  document.getElementById('powerDisplay').innerHTML =
+    `${maxPower.toLocaleString()}<br><span style="font-size:0.7rem;color:var(--sub);">W</span>`;
+
+  const priceEl = document.getElementById('priceDisplay');
+  priceEl.textContent = maxPrice >= 5000 ? 'Any' : `$${maxPrice.toLocaleString()}`;
+
+  const capEl = document.getElementById('capacityDisplay');
+  capEl.textContent = minCapacity === 0 ? 'Any' : `${minCapacity.toLocaleString()} Wh`;
+
+  renderAll();
 }
 
 function toggleChip(el, key) {
   el.classList.toggle('active');
   if (activeChips.has(key)) activeChips.delete(key);
   else activeChips.add(key);
-  renderTable();
+  renderAll();
 }
 
 function setSort(key) {
   if (sortKey === key) { sortDir *= -1; }
-  else { sortKey = key; sortDir = key === 'price' || key === 'dollar_per_wh' ? 1 : -1; }
-  // Update header highlight
-  document.querySelectorAll('th').forEach(th => {
-    th.classList.remove('sorted');
-    const arrow = th.querySelector('.sort-arrow');
-    if (arrow) arrow.textContent = '↕';
-  });
-  // Can't easily target header by key here, just re-render
-  renderTable();
+  else { sortKey = key; sortDir = (key === 'price' || key === 'dollar_per_wh') ? 1 : -1; }
+  renderAll();
   document.getElementById('sortCol').value =
     key === 'score' ? 'score' :
     key === 'price' && sortDir === 1 ? 'price' :
@@ -556,18 +689,17 @@ function setSort(key) {
     key === 'dollar_per_wh' ? 'dollar_per_wh' : 'score';
 }
 
-function renderTable() {
-  const search = document.getElementById('searchInput').value.toLowerCase();
-  const brand = document.getElementById('brandFilter').value;
-  const sortSel = document.getElementById('sortCol').value;
+function getFilteredSorted() {
+  const search = document.getElementById('searchInput') ? document.getElementById('searchInput').value.toLowerCase() : '';
+  const brand  = document.getElementById('brandFilter') ? document.getElementById('brandFilter').value : '';
+  const sortSel = document.getElementById('sortCol') ? document.getElementById('sortCol').value : 'score';
 
-  // Sync sort key from dropdown
-  if (sortSel === 'score') { sortKey = 'score'; sortDir = 1; }
-  else if (sortSel === 'price') { sortKey = 'price'; sortDir = -1; }
-  else if (sortSel === 'price_desc') { sortKey = 'price'; sortDir = 1; }
-  else if (sortSel === 'capacity_wh') { sortKey = 'capacity_wh'; sortDir = 1; }
-  else if (sortSel === 'peak_power_w') { sortKey = 'peak_power_w'; sortDir = 1; }
-  else if (sortSel === 'dollar_per_wh') { sortKey = 'dollar_per_wh'; sortDir = 1; }
+  if (sortSel === 'score')       { sortKey = 'score';       sortDir = -1; }
+  else if (sortSel === 'price')  { sortKey = 'price';       sortDir = 1;  }
+  else if (sortSel === 'price_desc') { sortKey = 'price';   sortDir = -1; }
+  else if (sortSel === 'capacity_wh')  { sortKey = 'capacity_wh';  sortDir = -1; }
+  else if (sortSel === 'peak_power_w') { sortKey = 'peak_power_w'; sortDir = -1; }
+  else if (sortSel === 'dollar_per_wh'){ sortKey = 'dollar_per_wh'; sortDir = 1; }
 
   let data = BATTERIES.map(b => ({
     ...b,
@@ -575,17 +707,17 @@ function renderTable() {
     dollar_per_wh: b.price / b.capacity_wh
   }));
 
-  // Filter
   data = data.filter(b => {
     if (search && !`${b.brand} ${b.model}`.toLowerCase().includes(search)) return false;
     if (brand && b.brand !== brand) return false;
+    if (b.price > maxPrice) return false;
+    if (b.capacity_wh < minCapacity) return false;
     if (activeChips.has('expandable') && !b.expandable) return false;
-    if (activeChips.has('app') && !b.app_support) return false;
-    if (activeChips.has('jump') && !b.jump_starter) return false;
+    if (activeChips.has('app')        && !b.app_support) return false;
+    if (activeChips.has('jump')       && !b.jump_starter) return false;
     return true;
   });
 
-  // Sort
   data.sort((a, b) => {
     const av = sortKey === 'brand_model' ? `${a.brand} ${a.model}` : a[sortKey];
     const bv = sortKey === 'brand_model' ? `${b.brand} ${b.model}` : b[sortKey];
@@ -593,46 +725,85 @@ function renderTable() {
     return sortDir * (bv - av);
   });
 
-  // Score range for bar normalization
+  return data;
+}
+
+const RANK_LABELS = ['#1', '#2', '#3', '#4', '#5'];
+const RANK_CLASSES = ['rank-1', 'rank-2', 'rank-3', 'rank-4', 'rank-5'];
+
+function renderTop5(data) {
+  const top5 = [...data].sort((a, b) => b.score - a.score).slice(0, 5);
+  const grid = document.getElementById('top5Grid');
+  if (top5.length === 0) { grid.innerHTML = ''; return; }
+
+  grid.innerHTML = top5.map((b, i) => {
+    const scoreClass = b.score >= 0 ? 'score-pos' : 'score-neg';
+    const inner = `
+      <div class="top5-rank">${RANK_LABELS[i]}</div>
+      ${b.url ? `<span class="top5-link-hint">↗</span>` : ''}
+      <div class="top5-brand">${b.brand}</div>
+      <div class="top5-model">${b.model}</div>
+      <div class="top5-stats">
+        <div class="top5-stat">
+          <span class="top5-stat-label">Price</span>
+          <span class="top5-stat-val">$${b.price.toLocaleString()}</span>
+        </div>
+        <div class="top5-stat">
+          <span class="top5-stat-label">Capacity</span>
+          <span class="top5-stat-val">${b.capacity_wh.toLocaleString()} Wh</span>
+        </div>
+        <div class="top5-stat">
+          <span class="top5-stat-label">Peak Output</span>
+          <span class="top5-stat-val">${b.peak_power_w.toLocaleString()} W</span>
+        </div>
+      </div>
+      <div class="top5-score">
+        <span class="top5-score-label">Value Score</span>
+        <span class="top5-score-val ${scoreClass}">${b.score > 0 ? '+' : ''}${b.score.toLocaleString()}</span>
+      </div>`;
+
+    if (b.url) {
+      return `<a href="${b.url}" target="_blank" rel="noopener" class="top5-card ${RANK_CLASSES[i]}">${inner}</a>`;
+    }
+    return `<div class="top5-card ${RANK_CLASSES[i]}">${inner}</div>`;
+  }).join('');
+}
+
+function renderTable() {
+  const data = getFilteredSorted();
   const scores = data.map(b => b.score);
   const maxAbs = Math.max(...scores.map(Math.abs), 1);
-
   const tbody = document.getElementById('tableBody');
   const empty = document.getElementById('emptyState');
+
+  document.getElementById('resultCount').textContent = `${data.length} of ${BATTERIES.length}`;
 
   if (data.length === 0) {
     tbody.innerHTML = '';
     empty.style.display = '';
-    document.getElementById('resultCount').textContent = '0 results';
     return;
   }
   empty.style.display = 'none';
-  document.getElementById('resultCount').textContent = `${data.length} of ${BATTERIES.length}`;
 
   tbody.innerHTML = data.map((b, i) => {
     const scoreClass = b.score > 0 ? 'score-pos' : b.score < 0 ? 'score-neg' : 'score-zero';
-    const barClass = b.score >= 0 ? 'fill-pos' : 'fill-neg';
-    const barWidth = Math.round(Math.abs(b.score) / maxAbs * 100);
+    const barClass   = b.score >= 0 ? 'fill-pos' : 'fill-neg';
+    const barWidth   = Math.round(Math.abs(b.score) / maxAbs * 100);
     const badges = [
-      b.expandable ? '<span class="badge badge-exp">exp</span>' : '',
-      b.app_support ? '<span class="badge badge-app">app</span>' : '',
-      b.jump_starter ? '<span class="badge badge-jump">jump</span>' : '',
+      b.expandable  ? '<span class="badge badge-exp">exp</span>'  : '',
+      b.app_support ? '<span class="badge badge-app">app</span>'  : '',
+      b.jump_starter? '<span class="badge badge-jump">jump</span>': '',
     ].filter(Boolean).join('');
-
     const modelLink = b.url
       ? `<a href="${b.url}" target="_blank" rel="noopener">${b.model}<span class="model-link-icon">↗</span></a>`
       : b.model;
-
     const notes = b.notes
       ? `<span title="${b.notes}">${b.notes}</span>`
       : '<span style="color:var(--muted)">—</span>';
 
     return `<tr>
       <td class="rank-num">${i + 1}</td>
-      <td>
-        <div class="td-model">${modelLink}</div>
-        <div class="td-brand">${b.brand}</div>
-      </td>
+      <td><div class="td-model">${modelLink}</div><div class="td-brand">${b.brand}</div></td>
       <td class="td-price">$${b.price.toLocaleString()}</td>
       <td class="td-num">${b.capacity_wh.toLocaleString()}</td>
       <td class="td-num">${b.dollar_per_wh.toFixed(2)}</td>
@@ -652,9 +823,11 @@ function renderTable() {
   }).join('');
 }
 
-// Initial render
-renderTable();
-document.getElementById('headerMeta').textContent = `${BATTERIES.length} stations · prices from sheet`;
+function renderAll() {
+  const data = getFilteredSorted();
+  renderTop5(data);
+  renderTable();
+}
 </script>
 </body>
 </html>
