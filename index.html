@@ -73,12 +73,12 @@
 
   /* ── Hero strip ── */
   .hero {
-    display: grid;
-    grid-template-columns: 1fr auto;
+    display: flex;
+    flex-direction: column;
     gap: 1.5rem;
-    align-items: start;
     margin-bottom: 2rem;
   }
+  .hero-text { }
   .hero-title {
     font-size: 1.6rem;
     font-weight: 700;
@@ -90,7 +90,6 @@
     font-size: 0.85rem;
     color: var(--sub);
     margin-top: 0.35rem;
-    max-width: 520px;
   }
 
   /* ── Filter Panel (slider group) ── */
@@ -98,9 +97,9 @@
     background: var(--surface);
     border: 1px solid var(--brand);
     border-radius: var(--radius-lg);
-    padding: 1.25rem 1.5rem;
-    min-width: 320px;
+    padding: 1.25rem 1.5rem 1.1rem;
     position: relative;
+    width: 100%;
   }
   .filter-panel::before {
     content: 'FILTERS';
@@ -116,15 +115,40 @@
     letter-spacing: 0.1em;
   }
   .filter-sliders {
+    display: grid;
+    grid-template-columns: 1fr 1px 1fr 1px 1fr;
+    gap: 0 1.5rem;
+    align-items: start;
+  }
+  .slider-divider {
+    background: var(--border);
+    width: 1px;
+    height: 100%;
+    border: none;
+    margin: 0;
+  }
+  .filter-chips-row {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-top: 1rem;
+    padding-top: 0.85rem;
+    border-top: 1px solid var(--border);
+  }
+  .filter-chips-label {
+    font-size: 0.68rem;
+    font-family: var(--font-mono);
+    color: var(--sub);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-right: 0.25rem;
+  }
+
+  .slider-row {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
-  }
-  .slider-row {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    gap: 0.5rem;
-    align-items: center;
+    gap: 0.3rem;
   }
   .slider-label {
     font-size: 0.68rem;
@@ -132,18 +156,15 @@
     color: var(--sub);
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    margin-bottom: 0.3rem;
   }
   .slider-value {
     font-family: var(--font-mono);
-    font-size: 1rem;
+    font-size: 1.3rem;
     font-weight: 600;
     color: var(--accent);
-    text-align: right;
     white-space: nowrap;
-    min-width: 80px;
+    margin-bottom: 0.1rem;
   }
-  .slider-value.power-val { font-size: 1.4rem; }
   input[type=range] {
     width: 100%;
     accent-color: var(--accent);
@@ -157,11 +178,6 @@
     color: var(--muted);
     margin-top: 0.2rem;
     font-family: var(--font-mono);
-  }
-  .slider-divider {
-    border: none;
-    border-top: 1px solid var(--border);
-    margin: 0.25rem 0;
   }
 
   /* ── Top 5 ── */
@@ -455,7 +471,8 @@
     .top5-grid { grid-template-columns: repeat(3, 1fr); }
   }
   @media (max-width: 900px) {
-    .hero { grid-template-columns: 1fr; }
+    .filter-sliders { grid-template-columns: 1fr; }
+    .slider-divider { width: 100%; height: 1px; }
     .top5-grid { grid-template-columns: repeat(2, 1fr); }
     main { padding: 1rem; }
     header { padding: 0 1rem; }
@@ -475,7 +492,7 @@
 
 <main>
   <div class="hero">
-    <div>
+    <div class="hero-text">
       <h1 class="hero-title">Find the <em>best value</em> portable power station</h1>
       <p class="hero-sub">View popular batteries scored by capacity, outlets, and output relative to price. Adjust your filters to recalculate rankings instantly.</p>
     </div>
@@ -484,43 +501,37 @@
     <div class="filter-panel">
       <div class="filter-sliders">
 
-        <div>
-          <div class="slider-row">
-            <div>
-              <div class="slider-label">Max power needed</div>
-              <input type="range" id="powerSlider" min="100" max="7200" step="100" value="1800" oninput="onSliderChange()">
-              <div class="slider-hints"><span>100W</span><span>1800W</span><span>7200W</span></div>
-            </div>
-            <div class="slider-value power-val" id="powerDisplay">1800<br><span style="font-size:0.7rem;color:var(--sub);">W</span></div>
-          </div>
+        <div class="slider-row">
+          <div class="slider-label">Max power needed</div>
+          <div class="slider-value" id="powerDisplay">1800 W</div>
+          <input type="range" id="powerSlider" min="100" max="7200" step="100" value="1800" oninput="onSliderChange()">
+          <div class="slider-hints"><span>100W</span><span>1800W</span><span>7200W</span></div>
         </div>
 
-        <hr class="slider-divider">
+        <div class="slider-divider"></div>
 
-        <div>
-          <div class="slider-row">
-            <div>
-              <div class="slider-label">Max price</div>
-              <input type="range" id="priceSlider" min="100" max="5000" step="50" value="5000" oninput="onSliderChange()">
-              <div class="slider-hints"><span>$100</span><span>$2,500</span><span>$5,000</span></div>
-            </div>
-            <div class="slider-value" id="priceDisplay">Any</div>
-          </div>
+        <div class="slider-row">
+          <div class="slider-label">Max price</div>
+          <div class="slider-value" id="priceDisplay">Any</div>
+          <input type="range" id="priceSlider" min="100" max="5000" step="50" value="5000" oninput="onSliderChange()">
+          <div class="slider-hints"><span>$100</span><span>$2,500</span><span>$5,000</span></div>
         </div>
 
-        <hr class="slider-divider">
+        <div class="slider-divider"></div>
 
-        <div>
-          <div class="slider-row">
-            <div>
-              <div class="slider-label">Min capacity</div>
-              <input type="range" id="capacitySlider" min="0" max="4000" step="100" value="0" oninput="onSliderChange()">
-              <div class="slider-hints"><span>0 Wh</span><span>2,000 Wh</span><span>4,000 Wh</span></div>
-            </div>
-            <div class="slider-value" id="capacityDisplay">Any</div>
-          </div>
+        <div class="slider-row">
+          <div class="slider-label">Min capacity</div>
+          <div class="slider-value" id="capacityDisplay">Any</div>
+          <input type="range" id="capacitySlider" min="0" max="4000" step="100" value="0" oninput="onSliderChange()">
+          <div class="slider-hints"><span>0 Wh</span><span>2,000 Wh</span><span>4,000 Wh</span></div>
         </div>
 
+      </div>
+      <div class="filter-chips-row">
+        <span class="filter-chips-label">Features:</span>
+        <div class="chip" id="chip-expandable" onclick="toggleChip(this,'expandable')">Expandable</div>
+        <div class="chip" id="chip-app" onclick="toggleChip(this,'app')">App Support</div>
+        <div class="chip" id="chip-jump" onclick="toggleChip(this,'jump')">Jump Starter</div>
       </div>
     </div>
   </div>
@@ -562,13 +573,6 @@
       <option value="peak_power_w">Sort: Peak Power</option>
       <option value="dollar_per_wh">Sort: $/Wh</option>
     </select>
-
-    <div class="chip-group">
-      <span style="font-size:0.72rem;color:var(--sub);font-family:var(--font-mono);">FEATURES:</span>
-      <div class="chip" id="chip-expandable" onclick="toggleChip(this,'expandable')">Expandable</div>
-      <div class="chip" id="chip-app" onclick="toggleChip(this,'app')">App Support</div>
-      <div class="chip" id="chip-jump" onclick="toggleChip(this,'jump')">Jump Starter</div>
-    </div>
 
     <div class="result-count" id="resultCount"></div>
   </div>
@@ -636,7 +640,7 @@ let maxPower = 1800;
 let maxPrice = 5000;
 let minCapacity = 0;
 let sortKey = 'score';
-let sortDir = -1;
+let sortDir = 1;
 let activeChips = new Set();
 
 function calcScore(b, pw) {
@@ -657,8 +661,7 @@ function onSliderChange() {
   maxPrice    = parseInt(document.getElementById('priceSlider').value);
   minCapacity = parseInt(document.getElementById('capacitySlider').value);
 
-  document.getElementById('powerDisplay').innerHTML =
-    `${maxPower.toLocaleString()}<br><span style="font-size:0.7rem;color:var(--sub);">W</span>`;
+  document.getElementById('powerDisplay').textContent = `${maxPower.toLocaleString()} W`;
 
   const priceEl = document.getElementById('priceDisplay');
   priceEl.textContent = maxPrice >= 5000 ? 'Any' : `$${maxPrice.toLocaleString()}`;
@@ -678,7 +681,7 @@ function toggleChip(el, key) {
 
 function setSort(key) {
   if (sortKey === key) { sortDir *= -1; }
-  else { sortKey = key; sortDir = (key === 'price' || key === 'dollar_per_wh') ? 1 : -1; }
+  else { sortKey = key; sortDir = (key === 'price' || key === 'dollar_per_wh') ? -1 : 1; }
   renderAll();
   document.getElementById('sortCol').value =
     key === 'score' ? 'score' :
@@ -694,12 +697,12 @@ function getFilteredSorted() {
   const brand  = document.getElementById('brandFilter') ? document.getElementById('brandFilter').value : '';
   const sortSel = document.getElementById('sortCol') ? document.getElementById('sortCol').value : 'score';
 
-  if (sortSel === 'score')       { sortKey = 'score';       sortDir = -1; }
-  else if (sortSel === 'price')  { sortKey = 'price';       sortDir = 1;  }
-  else if (sortSel === 'price_desc') { sortKey = 'price';   sortDir = -1; }
-  else if (sortSel === 'capacity_wh')  { sortKey = 'capacity_wh';  sortDir = -1; }
-  else if (sortSel === 'peak_power_w') { sortKey = 'peak_power_w'; sortDir = -1; }
-  else if (sortSel === 'dollar_per_wh'){ sortKey = 'dollar_per_wh'; sortDir = 1; }
+  if (sortSel === 'score')       { sortKey = 'score';        sortDir = 1;  }
+  else if (sortSel === 'price')  { sortKey = 'price';        sortDir = -1; }
+  else if (sortSel === 'price_desc') { sortKey = 'price';    sortDir = 1;  }
+  else if (sortSel === 'capacity_wh')  { sortKey = 'capacity_wh';  sortDir = 1; }
+  else if (sortSel === 'peak_power_w') { sortKey = 'peak_power_w'; sortDir = 1; }
+  else if (sortSel === 'dollar_per_wh'){ sortKey = 'dollar_per_wh'; sortDir = -1; }
 
   let data = BATTERIES.map(b => ({
     ...b,
