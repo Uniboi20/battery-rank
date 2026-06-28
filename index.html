@@ -3,10 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PowerRank — Portable Battery Station Comparison</title>
+<title>PowerRank — Battery Comparison</title>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
   :root {
     --bg:       #0d0f14;
     --surface:  #151820;
@@ -18,23 +17,664 @@
     --positive: #3dd68c;
     --negative: #f56565;
     --brand:    #7c6ef5;
-    --font-mono: 'JetBrains Mono', 'Fira Mono', 'Courier New', monospace;
-    --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
-    --radius:   8px;
-    --radius-lg: 14px;
+    --font-mono: 'JetBrains Mono','Fira Mono','Courier New',monospace;
+    --font-sans: 'Inter',system-ui,-apple-system,sans-serif;
+    --radius: 8px; --radius-lg: 14px;
   }
-
   html { font-size: 15px; }
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--font-sans);
-    min-height: 100vh;
-    line-height: 1.5;
-  }
-
+  body { background:var(--bg); color:var(--text); font-family:var(--font-sans); min-height:100vh; line-height:1.5; }
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
 
+  /* ── Header ── */
+  header {
+    border-bottom:1px solid var(--border); padding:0 2rem;
+    background:var(--surface); position:sticky; top:0; z-index:100;
+    display:flex; align-items:center; gap:1.5rem; height:60px;
+  }
+  .logo { font-family:var(--font-mono); font-size:1.1rem; font-weight:600; color:var(--accent); letter-spacing:-0.02em; white-space:nowrap; }
+  .logo span { color:var(--sub); font-weight:400; }
+  .header-meta { margin-left:auto; font-size:0.78rem; color:var(--sub); font-family:var(--font-mono); }
+
+  /* ── Tab switcher ── */
+  .tab-bar {
+    display:flex; gap:0; border-bottom:2px solid var(--border);
+    margin-left: 1rem;
+  }
+  .tab-btn {
+    padding:0 1.25rem; height:60px; border:none; background:none;
+    color:var(--sub); font-family:var(--font-mono); font-size:0.78rem;
+    font-weight:600; text-transform:uppercase; letter-spacing:0.07em;
+    cursor:pointer; border-bottom:2px solid transparent;
+    margin-bottom:-2px; transition:color 0.15s,border-color 0.15s;
+    white-space:nowrap;
+  }
+  .tab-btn:hover { color:var(--text); }
+  .tab-btn.active { color:var(--accent); border-bottom-color:var(--accent); }
+
+  /* ── Layout ── */
+  main { max-width:1400px; margin:0 auto; padding:2rem; }
+
+  /* ── Hero ── */
+  .hero { display:flex; flex-direction:column; gap:1.5rem; margin-bottom:2rem; }
+  .hero-title { font-size:1.6rem; font-weight:700; color:var(--text); line-height:1.2; }
+  .hero-title em { font-style:normal; color:var(--accent); }
+  .hero-sub { font-size:0.85rem; color:var(--sub); margin-top:0.35rem; }
+
+  /* ── Filter Panel ── */
+  .filter-panel {
+    background:var(--surface); border:1px solid var(--brand);
+    border-radius:var(--radius-lg); padding:1.25rem 1.5rem 1.1rem;
+    position:relative; width:100%;
+  }
+  .filter-panel::before {
+    content:'FILTERS'; position:absolute; top:-9px; left:1rem;
+    background:var(--surface); padding:0 6px; font-family:var(--font-mono);
+    font-size:0.65rem; font-weight:600; color:var(--brand); letter-spacing:0.1em;
+  }
+  .filter-sliders {
+    display:grid; grid-template-columns:1fr 1px 1fr 1px 1fr;
+    gap:0 1.5rem; align-items:start;
+  }
+  .slider-divider { background:var(--border); width:1px; height:100%; border:none; margin:0; }
+  .filter-chips-row {
+    display:flex; gap:0.5rem; flex-wrap:wrap; align-items:center;
+    margin-top:1rem; padding-top:0.85rem; border-top:1px solid var(--border);
+  }
+  .filter-chips-label { font-size:0.72rem; font-family:var(--font-mono); color:var(--text); text-transform:uppercase; letter-spacing:0.06em; font-weight:600; margin-right:0.25rem; }
+  .slider-row { display:flex; flex-direction:column; gap:0.3rem; }
+  .slider-label { font-size:0.72rem; font-family:var(--font-mono); color:var(--text); text-transform:uppercase; letter-spacing:0.06em; font-weight:600; }
+  .slider-value { font-family:var(--font-mono); font-size:1.3rem; font-weight:600; color:var(--accent); white-space:nowrap; margin-bottom:0.1rem; }
+  input[type=range] { width:100%; accent-color:var(--accent); height:4px; cursor:pointer; }
+  .slider-hints { display:flex; justify-content:space-between; font-size:0.65rem; color:var(--muted); margin-top:0.2rem; font-family:var(--font-mono); }
+
+  /* ── Chip ── */
+  .chip {
+    background:var(--surface); border:1px solid var(--border); border-radius:20px;
+    padding:0.3rem 0.85rem; font-size:0.78rem; cursor:pointer; color:var(--sub);
+    transition:all 0.15s; white-space:nowrap; font-family:var(--font-mono); user-select:none;
+  }
+  .chip:hover { border-color:var(--brand); color:var(--text); }
+  .chip.active { background:var(--brand); border-color:var(--brand); color:#fff; }
+
+  /* ── Top 5 ── */
+  .top5-section { margin-bottom:2rem; }
+  .top5-label {
+    font-family:var(--font-mono); font-size:0.68rem; font-weight:600;
+    color:var(--sub); text-transform:uppercase; letter-spacing:0.1em;
+    margin-bottom:0.85rem; display:flex; align-items:center; gap:0.5rem;
+  }
+  .top5-label::after { content:''; flex:1; height:1px; background:var(--border); }
+  .top5-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:0.75rem; }
+  .top5-card {
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:var(--radius-lg); padding:1rem 1.1rem 1.1rem;
+    position:relative; transition:border-color 0.15s,transform 0.15s;
+    text-decoration:none; color:inherit; display:block;
+  }
+  .top5-card:hover { border-color:var(--brand); transform:translateY(-2px); }
+  .top5-card.rank-1 { border-color:rgba(245,197,66,0.4); background:linear-gradient(135deg,#151820 0%,#1c1a10 100%); }
+  .top5-card.rank-2 { border-color:rgba(176,190,197,0.3); }
+  .top5-card.rank-3 { border-color:rgba(205,127,50,0.3); }
+  .top5-rank { font-family:var(--font-mono); font-size:0.65rem; font-weight:700; letter-spacing:0.06em; margin-bottom:0.6rem; }
+  .rank-1 .top5-rank { color:#f5c542; } .rank-2 .top5-rank { color:#b0bec5; }
+  .rank-3 .top5-rank { color:#cd7f32; } .rank-4 .top5-rank,.rank-5 .top5-rank { color:var(--muted); }
+  .top5-brand { font-size:0.72rem; color:var(--sub); margin-bottom:0.1rem; }
+  .top5-model { font-size:1rem; font-weight:700; color:var(--text); line-height:1.2; margin-bottom:0.75rem; }
+  .top5-card:hover .top5-model { color:var(--brand); }
+  .top5-stats { display:flex; flex-direction:column; gap:0.3rem; }
+  .top5-stat { display:flex; justify-content:space-between; align-items:baseline; gap:0.5rem; }
+  .top5-stat-label { font-size:0.68rem; color:var(--sub); font-family:var(--font-mono); }
+  .top5-stat-val { font-family:var(--font-mono); font-size:0.82rem; font-weight:600; color:var(--text); text-align:right; }
+  .top5-score { margin-top:0.75rem; padding-top:0.65rem; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
+  .top5-score-label { font-size:0.65rem; font-family:var(--font-mono); color:var(--sub); text-transform:uppercase; letter-spacing:0.06em; }
+  .top5-score-val { font-family:var(--font-mono); font-size:1rem; font-weight:700; }
+  .top5-link-hint { position:absolute; top:0.75rem; right:0.85rem; font-size:0.65rem; color:var(--muted); }
+
+  /* ── Controls ── */
+  .controls { display:flex; gap:0.75rem; flex-wrap:wrap; margin-bottom:1.25rem; align-items:center; }
+  .search-wrap { position:relative; flex:1; min-width:200px; max-width:320px; }
+  .search-wrap svg { position:absolute; left:10px; top:50%; transform:translateY(-50%); color:var(--sub); pointer-events:none; }
+  input[type=search],select {
+    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+    color:var(--text); font-family:var(--font-sans); font-size:0.85rem;
+    padding:0.55rem 0.75rem; outline:none; transition:border-color 0.15s;
+  }
+  input[type=search] { padding-left:2.2rem; width:100%; }
+  input[type=search]:focus,select:focus { border-color:var(--brand); }
+  select { cursor:pointer; min-width:140px; }
+  select option { background:var(--surface); }
+  .result-count { margin-left:auto; font-size:0.78rem; color:var(--sub); font-family:var(--font-mono); white-space:nowrap; }
+
+  /* ── Table ── */
+  .table-section-label {
+    font-family:var(--font-mono); font-size:0.68rem; font-weight:600;
+    color:var(--sub); text-transform:uppercase; letter-spacing:0.1em;
+    margin-bottom:0.85rem; display:flex; align-items:center; gap:0.5rem;
+  }
+  .table-section-label::after { content:''; flex:1; height:1px; background:var(--border); }
+  .table-wrap { overflow-x:auto; border:1px solid var(--border); border-radius:var(--radius-lg); background:var(--surface); }
+  table { width:100%; border-collapse:collapse; font-size:0.83rem; }
+  th {
+    background:#1a1d2b; color:var(--sub); font-size:0.7rem; font-weight:600;
+    text-transform:uppercase; letter-spacing:0.07em; padding:0.85rem 1rem;
+    text-align:left; white-space:nowrap; border-bottom:1px solid var(--border);
+    font-family:var(--font-mono); cursor:pointer; user-select:none; transition:color 0.15s;
+  }
+  th:hover { color:var(--text); } th.sorted { color:var(--accent); }
+  th .sort-arrow { margin-left:4px; opacity:0.6; } th.sorted .sort-arrow { opacity:1; }
+  td { padding:0.8rem 1rem; border-bottom:1px solid var(--border); vertical-align:middle; }
+  tr:last-child td { border-bottom:none; }
+  tr:hover td { background:rgba(124,110,245,0.04); }
+  .td-brand { color:var(--sub); font-size:0.75rem; }
+  .td-model { font-weight:600; color:var(--text); }
+  .td-model a { color:inherit; text-decoration:none; }
+  .td-model a:hover { color:var(--brand); }
+  .model-link-icon { color:var(--muted); font-size:0.65rem; margin-left:4px; vertical-align:middle; }
+  .td-num { font-family:var(--font-mono); text-align:right; color:var(--text); }
+  .td-price { font-family:var(--font-mono); font-weight:600; color:var(--text); text-align:right; }
+  .td-score { font-family:var(--font-mono); font-weight:600; text-align:right; }
+  .score-pos { color:var(--positive); } .score-neg { color:var(--negative); } .score-zero { color:var(--sub); }
+  .badge-row { display:flex; gap:4px; flex-wrap:wrap; }
+  .badge { font-size:0.65rem; font-family:var(--font-mono); padding:2px 6px; border-radius:4px; white-space:nowrap; }
+  .badge-exp   { background:rgba(124,110,245,0.15); color:#a89af5; border:1px solid rgba(124,110,245,0.3); }
+  .badge-app   { background:rgba(61,214,140,0.1);   color:#3dd68c;  border:1px solid rgba(61,214,140,0.25); }
+  .badge-jump  { background:rgba(245,166,35,0.1);   color:var(--accent); border:1px solid rgba(245,166,35,0.25); }
+  .badge-mag   { background:rgba(124,110,245,0.15); color:#a89af5; border:1px solid rgba(124,110,245,0.3); }
+  .badge-cable { background:rgba(61,214,140,0.1);   color:#3dd68c;  border:1px solid rgba(61,214,140,0.25); }
+  .badge-disp  { background:rgba(245,166,35,0.1);   color:var(--accent); border:1px solid rgba(245,166,35,0.25); }
+  .badge-wall  { background:rgba(245,101,101,0.1);  color:#f56565;  border:1px solid rgba(245,101,101,0.25); }
+  .rank-num { font-family:var(--font-mono); font-size:0.75rem; color:var(--muted); text-align:center; width:36px; }
+  tr:nth-child(1) .rank-num { color:#f5c542; font-weight:700; }
+  tr:nth-child(2) .rank-num { color:#b0bec5; font-weight:600; }
+  tr:nth-child(3) .rank-num { color:#cd7f32; font-weight:600; }
+  .score-bar-wrap { display:flex; align-items:center; gap:8px; min-width:120px; }
+  .score-bar { flex:1; height:4px; background:var(--border); border-radius:2px; overflow:hidden; }
+  .score-bar-fill { height:100%; border-radius:2px; transition:width 0.3s ease; }
+  .fill-pos { background:var(--positive); } .fill-neg { background:var(--negative); }
+  .notes-cell { color:var(--sub); font-size:0.75rem; max-width:160px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+  footer { margin-top:3rem; padding:1.5rem 2rem; border-top:1px solid var(--border); font-size:0.75rem; color:var(--muted); font-family:var(--font-mono); text-align:center; }
+  .empty { padding:4rem 2rem; text-align:center; color:var(--sub); }
+  .empty-icon { font-size:2.5rem; margin-bottom:0.75rem; }
+  .empty-title { font-weight:600; color:var(--text); margin-bottom:0.25rem; }
+
+  @media(max-width:1100px) { .top5-grid { grid-template-columns:repeat(3,1fr); } }
+  @media(max-width:900px) {
+    .filter-sliders { grid-template-columns:1fr; }
+    .slider-divider { width:100%; height:1px; }
+    .top5-grid { grid-template-columns:repeat(2,1fr); }
+    main { padding:1rem; } header { padding:0 1rem; }
+  }
+  @media(max-width:500px) { .top5-grid { grid-template-columns:1fr; } }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+</head>
+<body>
+
+<header>
+  <div class="logo">⚡ Power<span>Rank</span></div>
+  <nav class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('power_station', this)">⚡ Power Stations</button>
+    <button class="tab-btn" onclick="switchTab('power_bank', this)">🔋 Power Banks</button>
+  </nav>
+  <div class="header-meta" id="headerMeta">Loading…</div>
+</header>
+
+<main>
+  <div class="hero">
+    <div class="hero-text">
+      <h1 class="hero-title" id="heroTitle">Find the <em>best value</em> portable power station</h1>
+      <p class="hero-sub" id="heroSub">Scored by capacity, outlets, and output relative to price. Adjust filters to recalculate rankings instantly.</p>
+    </div>
+
+    <div class="filter-panel">
+      <div class="filter-sliders">
+        <div class="slider-row">
+          <div class="slider-label" id="powerLabel">Max power needed</div>
+          <div class="slider-value" id="powerDisplay">1800 W</div>
+          <input type="range" id="powerSlider" min="100" max="7200" step="100" value="1800" oninput="onSliderChange()">
+          <div class="slider-hints" id="powerHints"><span>100W</span><span>7200W</span></div>
+        </div>
+        <div class="slider-divider"></div>
+        <div class="slider-row">
+          <div class="slider-label">Max price</div>
+          <div class="slider-value" id="priceDisplay">Any</div>
+          <input type="range" id="priceSlider" min="100" max="5000" step="50" value="5000" oninput="onSliderChange()">
+          <div class="slider-hints" id="priceHints"><span>$100</span><span>$5,000</span></div>
+        </div>
+        <div class="slider-divider"></div>
+        <div class="slider-row">
+          <div class="slider-label" id="capLabel">Min capacity</div>
+          <div class="slider-value" id="capacityDisplay">Any</div>
+          <input type="range" id="capacitySlider" min="0" max="4000" step="100" value="0" oninput="onSliderChange()">
+          <div class="slider-hints" id="capHints"><span>0 Wh</span><span>4,000 Wh</span></div>
+        </div>
+      </div>
+      <div class="filter-chips-row" id="chipsRow">
+        <!-- populated by switchTab() -->
+      </div>
+    </div>
+  </div>
+
+  <div class="top5-section">
+    <div class="top5-label">Top 5 by value score</div>
+    <div class="top5-grid" id="top5Grid"></div>
+  </div>
+
+  <div class="table-section-label">All results</div>
+  <div class="controls">
+    <div class="search-wrap">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+      </svg>
+      <input type="search" id="searchInput" placeholder="Search brand or model…" oninput="renderAll()">
+    </div>
+    <select id="brandFilter" onchange="renderAll()"><option value="">All brands</option></select>
+    <select id="sortCol" onchange="renderAll()">
+      <option value="score">Sort: Value Score</option>
+      <option value="price">Sort: Price (low→high)</option>
+      <option value="price_desc">Sort: Price (high→low)</option>
+      <option value="capacity_wh">Sort: Capacity</option>
+      <option value="peak_power_w">Sort: Peak Power</option>
+      <option value="dollar_per_wh">Sort: $/Wh</option>
+    </select>
+    <div class="result-count" id="resultCount"></div>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr id="tableHead"></tr></thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+    <div id="emptyState" class="empty" style="display:none">
+      <div class="empty-icon">🔍</div>
+      <div class="empty-title">No matches found</div>
+      <div>Try adjusting your filters or clearing the search.</div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  Value score is unitless: positive = perceived value exceeds price, negative = price exceeds perceived value.
+  Scores recalculate in real time when you adjust filters. · Price data from Amazon.
+</footer>
+
+<script>
+const SUPABASE_URL = 'https://qeeotzunkyzivxjydiuw.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFlZW90enVua3l6aXZ4anlkaXV3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyNDcwOTYsImV4cCI6MjA5NzgyMzA5Nn0.YCcolPgRexsRm2rHR0vcWXNnF7eIbSMCmI8PCwhf2D4';
+
+// ── Data ──
+let ALL_DATA = [];       // everything from DB
+let activeTab = 'power_station';
+
+// ── Formula constants ──
+// Power stations
+const PS = { exp: 0.585, mult: 7, l2: 75, v120: 30, usb: 15, outExp: 1.58, outCap: 300, outDefault: 1800 };
+// Power banks
+const PB = { exp: 0.585, mult: 12.74, v120: 30, usb: 15, outExp: 1.58, outCap: 80, outDefault: 30,
+             magsafe: 20, cable: 15, display: 10, wallplug: 20 };
+
+// ── UI state ──
+let maxPower    = 1800;
+let maxPrice    = 5000;
+let minCapacity = 0;
+let sortKey     = 'score';
+let sortDir     = 1;
+let activeChips = new Set();
+
+// ── Tab config ──
+const TAB_CONFIG = {
+  power_station: {
+    title: 'Find the <em>best value</em> portable power station',
+    sub:   'Scored by capacity, outlets, and output relative to price. Adjust filters to recalculate rankings instantly.',
+    powerDefault: 1800, powerMax: 7200, powerStep: 100, powerUnit: 'W',
+    priceMax: 5000, priceStep: 50,
+    capMax: 4000, capStep: 100, capUnit: 'Wh',
+    chips: [
+      { key: 'expandable',  label: 'Expandable' },
+      { key: 'app_support', label: 'App Support' },
+      { key: 'jump_starter',label: 'Jump Starter' },
+    ],
+    headers: [
+      { label: '#', style: 'width:40px;cursor:default;' },
+      { label: 'Battery', sort: 'brand_model' },
+      { label: 'Price', sort: 'price', num: true },
+      { label: 'Wh', sort: 'capacity_wh', num: true },
+      { label: '$/Wh', sort: 'dollar_per_wh', num: true },
+      { label: 'L2', num: true },
+      { label: '120V', num: true },
+      { label: 'USB', num: true },
+      { label: 'Peak W', sort: 'peak_power_w', num: true },
+      { label: 'Features' },
+      { label: 'Score', sort: 'score' },
+      { label: 'Notes' },
+    ],
+    brands: ['Anker solix','Bluetti','Ecoflow','Goal Zero','Jackery','VTOMAN','DJI','Oupes','Pecron'],
+  },
+  power_bank: {
+    title: 'Find the <em>best value</em> power bank',
+    sub:   'Compact batteries scored by capacity, ports, and charging speed relative to price. Adjust filters to recalculate.',
+    powerDefault: 30, powerMin: 5, powerMax: 150, powerStep: 5, powerUnit: 'W',
+    priceMin: 10, priceMax: 200, priceStep: 5,
+    capMin: 10, capMax: 100, capStep: 5, capUnit: 'Wh',
+    chips: [
+      { key: 'has_magsafe',      label: 'MagSafe' },
+      { key: 'has_builtin_cable',label: 'Built-in Cable' },
+      { key: 'has_display',      label: 'Display' },
+      { key: 'has_wall_plug',    label: 'Wall Plug' },
+    ],
+    headers: [
+      { label: '#', style: 'width:40px;cursor:default;' },
+      { label: 'Battery', sort: 'brand_model' },
+      { label: 'Price', sort: 'price', num: true },
+      { label: 'Wh', sort: 'capacity_wh', num: true },
+      { label: 'mAh', sort: 'capacity_wh', num: true },
+      { label: '$/Wh', sort: 'dollar_per_wh', num: true },
+      { label: '120V', num: true },
+      { label: 'USB', num: true },
+      { label: 'Peak W', sort: 'peak_power_w', num: true },
+      { label: 'Features' },
+      { label: 'Score', sort: 'score' },
+      { label: 'Notes' },
+    ],
+    brands: [],  // populated from data
+  },
+};
+
+// ── Load ──
+async function loadData() {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/batteries?select=*`, {
+    headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
+  });
+  if (!res.ok) { console.error('Load failed', res.status); return; }
+  ALL_DATA = await res.json();
+  switchTab('power_station', document.querySelector('.tab-btn.active'));
+}
+loadData();
+
+// ── Score functions ──
+function calcPS(b, pw) {
+  const cap    = Math.pow(b.capacity_wh, PS.exp) * PS.mult;
+  const l2     = b.l2_outlets * PS.l2;
+  const v120   = b.outlets_120v * PS.v120;
+  const usb    = b.usb_outlets * PS.usb;
+  const b10    = PS.outCap / Math.pow(pw, PS.outExp);
+  const output = Math.min(Math.pow(b.peak_power_w, PS.outExp) * b10, PS.outCap);
+  const exp    = b.expandable    ? 150 : 0;
+  const app    = b.app_support   ? 75  : 0;
+  const jump   = b.jump_starter  ? 50  : 0;
+  return Math.round(cap + l2 + v120 + usb + output + exp + app + jump - b.price);
+}
+
+function calcPB(b, pw) {
+  const cap    = Math.pow(b.capacity_wh, PB.exp) * PB.mult;
+  const v120   = b.outlets_120v * PB.v120;
+  const usb    = b.usb_outlets * PB.usb;
+  const b10    = PB.outCap / Math.pow(pw, PB.outExp);
+  const output = Math.min(Math.pow(b.peak_power_w, PB.outExp) * b10, PB.outCap);
+  const mag    = b.has_magsafe       ? PB.magsafe  : 0;
+  const cable  = b.has_builtin_cable ? PB.cable    : 0;
+  const disp   = b.has_display       ? PB.display  : 0;
+  const wall   = b.has_wall_plug     ? PB.wallplug : 0;
+  return Math.round(cap + v120 + usb + output + mag + cable + disp + wall - b.price);
+}
+
+function calcScore(b, pw) {
+  return activeTab === 'power_station' ? calcPS(b, pw) : calcPB(b, pw);
+}
+
+// ── Tab switch ──
+function switchTab(tab, btnEl) {
+  activeTab = tab;
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  if (btnEl) btnEl.classList.add('active');
+
+  const cfg = TAB_CONFIG[tab];
+
+  // Update hero
+  document.getElementById('heroTitle').innerHTML = cfg.title;
+  document.getElementById('heroSub').textContent = cfg.sub;
+
+  // Reset sliders for this tab
+  maxPower    = cfg.powerDefault;
+  maxPrice    = cfg.priceMax;
+  minCapacity = 0;
+  activeChips = new Set();
+
+  const ps = document.getElementById('powerSlider');
+  ps.min = cfg.powerMin ?? 100; ps.max = cfg.powerMax; ps.step = cfg.powerStep; ps.value = cfg.powerDefault;
+  document.getElementById('powerDisplay').textContent = `${cfg.powerDefault} ${cfg.powerUnit}`;
+  document.getElementById('powerHints').innerHTML = `<span>${cfg.powerMin ?? 100}${cfg.powerUnit}</span><span>${cfg.powerMax}${cfg.powerUnit}</span>`;
+
+  const prs = document.getElementById('priceSlider');
+  prs.min = cfg.priceMin ?? 100; prs.max = cfg.priceMax; prs.step = cfg.priceStep; prs.value = cfg.priceMax;
+  document.getElementById('priceDisplay').textContent = 'Any';
+  document.getElementById('priceHints').innerHTML = `<span>$${cfg.priceMin ?? 100}</span><span>$${cfg.priceMax.toLocaleString()}</span>`;
+
+  const cs = document.getElementById('capacitySlider');
+  cs.min = cfg.capMin ?? 0; cs.max = cfg.capMax; cs.step = cfg.capStep; cs.value = cfg.capMin ?? 0;
+  document.getElementById('capacityDisplay').textContent = 'Any';
+  document.getElementById('capHints').innerHTML = `<span>${cfg.capMin ?? 0} ${cfg.capUnit}</span><span>${cfg.capMax} ${cfg.capUnit}</span>`;
+
+  // Chips
+  document.getElementById('chipsRow').innerHTML =
+    `<span class="filter-chips-label">Features:</span>` +
+    cfg.chips.map(c =>
+      `<div class="chip" id="chip-${c.key}" onclick="toggleChip(this,'${c.key}')">${c.label}</div>`
+    ).join('');
+
+  // Brand filter
+  const tabData = ALL_DATA.filter(b => b.category === tab);
+  const brands  = [...new Set(tabData.map(b => b.brand))].sort();
+  const bf = document.getElementById('brandFilter');
+  bf.innerHTML = '<option value="">All brands</option>' + brands.map(br => `<option>${br}</option>`).join('');
+
+  // Table headers
+  document.getElementById('tableHead').innerHTML = cfg.headers.map(h => {
+    const cls   = h.sort ? ` onclick="setSort('${h.sort}')"` : '';
+    const arrow = h.sort ? ` <span class="sort-arrow">↕</span>` : '';
+    const num   = h.num  ? ' class="td-num"' : '';
+    const style = h.style ? ` style="${h.style}"` : '';
+    return `<th${style}${num}${cls}>${h.label}${arrow}</th>`;
+  }).join('');
+
+  sortKey = 'score'; sortDir = 1;
+  document.getElementById('sortCol').value = 'score';
+  document.getElementById('searchInput').value = '';
+
+  const count = tabData.length;
+  document.getElementById('headerMeta').textContent =
+    `${count} ${tab === 'power_station' ? 'stations' : 'power banks'} · prices live from database`;
+
+  renderAll();
+}
+
+// ── Slider change ──
+function onSliderChange() {
+  const cfg = TAB_CONFIG[activeTab];
+  maxPower    = parseInt(document.getElementById('powerSlider').value);
+  maxPrice    = parseInt(document.getElementById('priceSlider').value);
+  minCapacity = parseFloat(document.getElementById('capacitySlider').value);
+
+  document.getElementById('powerDisplay').textContent = `${maxPower.toLocaleString()} ${cfg.powerUnit}`;
+  document.getElementById('priceDisplay').textContent =
+    maxPrice >= cfg.priceMax ? 'Any' : `$${maxPrice.toLocaleString()}`;
+  const capMin = cfg.capMin ?? 0;
+  document.getElementById('capacityDisplay').textContent =
+    minCapacity <= capMin ? 'Any' : `${minCapacity.toLocaleString()} ${cfg.capUnit}`;
+
+  renderAll();
+}
+
+function toggleChip(el, key) {
+  el.classList.toggle('active');
+  activeChips.has(key) ? activeChips.delete(key) : activeChips.add(key);
+  renderAll();
+}
+
+function setSort(key) {
+  if (sortKey === key) { sortDir *= -1; }
+  else { sortKey = key; sortDir = (key === 'price' || key === 'dollar_per_wh') ? -1 : 1; }
+  const sel = document.getElementById('sortCol');
+  if (key === 'score') sel.value = 'score';
+  else if (key === 'price') sel.value = sortDir === -1 ? 'price' : 'price_desc';
+  else if (key === 'capacity_wh') sel.value = 'capacity_wh';
+  else if (key === 'peak_power_w') sel.value = 'peak_power_w';
+  else if (key === 'dollar_per_wh') sel.value = 'dollar_per_wh';
+  renderAll();
+}
+
+function getFilteredSorted() {
+  const search  = document.getElementById('searchInput').value.toLowerCase();
+  const brand   = document.getElementById('brandFilter').value;
+  const sortSel = document.getElementById('sortCol').value;
+
+  if      (sortSel === 'score')       { sortKey = 'score';       sortDir = 1;  }
+  else if (sortSel === 'price')       { sortKey = 'price';       sortDir = -1; }
+  else if (sortSel === 'price_desc')  { sortKey = 'price';       sortDir = 1;  }
+  else if (sortSel === 'capacity_wh') { sortKey = 'capacity_wh'; sortDir = 1;  }
+  else if (sortSel === 'peak_power_w'){ sortKey = 'peak_power_w';sortDir = 1;  }
+  else if (sortSel === 'dollar_per_wh'){sortKey = 'dollar_per_wh';sortDir = -1;}
+
+  let data = ALL_DATA
+    .filter(b => b.category === activeTab)
+    .map(b => ({ ...b, score: calcScore(b, maxPower), dollar_per_wh: b.price / b.capacity_wh }));
+
+  data = data.filter(b => {
+    if (search && !`${b.brand} ${b.model}`.toLowerCase().includes(search)) return false;
+    if (brand && b.brand !== brand) return false;
+    if (b.price > maxPrice) return false;
+    if (b.capacity_wh < minCapacity) return false;
+    for (const key of activeChips) { if (!b[key]) return false; }
+    return true;
+  });
+
+  data.sort((a, b) => {
+    const av = sortKey === 'brand_model' ? `${a.brand} ${a.model}` : a[sortKey];
+    const bv = sortKey === 'brand_model' ? `${b.brand} ${b.model}` : b[sortKey];
+    if (typeof av === 'string') return sortDir * av.localeCompare(bv);
+    return sortDir * (bv - av);
+  });
+
+  return data;
+}
+
+const RANK_LABELS  = ['#1','#2','#3','#4','#5'];
+const RANK_CLASSES = ['rank-1','rank-2','rank-3','rank-4','rank-5'];
+
+function renderTop5(data) {
+  const top5 = [...data].sort((a,b) => b.score - a.score).slice(0,5);
+  const grid = document.getElementById('top5Grid');
+  if (!top5.length) { grid.innerHTML=''; return; }
+
+  const isPB = activeTab === 'power_bank';
+  grid.innerHTML = top5.map((b,i) => {
+    const scoreClass = b.score >= 0 ? 'score-pos' : 'score-neg';
+    const stat3 = isPB
+      ? `<div class="top5-stat"><span class="top5-stat-label">Capacity</span><span class="top5-stat-val">${Math.round(b.capacity_wh * 1000 / 3.7).toLocaleString()} mAh</span></div>`
+      : `<div class="top5-stat"><span class="top5-stat-label">Peak Output</span><span class="top5-stat-val">${b.peak_power_w.toLocaleString()} W</span></div>`;
+    const inner = `
+      <div class="top5-rank">${RANK_LABELS[i]}</div>
+      ${b.url ? '<span class="top5-link-hint">↗</span>' : ''}
+      <div class="top5-brand">${b.brand}</div>
+      <div class="top5-model">${b.model}</div>
+      <div class="top5-stats">
+        <div class="top5-stat"><span class="top5-stat-label">Price</span><span class="top5-stat-val">$${b.price.toLocaleString()}</span></div>
+        <div class="top5-stat"><span class="top5-stat-label">Capacity</span><span class="top5-stat-val">${b.capacity_wh.toLocaleString()} Wh</span></div>
+        ${stat3}
+      </div>
+      <div class="top5-score">
+        <span class="top5-score-label">Value Score</span>
+        <span class="top5-score-val ${scoreClass}">${b.score > 0 ? '+' : ''}${b.score.toLocaleString()}</span>
+      </div>`;
+    return b.url
+      ? `<a href="${b.url}" target="_blank" rel="noopener" class="top5-card ${RANK_CLASSES[i]}">${inner}</a>`
+      : `<div class="top5-card ${RANK_CLASSES[i]}">${inner}</div>`;
+  }).join('');
+}
+
+function renderTable() {
+  const data   = getFilteredSorted();
+  const maxAbs = Math.max(...data.map(b => Math.abs(b.score)), 1);
+  const tbody  = document.getElementById('tableBody');
+  const empty  = document.getElementById('emptyState');
+  const isPB   = activeTab === 'power_bank';
+
+  document.getElementById('resultCount').textContent = `${data.length} of ${ALL_DATA.filter(b=>b.category===activeTab).length}`;
+
+  if (!data.length) { tbody.innerHTML=''; empty.style.display=''; return; }
+  empty.style.display = 'none';
+
+  tbody.innerHTML = data.map((b,i) => {
+    const scoreClass = b.score > 0 ? 'score-pos' : b.score < 0 ? 'score-neg' : 'score-zero';
+    const barClass   = b.score >= 0 ? 'fill-pos' : 'fill-neg';
+    const barWidth   = Math.round(Math.abs(b.score) / maxAbs * 100);
+
+    let badges;
+    if (isPB) {
+      badges = [
+        b.has_magsafe       ? '<span class="badge badge-mag">MagSafe</span>'  : '',
+        b.has_builtin_cable ? '<span class="badge badge-cable">cable</span>'   : '',
+        b.has_display       ? '<span class="badge badge-disp">display</span>'  : '',
+        b.has_wall_plug     ? '<span class="badge badge-wall">wall plug</span>': '',
+      ].filter(Boolean).join('');
+    } else {
+      badges = [
+        b.expandable   ? '<span class="badge badge-exp">exp</span>'  : '',
+        b.app_support  ? '<span class="badge badge-app">app</span>'  : '',
+        b.jump_starter ? '<span class="badge badge-jump">jump</span>': '',
+      ].filter(Boolean).join('');
+    }
+
+    const modelLink = b.url
+      ? `<a href="${b.url}" target="_blank" rel="noopener">${b.model}<span class="model-link-icon">↗</span></a>`
+      : b.model;
+    const notes = b.notes
+      ? `<span title="${b.notes}">${b.notes}</span>`
+      : '<span style="color:var(--muted)">—</span>';
+
+    const mah = Math.round(b.capacity_wh * 1000 / 3.7).toLocaleString();
+
+    const cells = isPB
+      ? `<td class="td-num">${b.outlets_120v}</td>
+         <td class="td-num">${b.usb_outlets}</td>`
+      : `<td class="td-num">${b.l2_outlets}</td>
+         <td class="td-num">${b.outlets_120v}</td>
+         <td class="td-num">${b.usb_outlets}</td>`;
+
+    const capCells = isPB
+      ? `<td class="td-num">${b.capacity_wh.toLocaleString()}</td>
+         <td class="td-num">${mah}</td>`
+      : `<td class="td-num">${b.capacity_wh.toLocaleString()}</td>`;
+
+    return `<tr>
+      <td class="rank-num">${i+1}</td>
+      <td><div class="td-model">${modelLink}</div><div class="td-brand">${b.brand}</div></td>
+      <td class="td-price">$${b.price.toLocaleString()}</td>
+      ${capCells}
+      <td class="td-num">${b.dollar_per_wh.toFixed(2)}</td>
+      ${cells}
+      <td class="td-num">${b.peak_power_w.toLocaleString()}</td>
+      <td><div class="badge-row">${badges || '<span style="color:var(--muted);font-size:0.7rem;">—</span>'}</div></td>
+      <td>
+        <div class="score-bar-wrap">
+          <div class="score-bar"><div class="score-bar-fill ${barClass}" style="width:${barWidth}%"></div></div>
+          <span class="td-score ${scoreClass}">${b.score > 0 ? '+' : ''}${b.score.toLocaleString()}</span>
+        </div>
+      </td>
+      <td class="notes-cell">${notes}</td>
+    </tr>`;
+  }).join('');
+}
+
+function renderAll() {
+  const data = getFilteredSorted();
+  renderTop5(data);
+  renderTable();
+}
+</script>
+</body>
+</html>
   /* ── Header ── */
   header {
     border-bottom: 1px solid var(--border);
