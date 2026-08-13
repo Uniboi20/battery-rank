@@ -3,7 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PowerRank — Battery Comparison</title>
+<title>PowerRank — Power Station & Power Bank Buying Guide</title>
+<meta name="description" content="An independent buying guide for portable power stations and power banks. PowerRank scores each model on capacity, ports, and peak output relative to price, so you can find the best value for your needs — not just the most expensive option.">
+<meta name="robots" content="index, follow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
@@ -202,6 +204,34 @@
   .fill-pos { background:var(--positive); } .fill-neg { background:var(--negative); }
   .notes-cell { color:var(--sub); font-size:0.75rem; max-width:160px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 
+  /* ── Methodology / About ── */
+  .info-section { margin-top:3rem; }
+  .info-card {
+    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg);
+    padding:1.5rem 1.75rem;
+  }
+  .info-card p { color:var(--sub); font-size:0.85rem; line-height:1.65; margin-bottom:0.9rem; }
+  .info-card p:last-child { margin-bottom:0; }
+  .info-card strong { color:var(--text); }
+  .method-grid {
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:0.9rem;
+    margin:1.25rem 0 1.4rem;
+  }
+  .method-card {
+    background:var(--bg); border:1px solid var(--border); border-radius:var(--radius);
+    padding:0.9rem 1rem;
+  }
+  .method-card h3 {
+    font-family:var(--font-mono); font-size:0.72rem; font-weight:600; color:var(--accent);
+    text-transform:uppercase; letter-spacing:0.06em; margin-bottom:0.45rem;
+  }
+  .method-card p { font-size:0.78rem; color:var(--sub); line-height:1.55; margin:0; }
+  .about-note {
+    display:flex; align-items:flex-start; gap:0.6rem; margin-top:1.1rem;
+    padding-top:1rem; border-top:1px solid var(--border);
+    font-size:0.75rem; color:var(--muted);
+  }
+
   footer { margin-top:3rem; padding:1.5rem 2rem; border-top:1px solid var(--border); font-size:0.75rem; color:var(--muted); font-family:var(--font-mono); text-align:center; }
   .empty { padding:4rem 2rem; text-align:center; color:var(--sub); }
   .empty-icon { font-size:2.5rem; margin-bottom:0.75rem; }
@@ -301,6 +331,66 @@
       <div>Try adjusting your filters or clearing the search.</div>
     </div>
   </div>
+
+  <section class="info-section" id="methodology">
+    <div class="table-section-label">How value score is calculated</div>
+    <div class="info-card">
+      <p>
+        Most "best battery" lists quietly rank by whoever paid the most for premium marketing, or default to the
+        most expensive option on the shelf. PowerRank does the opposite on purpose: <strong>price is one of the
+        inputs to the score, not an afterthought.</strong> Every listed spec earns a unit points, then price is
+        subtracted directly. A model with great specs at a high price and a model with modest specs at a low
+        price can land in exactly the same place — that's the point. The score tells you where the balance falls,
+        not just which one has the biggest number on the box.
+      </p>
+      <div class="method-grid">
+        <div class="method-card">
+          <h3>Capacity</h3>
+          <p>Weighted on a curve, not a straight line (capacity<sup>0.585</sup>) — so jumping from 500Wh to
+          1,000Wh is worth more to the score than jumping from 2,000Wh to 2,500Wh. That mirrors how capacity
+          actually matters to most people: the first bump solves real problems, later bumps are diminishing
+          returns for most use cases.</p>
+        </div>
+        <div class="method-card">
+          <h3>Ports & outlets</h3>
+          <p>Each AC outlet, 120V/L2 port, and USB port adds a fixed amount, reflecting genuine day-to-day
+          usefulness — more things you can plug in at once without an adapter.</p>
+        </div>
+        <div class="method-card">
+          <h3>Peak output</h3>
+          <p>Scored relative to the "max power needed" slider, not in isolation. A unit only earns credit for
+          headroom up to what you said you need — massive peak wattage you'll never use doesn't inflate the
+          score.</p>
+        </div>
+        <div class="method-card">
+          <h3>Feature bonuses</h3>
+          <p>Expandable capacity, companion app support, jump-starting, MagSafe, built-in cables, a display, and
+          pass-through charging each add a modest, fixed bonus reflecting real convenience.</p>
+        </div>
+        <div class="method-card">
+          <h3>Price</h3>
+          <p>Subtracted directly, in dollars, from everything above — so the final score is denominated the same
+          way price is. A positive score means the spec sheet, in our formula's judgment, outweighs the price
+          tag; negative means the price is outrunning what you're getting.</p>
+        </div>
+      </div>
+      <p>
+        This is one opinionated formula, not an objective truth — the exact weights are judgment calls, and
+        reasonable people could weigh capacity vs. ports vs. price differently depending on how they'll actually
+        use a battery. Use the filters and sort options above to see the ranking shift as your own priorities
+        change.
+      </p>
+      <div class="about-note">
+        <span>ⓘ</span>
+        <span>
+          PowerRank is an independently run buying guide and is not currently affiliated with Amazon.
+          Product links go straight to the Amazon listing so you can confirm current price and availability
+          before buying — prices shown here are checked periodically (see the "checked Xd ago" note on each
+          item) and are an input to our own scoring, not a live feed.
+        </span>
+      </div>
+    </div>
+  </section>
 </main>
 
 <footer>
