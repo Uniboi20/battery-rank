@@ -173,6 +173,14 @@
   .model-link-icon { color:var(--muted); font-size:0.65rem; margin-left:4px; vertical-align:middle; }
   .td-num { font-family:var(--font-mono); text-align:right; color:var(--text); }
   .td-price { font-family:var(--font-mono); font-weight:600; color:var(--text); text-align:right; }
+  .price-age { display:block; font-size:0.62rem; font-family:var(--font-mono); text-align:right; margin-top:2px; font-weight:400; }
+  .price-age.age-fresh { color:var(--positive); }
+  .price-age.age-stale { color:var(--accent); }
+  .price-age.age-old   { color:var(--negative); }
+  .top5-price-age { font-size:0.62rem; font-family:var(--font-mono); margin-left:6px; }
+  .top5-price-age.age-fresh { color:var(--positive); }
+  .top5-price-age.age-stale { color:var(--accent); }
+  .top5-price-age.age-old   { color:var(--negative); }
   .td-score { font-family:var(--font-mono); font-weight:600; text-align:right; }
   .score-pos { color:var(--positive); } .score-neg { color:var(--negative); } .score-zero { color:var(--sub); }
   .badge-row { display:flex; gap:4px; flex-wrap:wrap; }
@@ -297,7 +305,9 @@
 
 <footer>
   Value score is unitless: positive = perceived value exceeds price, negative = price exceeds perceived value.
-  Scores recalculate in real time when you adjust filters. · Price data from Amazon.
+  Scores recalculate in real time when you adjust filters. · Prices are checked periodically and may not match
+  the current Amazon listing — the "checked Xd ago" note on each item shows how recent our data is, and the
+  product link always takes you to Amazon to confirm the current price before buying.
 </footer>
 
 <script>
@@ -307,6 +317,21 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 // ── Data ──
 let ALL_DATA = [];       // everything from DB
 let activeTab = 'power_station';
+
+// ── Price freshness ──
+// Prices here are researched/entered periodically, not a live Amazon feed —
+// this makes that explicit instead of implying real-time pricing.
+// fresh: checked within 3 days · stale: within 14 days · old: beyond that
+function priceAgeInfo(isoDate) {
+  if (!isoDate) return { label: 'unknown', cls: 'age-old' };
+  const hours = (Date.now() - new Date(isoDate).getTime()) / 36e5;
+  if (hours < 1)   return { label: 'checked <1h ago', cls: 'age-fresh' };
+  if (hours < 24)  return { label: `checked ${Math.round(hours)}h ago`, cls: 'age-fresh' };
+  const days = Math.round(hours / 24);
+  if (days <= 3)   return { label: `checked ${days}d ago`, cls: 'age-fresh' };
+  if (days <= 14)  return { label: `checked ${days}d ago`, cls: 'age-stale' };
+  return { label: `checked ${days}d ago`, cls: 'age-old' };
+}
 
 // ── Formula constants ──
 // Power stations
@@ -483,7 +508,7 @@ function switchTab(tab, btnEl) {
 
   const count = tabData.length;
   document.getElementById('headerMeta').textContent =
-    `${count} ${tab === 'power_station' ? 'stations' : 'power banks'} · prices live from database`;
+    `${count} ${tab === 'power_station' ? 'stations' : 'power banks'} · prices checked periodically, not real-time`;
 
   renderAll();
 }
@@ -578,6 +603,7 @@ function renderTop5(data) {
   const isPB = activeTab === 'power_bank';
   grid.innerHTML = top5.map((b,i) => {
     const scoreClass = b.score >= 0 ? 'score-pos' : 'score-neg';
+    const age = priceAgeInfo(b.price_updated_at);
     const stat3 = isPB
       ? `<div class="top5-stat"><span class="top5-stat-label">Peak Output</span><span class="top5-stat-val">${b.peak_power_w.toLocaleString()} W</span></div>`
       : `<div class="top5-stat"><span class="top5-stat-label">Peak Output</span><span class="top5-stat-val">${b.peak_power_w.toLocaleString()} W</span></div>`;
@@ -590,7 +616,7 @@ function renderTop5(data) {
       <div class="top5-brand">${b.brand}</div>
       <div class="top5-model">${b.model}</div>
       <div class="top5-stats">
-        <div class="top5-stat"><span class="top5-stat-label">Price</span><span class="top5-stat-val">$${b.price.toLocaleString()}</span></div>
+        <div class="top5-stat"><span class="top5-stat-label">Price</span><span class="top5-stat-val">$${b.price.toLocaleString()}<span class="top5-price-age ${age.cls}">${age.label}</span></span></div>
         ${capStat}
         ${stat3}
       </div>
@@ -640,6 +666,7 @@ function renderTable() {
     const modelLink = b.url
       ? `<a href="${b.url}" target="_blank" rel="noopener">${b.model}<span class="model-link-icon">↗</span></a>`
       : b.model;
+    const age = priceAgeInfo(b.price_updated_at);
     const notes = b.notes
       ? `<span title="${b.notes}">${b.notes}</span>`
       : '<span style="color:var(--muted)">—</span>';
@@ -659,7 +686,7 @@ function renderTable() {
     return `<tr>
       <td class="rank-num">${i+1}</td>
       <td><div class="td-model">${modelLink}</div><div class="td-brand">${b.brand}</div></td>
-      <td class="td-price">$${b.price.toLocaleString()}</td>
+      <td class="td-price">$${b.price.toLocaleString()}<span class="price-age ${age.cls}">${age.label}</span></td>
       ${capCells}
       ${cells}
       <td class="td-num">${b.peak_power_w.toLocaleString()}</td>
