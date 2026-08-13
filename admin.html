@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>PowerRank — Price Refresh (internal)</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin:0; padding:0; }
+  :root {
+    --bg:#0d0f14; --surface:#151820; --border:#252836; --muted:#3a3d52;
+    --text:#e2e4f0; --sub:#7b7f9e; --accent:#f5a623; --positive:#3dd68c;
+    --negative:#f56565; --brand:#7c6ef5;
+    --font-mono:'JetBrains Mono','Fira Mono','Courier New',monospace;
+    --font-sans:-apple-system,system-ui,sans-serif;
+  }
+  body { background:var(--bg); color:var(--text); font-family:var(--font-sans); padding:2rem; line-height:1.5; }
+  h1 { font-size:1.3rem; margin-bottom:0.25rem; }
+  .sub { color:var(--sub); font-size:0.85rem; margin-bottom:1.5rem; }
+  .warn { background:rgba(245,166,35,0.1); border:1px solid rgba(245,166,35,0.3); color:var(--accent);
+          border-radius:8px; padding:0.75rem 1rem; font-size:0.8rem; margin-bottom:1.5rem; max-width:640px; }
+
+  .unlock { display:flex; gap:0.5rem; align-items:center; margin-bottom:2rem; }
+  .unlock input { background:var(--surface); border:1px solid var(--border); border-radius:6px;
+                  color:var(--text); padding:0.5rem 0.75rem; font-family:var(--font-mono); width:260px; }
+  button { background:var(--brand); color:#fff; border:none; border-radius:6px; padding:0.5rem 1rem;
+           font-size:0.82rem; font-weight:600; cursor:pointer; font-family:var(--font-sans); }
+  button:hover { opacity:0.9; }
+  button.secondary { background:var(--surface); border:1px solid var(--border); color:var(--text); }
+  button:disabled { opacity:0.4; cursor:not-allowed; }
+
+  #app { display:none; }
+  .toolbar { display:flex; align-items:center; gap:1rem; margin-bottom:1.25rem; flex-wrap:wrap; }
+  .progress { font-family:var(--font-mono); font-size:0.8rem; color:var(--sub); }
+
+  .group-label { font-family:var(--font-mono); font-size:0.72rem; font-weight:600; color:var(--sub);
+                 text-transform:uppercase; letter-spacing:0.08em; margin:1.75rem 0 0.6rem; }
+  table { width:100%; border-collapse:collapse; font-size:0.83rem; background:var(--surface);
+          border:1px solid var(--border); border-radius:10px; overflow:hidden; }
+  th { background:#1a1d2b; color:var(--sub); font-size:0.68rem; text-transform:uppercase; letter-spacing:0.06em;
+       text-align:left; padding:0.6rem 0.85rem; font-family:var(--font-mono); }
+  td { padding:0.55rem 0.85rem; border-top:1px solid var(--border); vertical-align:middle; }
+  td a { color:var(--text); text-decoration:none; }
+  td a:hover { color:var(--brand); }
+  .brand { color:var(--sub); font-size:0.72rem; }
+  .price-input { width:90px; background:var(--bg); border:1px solid var(--border); border-radius:6px;
+                 color:var(--text); font-family:var(--font-mono); padding:0.3rem 0.5rem; }
+  .price-input.dirty { border-color:var(--accent); }
+  .age { font-family:var(--font-mono); font-size:0.7rem; }
+  .age-fresh { color:var(--positive); } .age-stale { color:var(--accent); } .age-old { color:var(--negative); }
+  .row-status { font-size:0.85rem; width:20px; display:inline-block; text-align:center; }
+  .row-save { padding:0.3rem 0.7rem; font-size:0.72rem; }
+</style>
+</head>
+<body>
+
+<h1>PowerRank — Price Refresh Tool</h1>
+<div class="sub">Internal use only. Not linked from the site, excluded from indexing.</div>
+<div class="warn">
+  This talks to a Netlify function that writes to Supabase with elevated access, gated by a password only
+  you know. Open each Amazon link yourself, check the current price, update the field, and save — one row
+  or all of them. Saving a price that hasn't changed still refreshes its "checked" timestamp, so it's fine
+  to resave everything even when nothing moved.
+</div>
+
+<div class="unlock" id="unlockBar">
+  <input type="password" id="secretInput" placeholder="Admin tool secret">
+  <button onclick="unlock()">Unlock</button>
+  <span id="unlockMsg" style="font-size:0.8rem;color:var(--negative);"></span>
+</div>
+
+<div id="app">
+  <div class="toolbar">
+    <button onclick="saveAll()">Save all rows</button>
+    <button class="secondary" onclick="loadData()">Reload from database</button>
+    <span class="progress" id="progress"></span>
+  </div>
+  <div id="tables"></div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://qeeotzunkyzivxjydiuw.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFlZW90enVua3l6aXZ4anlkaXV3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyNDcwOTYsImV4cCI6MjA5NzgyMzA5Nn0.YCcolPgRexsRm2rHR0vcWXNnF7eIbSMCmI8PCwhf2D4';
+
+let SECRET = '';
+let ROWS = [];
+
+function unlock() {
+  const val = document.getElementById('secretInput').value.trim();
+  if (!val) { document.getElementById('unlockMsg').textContent = 'Enter the secret first.'; return; }
+  SECRET = val;
+  document.getElementById('unlockBar').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  loadData();
+}
+
+function ageInfo(iso) {
+  if (!iso) return { label: 'never checked', cls: 'age-old' };
+  const hours = (Date.now() - new Date(iso).getTime()) / 36e5;
+  if (hours < 24) return { label: `${Math.max(1,Math.round(hours))}h ago`, cls: 'age-fresh' };
+  const days = Math.round(hours / 24);
+  if (days <= 3) return { label: `${days}d ago`, cls: 'age-fresh' };
+  if (days <= 14) return { label: `${days}d ago`, cls: 'age-stale' };
+  return { label: `${days}d ago`, cls: 'age-old' };
+}
+
+function amazonUrl(b) {
+  return b.asin ? `https://www.amazon.com/dp/${b.asin}` : (b.url || '#');
+}
+
+async function loadData() {
+  document.getElementById('progress').textContent = 'Loading…';
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/batteries?select=id,brand,model,asin,url,price,price_updated_at,category&order=price_updated_at.asc.nullsfirst`, {
+    headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` }
+  });
+  if (!res.ok) { document.getElementById('progress').textContent = 'Load failed.'; return; }
+  ROWS = await res.json();
+  render();
+  document.getElementById('progress').textContent = `${ROWS.length} batteries loaded, oldest-checked first.`;
+}
+
+function render() {
+  const groups = [
+    { key: 'power_station', label: 'Power Stations' },
+    { key: 'power_bank', label: 'Power Banks' },
+  ];
+  const container = document.getElementById('tables');
+  container.innerHTML = groups.map(g => {
+    const rows = ROWS.filter(b => b.category === g.key);
+    if (!rows.length) return '';
+    return `
+      <div class="group-label">${g.label} (${rows.length})</div>
+      <table>
+        <thead><tr><th>Battery</th><th>Current price</th><th>Checked</th><th>New price</th><th></th><th></th></tr></thead>
+        <tbody>
+          ${rows.map(b => {
+            const age = ageInfo(b.price_updated_at);
+            return `<tr id="row-${b.id}">
+              <td><a href="${amazonUrl(b)}" target="_blank" rel="noopener">${b.brand} ${b.model} ↗</a></td>
+              <td>$${Number(b.price).toLocaleString()}</td>
+              <td class="age ${age.cls}">${age.label}</td>
+              <td><input class="price-input" id="input-${b.id}" type="number" step="0.01" value="${b.price}"
+                    oninput="document.getElementById('input-${b.id}').classList.add('dirty')"></td>
+              <td><button class="row-save" onclick="saveRow(${b.id})">Save</button></td>
+              <td class="row-status" id="status-${b.id}"></td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>`;
+  }).join('');
+}
+
+async function saveRow(id) {
+  const input = document.getElementById(`input-${id}`);
+  const status = document.getElementById(`status-${id}`);
+  const price = parseFloat(input.value);
+  if (!(price > 0)) { status.textContent = '✗'; status.style.color = 'var(--negative)'; return; }
+  status.textContent = '…';
+  try {
+    const res = await fetch('/.netlify/functions/update-price', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ secret: SECRET, id, price }),
+    });
+    if (!res.ok) throw new Error(await res.text());
+    status.textContent = '✓';
+    status.style.color = 'var(--positive)';
+    input.classList.remove('dirty');
+    const row = ROWS.find(b => b.id === id);
+    if (row) { row.price = price; row.price_updated_at = new Date().toISOString(); }
+    const ageCell = document.querySelector(`#row-${id} .age`);
+    if (ageCell) {
+      const age = ageInfo(new Date().toISOString());
+      ageCell.textContent = age.label;
+      ageCell.className = `age ${age.cls}`;
+    }
+  } catch (err) {
+    status.textContent = '✗';
+    status.style.color = 'var(--negative)';
+    status.title = String(err);
+  }
+}
+
+async function saveAll() {
+  const ids = ROWS.map(b => b.id);
+  const progress = document.getElementById('progress');
+  for (let i = 0; i < ids.length; i++) {
+    progress.textContent = `Saving ${i + 1}/${ids.length}…`;
+    await saveRow(ids[i]);
+  }
+  progress.textContent = `Done — saved ${ids.length} rows.`;
+}
+</script>
+</body>
+</html>
