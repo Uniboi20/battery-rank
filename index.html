@@ -404,6 +404,20 @@
 const SUPABASE_URL = 'https://qeeotzunkyzivxjydiuw.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFlZW90enVua3l6aXZ4anlkaXV3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyNDcwOTYsImV4cCI6MjA5NzgyMzA5Nn0.YCcolPgRexsRm2rHR0vcWXNnF7eIbSMCmI8PCwhf2D4';
 
+// Set this once an Amazon Associates tracking ID is approved (e.g. 'powerrank0a-20') —
+// every product link on the site re-points automatically, no data edits needed.
+const AFFILIATE_TAG = '';
+
+// Build the Amazon link from the ASIN rather than a stored URL, so the affiliate tag
+// only has to be set in one place. Falls back to a stored `url` if a row is somehow
+// missing an ASIN (none currently are).
+function amazonUrl(b) {
+  if (b.asin) {
+    return `https://www.amazon.com/dp/${b.asin}` + (AFFILIATE_TAG ? `?tag=${AFFILIATE_TAG}` : '');
+  }
+  return b.url || null;
+}
+
 // ── Data ──
 let ALL_DATA = [];       // everything from DB
 let activeTab = 'power_station';
@@ -694,6 +708,7 @@ function renderTop5(data) {
   grid.innerHTML = top5.map((b,i) => {
     const scoreClass = b.score >= 0 ? 'score-pos' : 'score-neg';
     const age = priceAgeInfo(b.price_updated_at);
+    const link = amazonUrl(b);
     const stat3 = isPB
       ? `<div class="top5-stat"><span class="top5-stat-label">Peak Output</span><span class="top5-stat-val">${b.peak_power_w.toLocaleString()} W</span></div>`
       : `<div class="top5-stat"><span class="top5-stat-label">Peak Output</span><span class="top5-stat-val">${b.peak_power_w.toLocaleString()} W</span></div>`;
@@ -702,7 +717,7 @@ function renderTop5(data) {
       : `<div class="top5-stat"><span class="top5-stat-label">Capacity</span><span class="top5-stat-val">${b.capacity_wh.toLocaleString()} Wh</span></div>`;
     const inner = `
       <div class="top5-rank">${RANK_LABELS[i]}</div>
-      ${b.url ? '<span class="top5-link-hint">↗</span>' : ''}
+      ${link ? '<span class="top5-link-hint">↗</span>' : ''}
       <div class="top5-brand">${b.brand}</div>
       <div class="top5-model">${b.model}</div>
       <div class="top5-stats">
@@ -714,8 +729,8 @@ function renderTop5(data) {
         <span class="top5-score-label">Value Score</span>
         <span class="top5-score-val ${scoreClass}">${b.score > 0 ? '+' : ''}${b.score.toLocaleString()}</span>
       </div>`;
-    return b.url
-      ? `<a href="${b.url}" target="_blank" rel="noopener" class="top5-card ${RANK_CLASSES[i]}">${inner}</a>`
+    return link
+      ? `<a href="${link}" target="_blank" rel="noopener" class="top5-card ${RANK_CLASSES[i]}">${inner}</a>`
       : `<div class="top5-card ${RANK_CLASSES[i]}">${inner}</div>`;
   }).join('');
 }
@@ -753,8 +768,9 @@ function renderTable() {
       ].filter(Boolean).join('');
     }
 
-    const modelLink = b.url
-      ? `<a href="${b.url}" target="_blank" rel="noopener">${b.model}<span class="model-link-icon">↗</span></a>`
+    const link = amazonUrl(b);
+    const modelLink = link
+      ? `<a href="${link}" target="_blank" rel="noopener">${b.model}<span class="model-link-icon">↗</span></a>`
       : b.model;
     const age = priceAgeInfo(b.price_updated_at);
     const notes = b.notes
