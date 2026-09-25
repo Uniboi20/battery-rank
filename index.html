@@ -6,132 +6,155 @@
 <title>PowerRank — Power Station & Power Bank Buying Guide</title>
 <meta name="description" content="An independent buying guide for portable power stations and power banks. PowerRank scores each model on capacity, ports, and peak output relative to price, so you can find the best value for your needs — not just the most expensive option.">
 <meta name="robots" content="index, follow">
+<meta name="theme-color" content="#0d0f14">
+<meta property="og:title" content="PowerRank — Power Station & Power Bank Buying Guide">
+<meta property="og:description" content="Independent value rankings for portable power stations and power banks, scored on capacity, ports, and output relative to price.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
     --bg:       #0d0f14;
     --surface:  #151820;
+    --surface-2:#1a1d2b;
     --border:   #252836;
     --muted:    #3a3d52;
+    --faint:    #6b7090;
     --text:     #e2e4f0;
-    --sub:      #7b7f9e;
+    --sub:      #8e92b3;
     --accent:   #f5a623;
     --positive: #3dd68c;
     --negative: #f56565;
-    --brand:    #7c6ef5;
+    --brand:    #8b7ff7;
     --font-mono: 'JetBrains Mono','Fira Mono','Courier New',monospace;
     --font-sans: 'Inter',system-ui,-apple-system,sans-serif;
     --radius: 8px; --radius-lg: 14px;
   }
-  html { font-size: 15px; }
+  html { font-size: 15px; scroll-behavior: smooth; }
   body { background:var(--bg); color:var(--text); font-family:var(--font-sans); min-height:100vh; line-height:1.5; }
+  a { color:var(--brand); }
+  :focus-visible { outline:2px solid var(--accent); outline-offset:2px; border-radius:4px; }
+  .sr-only { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
 
   /* ── Header ── */
   header {
     border-bottom:1px solid var(--border); padding:0 2rem;
     background:var(--surface); position:sticky; top:0; z-index:100;
-    display:flex; align-items:center; gap:1.5rem; height:60px;
+    display:flex; align-items:center; gap:1.5rem; min-height:60px;
   }
-  .logo { font-family:var(--font-mono); font-size:1.1rem; font-weight:600; color:var(--accent); letter-spacing:-0.02em; white-space:nowrap; }
+  .logo { font-family:var(--font-mono); font-size:1.1rem; font-weight:600; color:var(--accent); letter-spacing:-0.02em; white-space:nowrap; text-decoration:none; }
   .logo span { color:var(--sub); font-weight:400; }
-  .header-meta { margin-left:auto; font-size:0.78rem; color:var(--sub); font-family:var(--font-mono); }
+  .header-meta { margin-left:auto; font-size:0.78rem; color:var(--sub); font-family:var(--font-mono); white-space:nowrap; }
 
   /* ── Tab switcher ── */
-  .tab-bar {
-    display:flex; gap:0; border-bottom:2px solid var(--border);
-    margin-left: 1rem;
-  }
+  .tab-bar { display:flex; gap:0; margin-left:1rem; align-self:stretch; }
   .tab-btn {
-    padding:0 1.25rem; height:60px; border:none; background:none;
+    padding:0 1.25rem; border:none; background:none;
     color:var(--sub); font-family:var(--font-mono); font-size:0.78rem;
     font-weight:600; text-transform:uppercase; letter-spacing:0.07em;
     cursor:pointer; border-bottom:2px solid transparent;
-    margin-bottom:-2px; transition:color 0.15s,border-color 0.15s;
-    white-space:nowrap;
+    transition:color 0.15s,border-color 0.15s; white-space:nowrap;
   }
   .tab-btn:hover { color:var(--text); }
-  .tab-btn.active { color:var(--accent); border-bottom-color:var(--accent); }
+  .tab-btn[aria-selected="true"] { color:var(--accent); border-bottom-color:var(--accent); }
+
+  /* ── Disclosure strip ── */
+  .disclosure-bar {
+    background:var(--surface-2); border-bottom:1px solid var(--border);
+    font-size:0.75rem; color:var(--sub); text-align:center; padding:0.45rem 1rem;
+  }
+  .disclosure-bar a { color:var(--text); }
 
   /* ── Layout ── */
   main { max-width:1400px; margin:0 auto; padding:2rem; }
 
   /* ── Hero ── */
   .hero { display:flex; flex-direction:column; gap:1.5rem; margin-bottom:2rem; }
-  .hero-title { font-size:1.6rem; font-weight:700; color:var(--text); line-height:1.2; }
+  .hero-title { font-size:1.75rem; font-weight:700; color:var(--text); line-height:1.2; letter-spacing:-0.01em; }
   .hero-title em { font-style:normal; color:var(--accent); }
-  .hero-sub { font-size:0.85rem; color:var(--sub); margin-top:0.35rem; }
+  .hero-sub { font-size:0.9rem; color:var(--sub); margin-top:0.4rem; max-width:70ch; }
+  .hero-sub a { color:var(--text); }
 
   /* ── Filter Panel ── */
   .filter-panel {
-    background:var(--surface); border:1px solid var(--brand);
-    border-radius:var(--radius-lg); padding:1.25rem 1.5rem 1.1rem;
-    position:relative; width:100%;
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:var(--radius-lg); padding:1.1rem 1.5rem 1.1rem; width:100%;
   }
-  .filter-panel::before {
-    content:'FILTERS'; position:absolute; top:-9px; left:1rem;
-    background:var(--surface); padding:0 6px; font-family:var(--font-mono);
-    font-size:0.65rem; font-weight:600; color:var(--brand); letter-spacing:0.1em;
+  .filter-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:0.9rem; }
+  .filter-title { font-family:var(--font-mono); font-size:0.68rem; font-weight:600; color:var(--brand); letter-spacing:0.1em; text-transform:uppercase; }
+  .link-btn {
+    background:none; border:none; color:var(--sub); font-family:var(--font-mono);
+    font-size:0.72rem; cursor:pointer; text-decoration:underline; text-underline-offset:3px;
   }
-  .filter-sliders {
-    display:grid; grid-template-columns:1fr 1px 1fr 1px 1fr;
-    gap:0 1.5rem; align-items:start;
-  }
-  .slider-divider { background:var(--border); width:1px; height:100%; border:none; margin:0; }
+  .link-btn:hover { color:var(--text); }
+  .filter-sliders { display:grid; grid-template-columns:1fr 1px 1fr 1px 1fr; gap:0 1.5rem; align-items:start; }
+  .slider-divider { background:var(--border); width:1px; height:100%; }
   .filter-chips-row {
     display:flex; gap:0.5rem; flex-wrap:wrap; align-items:center;
     margin-top:1rem; padding-top:0.85rem; border-top:1px solid var(--border);
   }
-  .filter-chips-label { font-size:0.72rem; font-family:var(--font-mono); color:var(--text); text-transform:uppercase; letter-spacing:0.06em; font-weight:600; margin-right:0.25rem; }
+  .filter-chips-label, .slider-label { font-size:0.72rem; font-family:var(--font-mono); color:var(--text); text-transform:uppercase; letter-spacing:0.06em; font-weight:600; }
+  .filter-chips-label { margin-right:0.25rem; }
   .slider-row { display:flex; flex-direction:column; gap:0.3rem; }
-  .slider-label { font-size:0.72rem; font-family:var(--font-mono); color:var(--text); text-transform:uppercase; letter-spacing:0.06em; font-weight:600; }
-  .slider-value { font-family:var(--font-mono); font-size:1.3rem; font-weight:600; color:var(--accent); white-space:nowrap; margin-bottom:0.1rem; }
-  input[type=range] { width:100%; accent-color:var(--accent); height:4px; cursor:pointer; }
-  .slider-hints { display:flex; justify-content:space-between; font-size:0.65rem; color:var(--muted); margin-top:0.2rem; font-family:var(--font-mono); }
+  .slider-help { font-size:0.72rem; color:var(--sub); }
+  .slider-value { font-family:var(--font-mono); font-size:1.3rem; font-weight:600; color:var(--accent); white-space:nowrap; }
+  input[type=range] { width:100%; accent-color:var(--accent); cursor:pointer; margin:0.35rem 0 0; }
+  .slider-hints { display:flex; justify-content:space-between; font-size:0.68rem; color:var(--faint); font-family:var(--font-mono); }
 
   /* ── Chip ── */
   .chip {
     background:var(--surface); border:1px solid var(--border); border-radius:20px;
     padding:0.3rem 0.85rem; font-size:0.78rem; cursor:pointer; color:var(--sub);
-    transition:all 0.15s; white-space:nowrap; font-family:var(--font-mono); user-select:none;
+    transition:all 0.15s; white-space:nowrap; font-family:var(--font-mono);
   }
   .chip:hover { border-color:var(--brand); color:var(--text); }
-  .chip.active { background:var(--brand); border-color:var(--brand); color:#fff; }
+  .chip[aria-pressed="true"] { background:var(--brand); border-color:var(--brand); color:#fff; }
 
-  /* ── Top 5 ── */
-  .top5-section { margin-bottom:2rem; }
-  .top5-label {
-    font-family:var(--font-mono); font-size:0.68rem; font-weight:600;
+  /* ── Section labels ── */
+  .section-label {
+    font-family:var(--font-mono); font-size:0.7rem; font-weight:600;
     color:var(--sub); text-transform:uppercase; letter-spacing:0.1em;
     margin-bottom:0.85rem; display:flex; align-items:center; gap:0.5rem;
   }
-  .top5-label::after { content:''; flex:1; height:1px; background:var(--border); }
+  .section-label::after { content:''; flex:1; height:1px; background:var(--border); }
+
+  /* ── Top 5 ── */
+  .top5-section { margin-bottom:2.25rem; }
   .top5-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:0.75rem; }
   .top5-card {
     background:var(--surface); border:1px solid var(--border);
     border-radius:var(--radius-lg); padding:1rem 1.1rem 1.1rem;
-    position:relative; transition:border-color 0.15s,transform 0.15s;
-    text-decoration:none; color:inherit; display:block;
+    display:flex; flex-direction:column; transition:border-color 0.15s;
   }
-  .top5-card:hover { border-color:var(--brand); transform:translateY(-2px); }
-  .top5-card.rank-1 { border-color:rgba(245,197,66,0.4); background:linear-gradient(135deg,#151820 0%,#1c1a10 100%); }
-  .top5-card.rank-2 { border-color:rgba(176,190,197,0.3); }
-  .top5-card.rank-3 { border-color:rgba(205,127,50,0.3); }
-  .top5-rank { font-family:var(--font-mono); font-size:0.65rem; font-weight:700; letter-spacing:0.06em; margin-bottom:0.6rem; }
-  .rank-1 .top5-rank { color:#f5c542; } .rank-2 .top5-rank { color:#b0bec5; }
-  .rank-3 .top5-rank { color:#cd7f32; } .rank-4 .top5-rank,.rank-5 .top5-rank { color:var(--muted); }
-  .top5-brand { font-size:0.72rem; color:var(--sub); margin-bottom:0.1rem; }
+  .top5-card:hover { border-color:var(--brand); }
+  .top5-card.rank-1 { border-color:rgba(245,197,66,0.45); background:linear-gradient(135deg,#151820 0%,#1c1a10 100%); }
+  .top5-card.rank-2 { border-color:rgba(176,190,197,0.35); }
+  .top5-card.rank-3 { border-color:rgba(205,127,50,0.35); }
+  .top5-rank { font-family:var(--font-mono); font-size:0.68rem; font-weight:700; letter-spacing:0.06em; margin-bottom:0.6rem; color:var(--sub); }
+  .rank-1 .top5-rank { color:#f5c542; } .rank-2 .top5-rank { color:#b0bec5; } .rank-3 .top5-rank { color:#cd7f32; }
+  .top5-brand { font-size:0.75rem; color:var(--sub); margin-bottom:0.1rem; }
   .top5-model { font-size:1rem; font-weight:700; color:var(--text); line-height:1.2; margin-bottom:0.75rem; }
-  .top5-card:hover .top5-model { color:var(--brand); }
   .top5-stats { display:flex; flex-direction:column; gap:0.3rem; }
   .top5-stat { display:flex; justify-content:space-between; align-items:baseline; gap:0.5rem; }
-  .top5-stat-label { font-size:0.68rem; color:var(--sub); font-family:var(--font-mono); }
+  .top5-stat-label { font-size:0.7rem; color:var(--sub); font-family:var(--font-mono); }
   .top5-stat-val { font-family:var(--font-mono); font-size:0.82rem; font-weight:600; color:var(--text); text-align:right; }
   .top5-score { margin-top:0.75rem; padding-top:0.65rem; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
-  .top5-score-label { font-size:0.65rem; font-family:var(--font-mono); color:var(--sub); text-transform:uppercase; letter-spacing:0.06em; }
+  .top5-score-label { font-size:0.68rem; font-family:var(--font-mono); color:var(--sub); text-transform:uppercase; letter-spacing:0.06em; }
   .top5-score-val { font-family:var(--font-mono); font-size:1rem; font-weight:700; }
-  .top5-link-hint { position:absolute; top:0.75rem; right:0.85rem; font-size:0.65rem; color:var(--muted); }
+  .top5-cta { margin-top:auto; padding-top:0.85rem; display:flex; }
+  .top5-cta .buy-btn { flex:1; justify-content:center; }
+
+  /* ── Amazon button ── */
+  .buy-btn {
+    display:inline-flex; align-items:center; gap:0.35rem;
+    background:rgba(245,166,35,0.1); border:1px solid rgba(245,166,35,0.4); color:var(--accent);
+    border-radius:var(--radius); padding:0.4rem 0.7rem; font-size:0.75rem; font-weight:600;
+    text-decoration:none; white-space:nowrap; transition:background 0.15s,border-color 0.15s;
+  }
+  .buy-btn:hover { background:rgba(245,166,35,0.2); border-color:var(--accent); }
 
   /* ── Controls ── */
   .controls { display:flex; gap:0.75rem; flex-wrap:wrap; margin-bottom:1.25rem; align-items:center; }
@@ -149,293 +172,368 @@
   .result-count { margin-left:auto; font-size:0.78rem; color:var(--sub); font-family:var(--font-mono); white-space:nowrap; }
 
   /* ── Table ── */
-  .table-section-label {
-    font-family:var(--font-mono); font-size:0.68rem; font-weight:600;
-    color:var(--sub); text-transform:uppercase; letter-spacing:0.1em;
-    margin-bottom:0.85rem; display:flex; align-items:center; gap:0.5rem;
-  }
-  .table-section-label::after { content:''; flex:1; height:1px; background:var(--border); }
   .table-wrap { overflow-x:auto; border:1px solid var(--border); border-radius:var(--radius-lg); background:var(--surface); }
   table { width:100%; border-collapse:collapse; font-size:0.83rem; }
   th {
-    background:#1a1d2b; color:var(--sub); font-size:0.7rem; font-weight:600;
-    text-transform:uppercase; letter-spacing:0.07em; padding:0.85rem 1rem;
+    background:var(--surface-2); color:var(--sub); font-size:0.7rem; font-weight:600;
+    text-transform:uppercase; letter-spacing:0.07em; padding:0;
     text-align:left; white-space:nowrap; border-bottom:1px solid var(--border);
-    font-family:var(--font-mono); cursor:pointer; user-select:none; transition:color 0.15s;
+    font-family:var(--font-mono); position:sticky; top:0;
   }
-  th:hover { color:var(--text); } th.sorted { color:var(--accent); }
-  th .sort-arrow { margin-left:4px; opacity:0.6; } th.sorted .sort-arrow { opacity:1; }
+  th > span, th > button { display:block; padding:0.85rem 1rem; }
+  th button {
+    width:100%; background:none; border:none; color:inherit; font:inherit; letter-spacing:inherit;
+    text-transform:inherit; text-align:inherit; cursor:pointer; transition:color 0.15s;
+  }
+  th button:hover { color:var(--text); }
+  th[aria-sort] button { color:var(--accent); }
+  th.td-num, th.td-num button { text-align:right; }
+  .sort-arrow { margin-left:4px; opacity:0.5; }
+  th[aria-sort] .sort-arrow { opacity:1; }
   td { padding:0.8rem 1rem; border-bottom:1px solid var(--border); vertical-align:middle; }
-  tr:last-child td { border-bottom:none; }
-  tr:hover td { background:rgba(124,110,245,0.04); }
+  tbody tr:last-child td { border-bottom:none; }
+  tbody tr:hover td { background:rgba(139,127,247,0.05); }
   .td-brand { color:var(--sub); font-size:0.75rem; }
   .td-model { font-weight:600; color:var(--text); }
-  .td-model a { color:inherit; text-decoration:none; }
-  .td-model a:hover { color:var(--brand); }
-  .model-link-icon { color:var(--muted); font-size:0.65rem; margin-left:4px; vertical-align:middle; }
   .td-num { font-family:var(--font-mono); text-align:right; color:var(--text); }
-  .td-price { font-family:var(--font-mono); font-weight:600; color:var(--text); text-align:right; }
-  .price-age { display:block; font-size:0.62rem; font-family:var(--font-mono); text-align:right; margin-top:2px; font-weight:400; }
-  .price-age.age-fresh { color:var(--positive); }
-  .price-age.age-stale { color:var(--accent); }
-  .price-age.age-old   { color:var(--negative); }
-  .top5-price-age { font-size:0.62rem; font-family:var(--font-mono); margin-left:6px; }
-  .top5-price-age.age-fresh { color:var(--positive); }
-  .top5-price-age.age-stale { color:var(--accent); }
-  .top5-price-age.age-old   { color:var(--negative); }
-  .td-score { font-family:var(--font-mono); font-weight:600; text-align:right; }
+  .td-score { font-family:var(--font-mono); font-weight:600; text-align:right; min-width:3.5rem; }
   .score-pos { color:var(--positive); } .score-neg { color:var(--negative); } .score-zero { color:var(--sub); }
   .badge-row { display:flex; gap:4px; flex-wrap:wrap; }
-  .badge { font-size:0.65rem; font-family:var(--font-mono); padding:2px 6px; border-radius:4px; white-space:nowrap; }
-  .badge-exp   { background:rgba(124,110,245,0.15); color:#a89af5; border:1px solid rgba(124,110,245,0.3); }
-  .badge-app   { background:rgba(61,214,140,0.1);   color:#3dd68c;  border:1px solid rgba(61,214,140,0.25); }
-  .badge-jump  { background:rgba(245,166,35,0.1);   color:var(--accent); border:1px solid rgba(245,166,35,0.25); }
-  .badge-mag   { background:rgba(124,110,245,0.15); color:#a89af5; border:1px solid rgba(124,110,245,0.3); }
-  .badge-cable { background:rgba(61,214,140,0.1);   color:#3dd68c;  border:1px solid rgba(61,214,140,0.25); }
-  .badge-disp  { background:rgba(245,166,35,0.1);   color:var(--accent); border:1px solid rgba(245,166,35,0.25); }
-  .badge-wall  { background:rgba(245,101,101,0.1);  color:#f56565;  border:1px solid rgba(245,101,101,0.25); }
-  .rank-num { font-family:var(--font-mono); font-size:0.75rem; color:var(--muted); text-align:center; width:36px; }
-  tr:nth-child(1) .rank-num { color:#f5c542; font-weight:700; }
-  tr:nth-child(2) .rank-num { color:#b0bec5; font-weight:600; }
-  tr:nth-child(3) .rank-num { color:#cd7f32; font-weight:600; }
-  .score-bar-wrap { display:flex; align-items:center; gap:8px; min-width:120px; }
+  .badge { font-size:0.68rem; font-family:var(--font-mono); padding:2px 6px; border-radius:4px; white-space:nowrap; }
+  .badge-purple { background:rgba(139,127,247,0.15); color:#b3a9f8; border:1px solid rgba(139,127,247,0.3); }
+  .badge-green  { background:rgba(61,214,140,0.1);  color:var(--positive); border:1px solid rgba(61,214,140,0.25); }
+  .badge-amber  { background:rgba(245,166,35,0.1);  color:var(--accent);   border:1px solid rgba(245,166,35,0.25); }
+  .badge-red    { background:rgba(245,101,101,0.1); color:var(--negative); border:1px solid rgba(245,101,101,0.25); }
+  .rank-num { font-family:var(--font-mono); font-size:0.75rem; color:var(--sub); text-align:center; width:40px; }
+  table.ranked tbody tr:nth-child(1) .rank-num { color:#f5c542; font-weight:700; }
+  table.ranked tbody tr:nth-child(2) .rank-num { color:#b0bec5; font-weight:600; }
+  table.ranked tbody tr:nth-child(3) .rank-num { color:#cd7f32; font-weight:600; }
+  .score-bar-wrap { display:flex; align-items:center; gap:8px; min-width:130px; }
   .score-bar { flex:1; height:4px; background:var(--border); border-radius:2px; overflow:hidden; }
   .score-bar-fill { height:100%; border-radius:2px; transition:width 0.3s ease; }
   .fill-pos { background:var(--positive); } .fill-neg { background:var(--negative); }
-  .notes-cell { color:var(--sub); font-size:0.75rem; max-width:160px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-
-  /* ── Methodology / About ── */
-  .info-section { margin-top:3rem; }
-  .info-card {
-    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg);
-    padding:1.5rem 1.75rem;
+  .notes-cell { color:var(--sub); font-size:0.75rem; max-width:180px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .dash { color:var(--faint); }
+  .status-cell { padding:3rem 2rem; text-align:center; color:var(--sub); }
+  .status-cell button { margin-top:0.75rem; }
+  .btn {
+    background:var(--brand); color:#fff; border:none; border-radius:var(--radius);
+    padding:0.5rem 1rem; font-size:0.82rem; font-weight:600; cursor:pointer;
   }
-  .info-card p { color:var(--sub); font-size:0.85rem; line-height:1.65; margin-bottom:0.9rem; }
+  .empty { padding:4rem 2rem; text-align:center; color:var(--sub); }
+  .empty-title { font-weight:600; color:var(--text); margin-bottom:0.25rem; }
+  .empty .link-btn { margin-top:0.75rem; font-size:0.8rem; }
+  .table-note { font-size:0.75rem; color:var(--sub); margin-top:0.75rem; }
+
+  /* ── Info sections ── */
+  .info-section { margin-top:3rem; }
+  .info-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); padding:1.5rem 1.75rem; }
+  .info-card p { color:var(--sub); font-size:0.88rem; line-height:1.7; margin-bottom:0.9rem; max-width:90ch; }
   .info-card p:last-child { margin-bottom:0; }
   .info-card strong { color:var(--text); }
-  .method-grid {
-    display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:0.9rem;
-    margin:1.25rem 0 1.4rem;
-  }
-  .method-card {
-    background:var(--bg); border:1px solid var(--border); border-radius:var(--radius);
-    padding:0.9rem 1rem;
-  }
-  .method-card h3 {
-    font-family:var(--font-mono); font-size:0.72rem; font-weight:600; color:var(--accent);
-    text-transform:uppercase; letter-spacing:0.06em; margin-bottom:0.45rem;
-  }
-  .method-card p { font-size:0.78rem; color:var(--sub); line-height:1.55; margin:0; }
-  .about-note {
-    display:flex; align-items:flex-start; gap:0.6rem; margin-top:1.1rem;
-    padding-top:1rem; border-top:1px solid var(--border);
-    font-size:0.75rem; color:var(--muted);
-  }
+  .method-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:0.9rem; margin:1.25rem 0 1.4rem; }
+  .method-card { background:var(--bg); border:1px solid var(--border); border-radius:var(--radius); padding:0.9rem 1rem; }
+  .method-card h3 { font-family:var(--font-mono); font-size:0.72rem; font-weight:600; color:var(--accent); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:0.45rem; }
+  .method-card p { font-size:0.8rem; line-height:1.6; margin:0; }
+  .faq details { border-bottom:1px solid var(--border); }
+  .faq details:last-child { border-bottom:none; }
+  .faq summary { cursor:pointer; padding:0.9rem 0; font-weight:600; font-size:0.92rem; color:var(--text); list-style:none; display:flex; justify-content:space-between; gap:1rem; }
+  .faq summary::-webkit-details-marker { display:none; }
+  .faq summary::after { content:'+'; color:var(--accent); font-family:var(--font-mono); }
+  .faq details[open] summary::after { content:'−'; }
+  .faq details p { padding-bottom:0.9rem; }
 
-  footer { margin-top:3rem; padding:1.5rem 2rem; border-top:1px solid var(--border); font-size:0.75rem; color:var(--muted); font-family:var(--font-mono); text-align:center; }
-  .empty { padding:4rem 2rem; text-align:center; color:var(--sub); }
-  .empty-icon { font-size:2.5rem; margin-bottom:0.75rem; }
-  .empty-title { font-weight:600; color:var(--text); margin-bottom:0.25rem; }
+  footer { margin-top:3rem; padding:1.75rem 2rem; border-top:1px solid var(--border); font-size:0.78rem; color:var(--sub); text-align:center; line-height:1.7; }
+  footer nav { display:flex; gap:1.25rem; justify-content:center; flex-wrap:wrap; margin-bottom:0.6rem; font-family:var(--font-mono); }
+  footer nav a { color:var(--text); text-decoration:none; }
+  footer nav a:hover { color:var(--accent); }
+  footer p { max-width:80ch; margin:0 auto 0.4rem; }
 
   @media(max-width:1100px) { .top5-grid { grid-template-columns:repeat(3,1fr); } }
   @media(max-width:900px) {
-    .filter-sliders { grid-template-columns:1fr; }
+    .filter-sliders { grid-template-columns:1fr; gap:1rem; }
     .slider-divider { width:100%; height:1px; }
     .top5-grid { grid-template-columns:repeat(2,1fr); }
-    main { padding:1rem; } header { padding:0 1rem; }
+    main { padding:1.25rem 1rem; } header { padding:0 1rem; }
+    .header-meta { display:none; }
   }
-  @media(max-width:500px) { .top5-grid { grid-template-columns:1fr; } }
+  @media(max-width:600px) {
+    header { flex-wrap:wrap; gap:0; padding-top:0.6rem; }
+    .tab-bar { margin-left:0; width:100%; min-height:44px; }
+    .tab-btn { flex:1; padding:0 0.5rem; }
+    .hero-title { font-size:1.4rem; }
+    .search-wrap { max-width:none; flex-basis:100%; }
+    .controls select { flex:1; }
+    .result-count { margin-left:0; }
+    .top5-grid { grid-template-columns:1fr; }
+    .info-card { padding:1.25rem; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { transition:none !important; scroll-behavior:auto !important; } }
 </style>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
 <body>
 
 <header>
-  <div class="logo">⚡ Power<span>Rank</span></div>
-  <nav class="tab-bar">
-    <button class="tab-btn active" onclick="switchTab('power_station', this)">⚡ Power Stations</button>
-    <button class="tab-btn" onclick="switchTab('power_bank', this)">🔋 Power Banks</button>
+  <a class="logo" href="/">⚡ Power<span>Rank</span></a>
+  <nav class="tab-bar" role="tablist" aria-label="Product category">
+    <button class="tab-btn" role="tab" id="tab-power_station" aria-selected="true" aria-controls="main" onclick="switchTab('power_station')">⚡ Power Stations</button>
+    <button class="tab-btn" role="tab" id="tab-power_bank" aria-selected="false" aria-controls="main" onclick="switchTab('power_bank')">🔋 Power Banks</button>
   </nav>
-  <div class="header-meta" id="headerMeta">Loading…</div>
+  <div class="header-meta" id="headerMeta"></div>
 </header>
 
-<main>
+<!-- Affiliate disclosure, shown before any product link (FTC + Amazon Associates requirement).
+     Rewritten by applyDisclosure() if AFFILIATE_TAG is empty so the site never claims a
+     relationship it doesn't have. -->
+<div class="disclosure-bar" id="disclosureBar">
+  PowerRank is reader-supported. As an Amazon Associate I earn from qualifying purchases.
+  <a href="/about.html#disclosure">Learn more</a>
+</div>
+
+<main id="main">
   <div class="hero">
     <div class="hero-text">
       <h1 class="hero-title" id="heroTitle">Find the <em>best value</em> portable power station</h1>
       <p class="hero-sub" id="heroSub">Scored by capacity, outlets, and output relative to price. Adjust filters to recalculate rankings instantly.</p>
     </div>
 
-    <div class="filter-panel">
+    <section class="filter-panel" aria-label="Filters">
+      <div class="filter-head">
+        <span class="filter-title">Filters</span>
+        <button class="link-btn" onclick="resetFilters()">Reset filters</button>
+      </div>
       <div class="filter-sliders">
         <div class="slider-row">
-          <div class="slider-label" id="powerLabel">Max power needed</div>
-          <div class="slider-value" id="powerDisplay">1800 W</div>
+          <label class="slider-label" for="powerSlider">Max power needed</label>
+          <div class="slider-help" id="powerHelp">Your largest device's wattage. Output beyond this doesn't add to the score.</div>
+          <div class="slider-value" id="powerDisplay" aria-live="polite">1,800 W</div>
           <input type="range" id="powerSlider" min="100" max="7200" step="100" value="1800" oninput="onSliderChange()">
-          <div class="slider-hints" id="powerHints"><span>100W</span><span>7200W</span></div>
+          <div class="slider-hints" id="powerHints"><span>100 W</span><span>7,200 W</span></div>
         </div>
         <div class="slider-divider"></div>
         <div class="slider-row">
-          <div class="slider-label">Max price</div>
-          <div class="slider-value" id="priceDisplay">Any</div>
+          <label class="slider-label" for="priceSlider">Budget</label>
+          <div class="slider-help">Hides models typically priced above your budget.</div>
+          <div class="slider-value" id="priceDisplay" aria-live="polite">Any</div>
           <input type="range" id="priceSlider" min="100" max="5000" step="50" value="5000" oninput="onSliderChange()">
-          <div class="slider-hints" id="priceHints"><span>$100</span><span>$5,000</span></div>
+          <div class="slider-hints" id="priceHints"><span>$100</span><span>$5,000+</span></div>
         </div>
         <div class="slider-divider"></div>
         <div class="slider-row">
-          <div class="slider-label" id="capLabel">Min capacity</div>
-          <div class="slider-value" id="capacityDisplay">Any</div>
+          <label class="slider-label" for="capacitySlider" id="capLabel">Min capacity</label>
+          <div class="slider-help" id="capHelp">Total stored energy. More capacity = longer runtime.</div>
+          <div class="slider-value" id="capacityDisplay" aria-live="polite">Any</div>
           <input type="range" id="capacitySlider" min="0" max="4000" step="100" value="0" oninput="onSliderChange()">
           <div class="slider-hints" id="capHints"><span>0 Wh</span><span>4,000 Wh</span></div>
         </div>
       </div>
-      <div class="filter-chips-row" id="chipsRow">
-        <!-- populated by switchTab() -->
+      <div class="filter-chips-row" id="chipsRow" role="group" aria-label="Required features"></div>
+    </section>
+  </div>
+
+  <section class="top5-section" aria-labelledby="top5Label">
+    <h2 class="section-label" id="top5Label">Top 5 by value score</h2>
+    <div class="top5-grid" id="top5Grid"></div>
+  </section>
+
+  <section aria-labelledby="allLabel">
+    <h2 class="section-label" id="allLabel">All results</h2>
+    <div class="controls">
+      <div class="search-wrap">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+        </svg>
+        <label for="searchInput" class="sr-only">Search brand or model</label>
+        <input type="search" id="searchInput" placeholder="Search brand or model…" oninput="renderAll()">
+      </div>
+      <label for="brandFilter" class="sr-only">Brand</label>
+      <select id="brandFilter" onchange="renderAll()"><option value="">All brands</option></select>
+      <label for="sortCol" class="sr-only">Sort by</label>
+      <select id="sortCol" onchange="onSortSelect()">
+        <option value="" hidden>Sort: Custom</option>
+        <option value="score:desc">Sort: Value score</option>
+        <option value="capacity:desc">Sort: Capacity</option>
+        <option value="peak_power_w:desc">Sort: Peak output</option>
+        <option value="price:asc">Sort: Lowest price first</option>
+        <option value="brand_model:asc">Sort: Name (A–Z)</option>
+      </select>
+      <div class="result-count" id="resultCount" aria-live="polite"></div>
+    </div>
+
+    <div class="table-wrap">
+      <table id="resultsTable">
+        <caption class="sr-only">All results, ranked</caption>
+        <thead><tr id="tableHead"></tr></thead>
+        <tbody id="tableBody">
+          <tr><td class="status-cell" colspan="12">Loading batteries…</td></tr>
+        </tbody>
+      </table>
+      <div id="emptyState" class="empty" hidden>
+        <div class="empty-title">No matches found</div>
+        <div>Try loosening your filters or clearing the search.</div>
+        <button class="link-btn" onclick="resetFilters()">Reset all filters</button>
       </div>
     </div>
-  </div>
+    <p class="table-note">
+      Prices change frequently, so we don't list them here — use the <strong>Check price</strong> button to see the
+      current price and availability on Amazon.
+    </p>
+  </section>
 
-  <div class="top5-section">
-    <div class="top5-label">Top 5 by value score</div>
-    <div class="top5-grid" id="top5Grid"></div>
-  </div>
-
-  <div class="table-section-label">All results</div>
-  <div class="controls">
-    <div class="search-wrap">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-      </svg>
-      <input type="search" id="searchInput" placeholder="Search brand or model…" oninput="renderAll()">
-    </div>
-    <select id="brandFilter" onchange="renderAll()"><option value="">All brands</option></select>
-    <select id="sortCol" onchange="renderAll()">
-      <option value="score">Sort: Value Score</option>
-      <option value="price">Sort: Price (low→high)</option>
-      <option value="price_desc">Sort: Price (high→low)</option>
-      <option value="capacity_wh">Sort: Capacity</option>
-      <option value="peak_power_w">Sort: Peak Power</option>
-      <option value="dollar_per_wh">Sort: $/Wh · $/1k mAh</option>
-    </select>
-    <div class="result-count" id="resultCount"></div>
-  </div>
-
-  <div class="table-wrap">
-    <table>
-      <thead><tr id="tableHead"></tr></thead>
-      <tbody id="tableBody"></tbody>
-    </table>
-    <div id="emptyState" class="empty" style="display:none">
-      <div class="empty-icon">🔍</div>
-      <div class="empty-title">No matches found</div>
-      <div>Try adjusting your filters or clearing the search.</div>
-    </div>
-  </div>
-
-  <section class="info-section" id="methodology">
-    <div class="table-section-label">How value score is calculated</div>
+  <section class="info-section" id="methodology" aria-labelledby="methodLabel">
+    <h2 class="section-label" id="methodLabel">How the value score is calculated</h2>
     <div class="info-card">
       <p>
-        Most "best battery" lists quietly rank by whoever paid the most for premium marketing, or default to the
-        most expensive option on the shelf. PowerRank does the opposite on purpose: <strong>price is one of the
-        inputs to the score, not an afterthought.</strong> Every listed spec earns a unit points, then price is
-        subtracted directly. A model with great specs at a high price and a model with modest specs at a low
-        price can land in exactly the same place — that's the point. The score tells you where the balance falls,
-        not just which one has the biggest number on the box.
+        Most "best battery" lists quietly default to the most expensive option on the shelf. PowerRank does the
+        opposite on purpose: <strong>price is one of the inputs to the score, not an afterthought.</strong> Every
+        listed spec earns points, then a typical selling price is subtracted. A model with great specs at a high
+        price and a model with modest specs at a low price can land in exactly the same place — that's the point.
+        The score tells you where the balance falls, not just which one has the biggest number on the box.
       </p>
       <div class="method-grid">
         <div class="method-card">
           <h3>Capacity</h3>
-          <p>Weighted on a curve, not a straight line (capacity<sup>0.585</sup>) — so jumping from 500Wh to
-          1,000Wh is worth more to the score than jumping from 2,000Wh to 2,500Wh. That mirrors how capacity
-          actually matters to most people: the first bump solves real problems, later bumps are diminishing
-          returns for most use cases.</p>
+          <p>Weighted on a curve, not a straight line (capacity<sup>0.585</sup>) — so jumping from 500 Wh to
+          1,000 Wh is worth more to the score than jumping from 2,000 Wh to 2,500 Wh. The first bump solves real
+          problems; later bumps are diminishing returns for most people.</p>
         </div>
         <div class="method-card">
           <h3>Ports & outlets</h3>
-          <p>Each AC outlet, 120V/L2 port, and USB port adds a fixed amount, reflecting genuine day-to-day
-          usefulness — more things you can plug in at once without an adapter.</p>
+          <p>Each AC outlet, 120V/L2 port, and USB port adds a fixed amount, reflecting day-to-day usefulness —
+          more things you can plug in at once without an adapter.</p>
         </div>
         <div class="method-card">
           <h3>Peak output</h3>
           <p>Scored relative to the "max power needed" slider, not in isolation. A unit only earns credit for
-          headroom up to what you said you need — massive peak wattage you'll never use doesn't inflate the
-          score.</p>
+          headroom up to what you said you need — wattage you'll never use doesn't inflate the score.</p>
         </div>
         <div class="method-card">
           <h3>Feature bonuses</h3>
-          <p>Expandable capacity, companion app support, jump-starting, MagSafe, built-in cables, a display, and
-          pass-through charging each add a modest, fixed bonus reflecting real convenience.</p>
+          <p>Expandable capacity, companion app support, jump-starting, MagSafe, built-in cables, a display, and a
+          built-in wall plug each add a modest, fixed bonus reflecting real convenience.</p>
         </div>
         <div class="method-card">
           <h3>Price</h3>
-          <p>Subtracted directly, in dollars, from everything above — so the final score is denominated the same
-          way price is. A positive score means the spec sheet, in our formula's judgment, outweighs the price
-          tag; negative means the price is outrunning what you're getting.</p>
+          <p>A typical selling price we research periodically is subtracted from everything above. A positive
+          score means the spec sheet outweighs the price; negative means the price is outrunning what you get.
+          Actual prices change often, so always check the current price before buying — it may shift a
+          model's real-world value.</p>
         </div>
       </div>
       <p>
         This is one opinionated formula, not an objective truth — the exact weights are judgment calls, and
-        reasonable people could weigh capacity vs. ports vs. price differently depending on how they'll actually
-        use a battery. Use the filters and sort options above to see the ranking shift as your own priorities
-        change.
+        reasonable people could weigh capacity vs. ports vs. price differently depending on how they'll use a
+        battery. Use the filters and sort options above to see the ranking shift as your priorities change.
+        No brand pays to be listed or to change its ranking.
       </p>
-      <div class="about-note">
-        <span>ⓘ</span>
-        <span>
-          PowerRank is an independently run buying guide and is not currently affiliated with Amazon.
-          Product links go straight to the Amazon listing so you can confirm current price and availability
-          before buying — prices shown here are checked periodically (see the "checked Xd ago" note on each
-          item) and are an input to our own scoring, not a live feed.
-        </span>
-      </div>
+    </div>
+  </section>
+
+  <section class="info-section" id="guide" aria-labelledby="guideLabel">
+    <h2 class="section-label" id="guideLabel">Buying guide</h2>
+    <div class="info-card faq">
+      <details>
+        <summary>How much capacity do I need?</summary>
+        <p>Add up the watts of what you want to run and multiply by the hours you need. A rough runtime estimate is
+        <strong>capacity (Wh) × 0.85 ÷ load (W)</strong> — the 0.85 accounts for inverter losses. For example, a
+        1,000 Wh station running a 60 W fridge averages around 14 hours. For whole-day backup of several devices,
+        most people land between 1,000 and 2,000 Wh.</p>
+      </details>
+      <details>
+        <summary>What's the difference between peak output and continuous output?</summary>
+        <p>Continuous (rated) output is what the inverter can supply indefinitely. Peak or surge output is a brief
+        burst for motors and compressors that draw extra power when they start. Size the continuous rating to your
+        largest device, and make sure the surge rating covers startup spikes for things like fridges, pumps, and
+        power tools. The "max power needed" slider lets you tell the score how much output actually matters to you.</p>
+      </details>
+      <details>
+        <summary>What do L2, 120V, and USB outlets mean in the table?</summary>
+        <p><strong>120V</strong> is the standard household AC outlet. <strong>L2</strong> counts 240V-capable or
+        high-amp outlets (such as TT-30 or L14-30 connectors) used for RVs, EVs, and transfer switches — only larger
+        stations have them. <strong>USB</strong> counts USB-A and USB-C ports combined.</p>
+      </details>
+      <details>
+        <summary>Why are power banks rated in mAh instead of Wh?</summary>
+        <p>Power banks are traditionally labeled by their cell capacity in milliamp-hours at the cell's nominal
+        voltage (usually 3.6–3.85 V). To convert: <strong>Wh = mAh × voltage ÷ 1,000</strong>, so a 20,000 mAh bank
+        holds roughly 72–77 Wh. Expect to get about 60–70% of the rated mAh into your phone because of conversion
+        losses.</p>
+      </details>
+      <details>
+        <summary>Can I bring a power bank or power station on a plane?</summary>
+        <p>In the US, the FAA allows lithium batteries up to 100 Wh in carry-on bags without approval, and 100–160 Wh
+        with airline approval. Spare lithium batteries aren't allowed in checked luggage. Most power banks up to about
+        26,800 mAh fall under 100 Wh; portable power stations are almost always too large to fly. Check your airline's
+        current rules before traveling.</p>
+      </details>
+      <details>
+        <summary>Does battery chemistry matter?</summary>
+        <p>Most newer power stations use LiFePO4 (lithium iron phosphate) cells, which are typically rated for
+        3,000+ charge cycles and are more thermally stable. Older or lighter models may use NMC cells, which are
+        lighter for the same capacity but usually rated for fewer cycles. If you'll cycle the unit often, LiFePO4
+        is generally worth it.</p>
+      </details>
     </div>
   </section>
 </main>
 
 <footer>
-  Value score is unitless: positive = perceived value exceeds price, negative = price exceeds perceived value.
-  Scores recalculate in real time when you adjust filters. · Prices are checked periodically and may not match
-  the current Amazon listing — the "checked Xd ago" note on each item shows how recent our data is, and the
-  product link always takes you to Amazon to confirm the current price before buying.
+  <nav aria-label="Site">
+    <a href="/about.html">About</a>
+    <a href="/about.html#disclosure">Affiliate disclosure</a>
+    <a href="/privacy.html">Privacy policy</a>
+    <a href="#methodology">Methodology</a>
+  </nav>
+  <p id="footerDisclosure">As an Amazon Associate I earn from qualifying purchases. This doesn't affect our rankings,
+  which come from the formula described above.</p>
+  <p>Value score is unitless: positive = specs outweigh price, negative = price outweighs specs. Specs come from
+  manufacturer listings and may change; confirm details on the product page before buying.</p>
+  <p>© <span id="year">2026</span> PowerRank</p>
 </footer>
 
+<script src="/config.js"></script>
 <script>
 const SUPABASE_URL = 'https://qeeotzunkyzivxjydiuw.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFlZW90enVua3l6aXZ4anlkaXV3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyNDcwOTYsImV4cCI6MjA5NzgyMzA5Nn0.YCcolPgRexsRm2rHR0vcWXNnF7eIbSMCmI8PCwhf2D4';
 
-// Set this once an Amazon Associates tracking ID is approved (e.g. 'powerrank0a-20') —
-// every product link on the site re-points automatically, no data edits needed.
-const AFFILIATE_TAG = '';
+// Amazon Associates rules: prices may only be displayed if they come from PA-API / Creators API
+// (or Amazon-served widgets). Prices in our database are researched by hand, so they are used
+// only as a scoring input and for the budget filter — never rendered on the page.
 
-// Build the Amazon link from the ASIN rather than a stored URL, so the affiliate tag
-// only has to be set in one place. Falls back to a stored `url` if a row is somehow
-// missing an ASIN (none currently are).
+// Build the Amazon link from the ASIN so the affiliate tag only lives in one place.
 function amazonUrl(b) {
   if (b.asin) {
-    return `https://www.amazon.com/dp/${b.asin}` + (AFFILIATE_TAG ? `?tag=${AFFILIATE_TAG}` : '');
+    return `https://www.amazon.com/dp/${encodeURIComponent(b.asin)}` + (AFFILIATE_TAG ? `?tag=${AFFILIATE_TAG}` : '');
   }
-  return b.url || null;
+  if (!b.url) return null;
+  if (!AFFILIATE_TAG || !/amazon\.com/i.test(b.url)) return b.url;
+  const u = new URL(b.url); u.searchParams.set('tag', AFFILIATE_TAG); return u.toString();
 }
+
+function buyButton(b, label = 'Check price on Amazon') {
+  const link = amazonUrl(b);
+  if (!link) return '<span class="dash">—</span>';
+  return `<a class="buy-btn" href="${esc(link)}" target="_blank" rel="sponsored noopener"
+            aria-label="${esc(label)}: ${esc(b.brand)} ${esc(b.model)} (opens Amazon in a new tab)">${esc(label)} ↗</a>`;
+}
+
+function esc(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+}
+
+function applyDisclosure() {
+  if (AFFILIATE_TAG) return;
+  document.getElementById('disclosureBar').innerHTML =
+    'PowerRank is independent and not currently affiliated with Amazon. <a href="/about.html#disclosure">Learn more</a>';
+  document.getElementById('footerDisclosure').textContent =
+    'PowerRank is not currently affiliated with Amazon or any brand listed here.';
+}
+applyDisclosure();
+document.getElementById('year').textContent = new Date().getFullYear();
 
 // ── Data ──
-let ALL_DATA = [];       // everything from DB
+let ALL_DATA = [];
 let activeTab = 'power_station';
-
-// ── Price freshness ──
-// Prices here are researched/entered periodically, not a live Amazon feed —
-// this makes that explicit instead of implying real-time pricing.
-// fresh: checked within 3 days · stale: within 14 days · old: beyond that
-function priceAgeInfo(isoDate) {
-  if (!isoDate) return { label: 'unknown', cls: 'age-old' };
-  const hours = (Date.now() - new Date(isoDate).getTime()) / 36e5;
-  if (hours < 1)   return { label: 'checked <1h ago', cls: 'age-fresh' };
-  if (hours < 24)  return { label: `checked ${Math.round(hours)}h ago`, cls: 'age-fresh' };
-  const days = Math.round(hours / 24);
-  if (days <= 3)   return { label: `checked ${days}d ago`, cls: 'age-fresh' };
-  if (days <= 14)  return { label: `checked ${days}d ago`, cls: 'age-stale' };
-  return { label: `checked ${days}d ago`, cls: 'age-old' };
-}
 
 // ── Formula constants ──
 // Power stations
@@ -450,7 +548,7 @@ let maxPower    = 1800;
 let maxPrice    = 5000;
 let minCapacity = 0;
 let sortKey     = 'score';
-let sortDir     = 1;
+let sortDir     = 'desc';
 let activeChips = new Set();
 
 // ── Tab config ──
@@ -458,68 +556,79 @@ const TAB_CONFIG = {
   power_station: {
     title: 'Find the <em>best value</em> portable power station',
     sub:   'Scored by capacity, outlets, and output relative to price. Adjust filters to recalculate rankings instantly.',
-    powerDefault: 1800, powerMax: 7200, powerStep: 100, powerUnit: 'W',
-    priceMax: 5000, priceStep: 50,
-    capMax: 4000, capStep: 100, capUnit: 'Wh',
+    noun: 'power stations',
+    powerDefault: 1800, powerMin: 100, powerMax: 7200, powerStep: 100,
+    priceMin: 100, priceMax: 5000, priceStep: 50,
+    capMin: 0, capMax: 4000, capStep: 100, capUnit: 'Wh',
     chips: [
-      { key: 'expandable',  label: 'Expandable' },
-      { key: 'app_support', label: 'App Support' },
-      { key: 'jump_starter',label: 'Jump Starter' },
+      { key: 'expandable',   label: 'Expandable' },
+      { key: 'app_support',  label: 'App Support' },
+      { key: 'jump_starter', label: 'Jump Starter' },
     ],
     headers: [
-      { label: '#', style: 'width:40px;cursor:default;' },
+      { label: '#', cls: 'rank-num' },
       { label: 'Battery', sort: 'brand_model' },
-      { label: 'Price', sort: 'price', num: true },
-      { label: 'Wh', sort: 'capacity_wh', num: true },
-      { label: '$/Wh', sort: 'dollar_per_wh', num: true },
-      { label: 'L2', num: true },
-      { label: '120V', num: true },
-      { label: 'USB', num: true },
-      { label: 'Peak W', sort: 'peak_power_w', num: true },
+      { label: 'Wh', sort: 'capacity', num: true, title: 'Capacity in watt-hours' },
+      { label: 'L2', num: true, title: '240V / high-amp outlets' },
+      { label: '120V', num: true, title: 'Standard AC outlets' },
+      { label: 'USB', num: true, title: 'USB-A + USB-C ports' },
+      { label: 'Peak W', sort: 'peak_power_w', num: true, title: 'Peak (surge) output in watts' },
       { label: 'Features' },
       { label: 'Score', sort: 'score' },
       { label: 'Notes' },
+      { label: 'Price' },
     ],
-    brands: ['Anker solix','Bluetti','Ecoflow','Goal Zero','Jackery','VTOMAN','DJI','Oupes','Pecron'],
   },
   power_bank: {
     title: 'Find the <em>best value</em> power bank',
     sub:   'Compact batteries scored by capacity, ports, and charging speed relative to price. Adjust filters to recalculate.',
-    powerDefault: 30, powerMin: 5, powerMax: 150, powerStep: 5, powerUnit: 'W',
+    noun: 'power banks',
+    powerDefault: 30, powerMin: 5, powerMax: 150, powerStep: 5,
     priceMin: 10, priceMax: 200, priceStep: 5,
     capMin: 1000, capMax: 30000, capStep: 1000, capUnit: 'mAh',
     chips: [
-      { key: 'has_magsafe',      label: 'MagSafe' },
-      { key: 'has_builtin_cable',label: 'Built-in Cable' },
-      { key: 'has_display',      label: 'Display' },
-      { key: 'has_wall_plug',    label: 'Wall Plug' },
+      { key: 'has_magsafe',       label: 'MagSafe' },
+      { key: 'has_builtin_cable', label: 'Built-in Cable' },
+      { key: 'has_display',       label: 'Display' },
+      { key: 'has_wall_plug',     label: 'Wall Plug' },
     ],
     headers: [
-      { label: '#', style: 'width:40px;cursor:default;' },
+      { label: '#', cls: 'rank-num' },
       { label: 'Battery', sort: 'brand_model' },
-      { label: 'Price', sort: 'price', num: true },
-      { label: 'mAh', sort: 'capacity_mah', num: true },
-      { label: '$/1,000mAh', sort: 'dollar_per_mah', num: true },
-      { label: 'USB', num: true },
-      { label: 'Peak W', sort: 'peak_power_w', num: true },
+      { label: 'mAh', sort: 'capacity', num: true, title: 'Capacity in milliamp-hours' },
+      { label: 'USB', num: true, title: 'USB-A + USB-C ports' },
+      { label: 'Peak W', sort: 'peak_power_w', num: true, title: 'Max charging output in watts' },
       { label: 'Features' },
       { label: 'Score', sort: 'score' },
       { label: 'Notes' },
+      { label: 'Price' },
     ],
-    brands: [],
   },
 };
 
 // ── Load ──
 async function loadData() {
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/batteries?select=*`, {
-    headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
-  });
-  if (!res.ok) { console.error('Load failed', res.status); return; }
-  ALL_DATA = await res.json();
-  switchTab('power_station', document.querySelector('.tab-btn.active'));
+  setTableStatus('Loading batteries…');
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/batteries?select=*`, {
+      headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    ALL_DATA = await res.json();
+  } catch (err) {
+    console.error('Load failed', err);
+    setTableStatus('We couldn\'t load the battery list. Check your connection and try again.', true);
+    return;
+  }
+  const initial = location.hash === '#power-banks' ? 'power_bank' : 'power_station';
+  switchTab(initial);
 }
-loadData();
+
+function setTableStatus(msg, retry = false) {
+  document.getElementById('emptyState').hidden = true;
+  document.getElementById('tableBody').innerHTML =
+    `<tr><td class="status-cell" colspan="12">${esc(msg)}${retry ? '<br><button class="btn" onclick="loadData()">Retry</button>' : ''}</td></tr>`;
+}
 
 // ── Score functions ──
 function calcPS(b, pw) {
@@ -552,69 +661,62 @@ function calcScore(b, pw) {
 }
 
 // ── Tab switch ──
-function switchTab(tab, btnEl) {
+function switchTab(tab) {
   activeTab = tab;
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  if (btnEl) btnEl.classList.add('active');
+  document.querySelectorAll('.tab-btn').forEach(b =>
+    b.setAttribute('aria-selected', String(b.id === `tab-${tab}`)));
+  history.replaceState(null, '', tab === 'power_bank' ? '#power-banks' : location.pathname);
 
   const cfg = TAB_CONFIG[tab];
-
-  // Update hero
   document.getElementById('heroTitle').innerHTML = cfg.title;
   document.getElementById('heroSub').textContent = cfg.sub;
-
-  // Reset sliders for this tab
-  maxPower    = cfg.powerDefault;
-  maxPrice    = cfg.priceMax;
-  minCapacity = cfg.capMin ?? 0;
-  activeChips = new Set();
+  document.getElementById('capHelp').textContent = tab === 'power_bank'
+    ? 'Rated cell capacity. 10,000 mAh ≈ 2 phone charges.'
+    : 'Total stored energy. More capacity = longer runtime.';
+  document.getElementById('powerHelp').textContent = tab === 'power_bank'
+    ? 'The fastest charging you need (e.g. 20 W phone, 65–100 W laptop).'
+    : 'Your largest device\'s wattage. Output beyond this doesn\'t add to the score.';
 
   const ps = document.getElementById('powerSlider');
-  ps.min = cfg.powerMin ?? 100; ps.max = cfg.powerMax; ps.step = cfg.powerStep; ps.value = cfg.powerDefault;
-  document.getElementById('powerDisplay').textContent = `${cfg.powerDefault} ${cfg.powerUnit}`;
-  document.getElementById('powerHints').innerHTML = `<span>${cfg.powerMin ?? 100}${cfg.powerUnit}</span><span>${cfg.powerMax}${cfg.powerUnit}</span>`;
+  ps.min = cfg.powerMin; ps.max = cfg.powerMax; ps.step = cfg.powerStep;
+  document.getElementById('powerHints').innerHTML = `<span>${cfg.powerMin} W</span><span>${cfg.powerMax.toLocaleString()} W</span>`;
 
   const prs = document.getElementById('priceSlider');
-  prs.min = cfg.priceMin ?? 100; prs.max = cfg.priceMax; prs.step = cfg.priceStep; prs.value = cfg.priceMax;
-  document.getElementById('priceDisplay').textContent = 'Any';
-  document.getElementById('priceHints').innerHTML = `<span>$${cfg.priceMin ?? 100}</span><span>$${cfg.priceMax.toLocaleString()}</span>`;
+  prs.min = cfg.priceMin; prs.max = cfg.priceMax; prs.step = cfg.priceStep;
+  document.getElementById('priceHints').innerHTML = `<span>$${cfg.priceMin}</span><span>$${cfg.priceMax.toLocaleString()}+</span>`;
 
   const cs = document.getElementById('capacitySlider');
-  cs.min = cfg.capMin ?? 0; cs.max = cfg.capMax; cs.step = cfg.capStep; cs.value = cfg.capMin ?? 0;
-  document.getElementById('capacityDisplay').textContent = 'Any';
-  document.getElementById('capHints').innerHTML = `<span>${cfg.capMin ?? 0} ${cfg.capUnit}</span><span>${cfg.capMax} ${cfg.capUnit}</span>`;
+  cs.min = cfg.capMin; cs.max = cfg.capMax; cs.step = cfg.capStep;
+  document.getElementById('capHints').innerHTML =
+    `<span>${cfg.capMin.toLocaleString()} ${cfg.capUnit}</span><span>${cfg.capMax.toLocaleString()} ${cfg.capUnit}</span>`;
 
-  // Chips
   document.getElementById('chipsRow').innerHTML =
-    `<span class="filter-chips-label">Features:</span>` +
+    `<span class="filter-chips-label">Must have:</span>` +
     cfg.chips.map(c =>
-      `<div class="chip" id="chip-${c.key}" onclick="toggleChip(this,'${c.key}')">${c.label}</div>`
+      `<button type="button" class="chip" aria-pressed="false" data-key="${c.key}" onclick="toggleChip(this)">${c.label}</button>`
     ).join('');
 
-  // Brand filter
   const tabData = ALL_DATA.filter(b => b.category === tab);
-  const brands  = [...new Set(tabData.map(b => b.brand))].sort();
-  const bf = document.getElementById('brandFilter');
-  bf.innerHTML = '<option value="">All brands</option>' + brands.map(br => `<option>${br}</option>`).join('');
+  const brands  = [...new Set(tabData.map(b => b.brand))].sort((a, b) => a.localeCompare(b));
+  document.getElementById('brandFilter').innerHTML =
+    '<option value="">All brands</option>' + brands.map(br => `<option value="${esc(br)}">${esc(br)}</option>`).join('');
 
-  // Table headers
-  document.getElementById('tableHead').innerHTML = cfg.headers.map(h => {
-    const cls   = h.sort ? ` onclick="setSort('${h.sort}')"` : '';
-    const arrow = h.sort ? ` <span class="sort-arrow">↕</span>` : '';
-    const num   = h.num  ? ' class="td-num"' : '';
-    const style = h.style ? ` style="${h.style}"` : '';
-    return `<th${style}${num}${cls}>${h.label}${arrow}</th>`;
-  }).join('');
+  document.getElementById('headerMeta').textContent = `${tabData.length} ${cfg.noun} compared`;
 
-  sortKey = 'score'; sortDir = 1;
-  document.getElementById('sortCol').value = 'score';
+  resetFilters();
+}
+
+function resetFilters() {
+  const cfg = TAB_CONFIG[activeTab];
+  document.getElementById('powerSlider').value = cfg.powerDefault;
+  document.getElementById('priceSlider').value = cfg.priceMax;
+  document.getElementById('capacitySlider').value = cfg.capMin;
   document.getElementById('searchInput').value = '';
-
-  const count = tabData.length;
-  document.getElementById('headerMeta').textContent =
-    `${count} ${tab === 'power_station' ? 'stations' : 'power banks'} · prices checked periodically, not real-time`;
-
-  renderAll();
+  document.getElementById('brandFilter').value = '';
+  activeChips = new Set();
+  document.querySelectorAll('.chip').forEach(c => c.setAttribute('aria-pressed', 'false'));
+  sortKey = 'score'; sortDir = 'desc';
+  onSliderChange();
 }
 
 // ── Slider change ──
@@ -624,195 +726,191 @@ function onSliderChange() {
   maxPrice    = parseInt(document.getElementById('priceSlider').value);
   minCapacity = parseFloat(document.getElementById('capacitySlider').value);
 
-  document.getElementById('powerDisplay').textContent = `${maxPower.toLocaleString()} ${cfg.powerUnit}`;
+  document.getElementById('powerDisplay').textContent = `${maxPower.toLocaleString()} W`;
   document.getElementById('priceDisplay').textContent =
-    maxPrice >= cfg.priceMax ? 'Any' : `$${maxPrice.toLocaleString()}`;
-  const capMin = cfg.capMin ?? 0;
+    maxPrice >= cfg.priceMax ? 'Any' : `Up to $${maxPrice.toLocaleString()}`;
   document.getElementById('capacityDisplay').textContent =
-    minCapacity <= capMin ? 'Any' : `${minCapacity.toLocaleString()} ${cfg.capUnit}`;
+    minCapacity <= cfg.capMin ? 'Any' : `${minCapacity.toLocaleString()} ${cfg.capUnit}+`;
 
   renderAll();
 }
 
-function toggleChip(el, key) {
-  el.classList.toggle('active');
-  activeChips.has(key) ? activeChips.delete(key) : activeChips.add(key);
+function toggleChip(el) {
+  const key = el.dataset.key;
+  const on = !activeChips.has(key);
+  on ? activeChips.add(key) : activeChips.delete(key);
+  el.setAttribute('aria-pressed', String(on));
   renderAll();
 }
+
+// ── Sorting ──
+// Single source of truth: sortKey + sortDir. The dropdown and the column headers both write it.
+const DEFAULT_DIR = { brand_model: 'asc', price: 'asc' };
 
 function setSort(key) {
-  if (sortKey === key) { sortDir *= -1; }
-  else { sortKey = key; sortDir = (key === 'price' || key === 'dollar_per_wh') ? -1 : 1; }
-  const sel = document.getElementById('sortCol');
-  if (key === 'score') sel.value = 'score';
-  else if (key === 'price') sel.value = sortDir === -1 ? 'price' : 'price_desc';
-  else if (key === 'capacity_wh' || key === 'capacity_mah') sel.value = 'capacity_wh';
-  else if (key === 'peak_power_w') sel.value = 'peak_power_w';
-  else if (key === 'dollar_per_wh' || key === 'dollar_per_mah') sel.value = 'dollar_per_wh';
+  if (sortKey === key) sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+  else { sortKey = key; sortDir = DEFAULT_DIR[key] || 'desc'; }
   renderAll();
 }
 
-function getFilteredSorted() {
-  const search  = document.getElementById('searchInput').value.toLowerCase();
-  const brand   = document.getElementById('brandFilter').value;
-  const sortSel = document.getElementById('sortCol').value;
+function onSortSelect() {
+  const [key, dir] = document.getElementById('sortCol').value.split(':');
+  sortKey = key; sortDir = dir;
+  renderAll();
+}
 
-  if      (sortSel === 'score')        { sortKey = 'score';        sortDir = 1;  }
-  else if (sortSel === 'price')        { sortKey = 'price';        sortDir = -1; }
-  else if (sortSel === 'price_desc')   { sortKey = 'price';        sortDir = 1;  }
-  else if (sortSel === 'capacity_wh')  { sortKey = 'capacity_wh';  sortDir = 1;  }
-  else if (sortSel === 'capacity_mah') { sortKey = 'capacity_mah'; sortDir = 1;  }
-  else if (sortSel === 'peak_power_w') { sortKey = 'peak_power_w'; sortDir = 1;  }
-  else if (sortSel === 'dollar_per_wh'){ sortKey = 'dollar_per_wh';sortDir = -1; }
-  else if (sortSel === 'dollar_per_mah'){sortKey = 'dollar_per_mah';sortDir = -1;}
+function syncSortUI() {
+  const sel = document.getElementById('sortCol');
+  const val = `${sortKey}:${sortDir}`;
+  sel.value = [...sel.options].some(o => o.value === val) ? val : '';
 
-  let data = ALL_DATA
+  const cfg = TAB_CONFIG[activeTab];
+  document.getElementById('tableHead').innerHTML = cfg.headers.map(h => {
+    const cls   = [h.num ? 'td-num' : '', h.cls || ''].filter(Boolean).join(' ');
+    const title = h.title ? ` title="${h.title}"` : '';
+    if (!h.sort) return `<th scope="col"${cls ? ` class="${cls}"` : ''}${title}><span>${h.label}</span></th>`;
+    const active = h.sort === sortKey;
+    const aria   = active ? ` aria-sort="${sortDir === 'asc' ? 'ascending' : 'descending'}"` : '';
+    const arrow  = active ? (sortDir === 'asc' ? '↑' : '↓') : '↕';
+    return `<th scope="col"${cls ? ` class="${cls}"` : ''}${aria}${title}>` +
+           `<button type="button" onclick="setSort('${h.sort}')">${h.label}<span class="sort-arrow" aria-hidden="true">${arrow}</span></button></th>`;
+  }).join('');
+
+  document.getElementById('resultsTable').classList.toggle('ranked', sortKey === 'score' && sortDir === 'desc');
+}
+
+function getFiltered() {
+  const search = document.getElementById('searchInput').value.trim().toLowerCase();
+  const brand  = document.getElementById('brandFilter').value;
+  const isPB   = activeTab === 'power_bank';
+  const cfg    = TAB_CONFIG[activeTab];
+
+  return ALL_DATA
     .filter(b => b.category === activeTab)
     .map(b => ({
       ...b,
       score: calcScore(b, maxPower),
-      dollar_per_wh:  b.price / b.capacity_wh,
-      dollar_per_mah: b.capacity_mah ? (b.price / b.capacity_mah) * 1000 : null,
-    }));
-
-  const isPB = activeTab === 'power_bank';
-  data = data.filter(b => {
-    if (search && !`${b.brand} ${b.model}`.toLowerCase().includes(search)) return false;
-    if (brand && b.brand !== brand) return false;
-    if (b.price > maxPrice) return false;
-    if (isPB && b.capacity_mah < minCapacity) return false;
-    if (!isPB && b.capacity_wh < minCapacity) return false;
-    for (const key of activeChips) { if (!b[key]) return false; }
-    return true;
-  });
-
-  data.sort((a, b) => {
-    const av = sortKey === 'brand_model' ? `${a.brand} ${a.model}` : a[sortKey];
-    const bv = sortKey === 'brand_model' ? `${b.brand} ${b.model}` : b[sortKey];
-    if (typeof av === 'string') return sortDir * av.localeCompare(bv);
-    return sortDir * (bv - av);
-  });
-
-  return data;
+      capacity: isPB ? (b.capacity_mah || 0) : b.capacity_wh,
+    }))
+    .filter(b => {
+      if (search && !`${b.brand} ${b.model}`.toLowerCase().includes(search)) return false;
+      if (brand && b.brand !== brand) return false;
+      if (maxPrice < cfg.priceMax && b.price > maxPrice) return false;
+      if (b.capacity < minCapacity) return false;
+      for (const key of activeChips) { if (!b[key]) return false; }
+      return true;
+    });
 }
 
-const RANK_LABELS  = ['#1','#2','#3','#4','#5'];
+function sortData(data) {
+  const val = b => sortKey === 'brand_model' ? `${b.brand} ${b.model}` : b[sortKey];
+  return [...data].sort((a, b) => {
+    const av = val(a), bv = val(b);
+    const cmp = typeof av === 'string' ? av.localeCompare(bv) : av - bv;
+    return sortDir === 'asc' ? cmp : -cmp;
+  });
+}
+
 const RANK_CLASSES = ['rank-1','rank-2','rank-3','rank-4','rank-5'];
 
-function renderTop5(data) {
-  const top5 = [...data].sort((a,b) => b.score - a.score).slice(0,5);
-  const grid = document.getElementById('top5Grid');
-  if (!top5.length) { grid.innerHTML=''; return; }
+function fmtScore(s) { return `${s > 0 ? '+' : ''}${s.toLocaleString()}`; }
 
+function renderTop5(data) {
+  const top5 = [...data].sort((a, b) => b.score - a.score).slice(0, 5);
+  const grid = document.getElementById('top5Grid');
+  document.getElementById('top5Label').parentElement.hidden = !top5.length;
   const isPB = activeTab === 'power_bank';
-  grid.innerHTML = top5.map((b,i) => {
+
+  grid.innerHTML = top5.map((b, i) => {
     const scoreClass = b.score >= 0 ? 'score-pos' : 'score-neg';
-    const age = priceAgeInfo(b.price_updated_at);
-    const link = amazonUrl(b);
-    const stat3 = isPB
-      ? `<div class="top5-stat"><span class="top5-stat-label">Peak Output</span><span class="top5-stat-val">${b.peak_power_w.toLocaleString()} W</span></div>`
-      : `<div class="top5-stat"><span class="top5-stat-label">Peak Output</span><span class="top5-stat-val">${b.peak_power_w.toLocaleString()} W</span></div>`;
-    const capStat = isPB
-      ? `<div class="top5-stat"><span class="top5-stat-label">Capacity</span><span class="top5-stat-val">${(b.capacity_mah || 0).toLocaleString()} mAh</span></div>`
-      : `<div class="top5-stat"><span class="top5-stat-label">Capacity</span><span class="top5-stat-val">${b.capacity_wh.toLocaleString()} Wh</span></div>`;
-    const inner = `
-      <div class="top5-rank">${RANK_LABELS[i]}</div>
-      ${link ? '<span class="top5-link-hint">↗</span>' : ''}
-      <div class="top5-brand">${b.brand}</div>
-      <div class="top5-model">${b.model}</div>
+    const cap = isPB ? `${(b.capacity_mah || 0).toLocaleString()} mAh` : `${b.capacity_wh.toLocaleString()} Wh`;
+    const ports = isPB
+      ? `${b.usb_outlets} USB`
+      : `${b.outlets_120v + b.l2_outlets} AC · ${b.usb_outlets} USB`;
+    return `<article class="top5-card ${RANK_CLASSES[i]}">
+      <div class="top5-rank">#${i + 1}</div>
+      <div class="top5-brand">${esc(b.brand)}</div>
+      <h3 class="top5-model">${esc(b.model)}</h3>
       <div class="top5-stats">
-        <div class="top5-stat"><span class="top5-stat-label">Price</span><span class="top5-stat-val">$${b.price.toLocaleString()}<span class="top5-price-age ${age.cls}">${age.label}</span></span></div>
-        ${capStat}
-        ${stat3}
+        <div class="top5-stat"><span class="top5-stat-label">Capacity</span><span class="top5-stat-val">${cap}</span></div>
+        <div class="top5-stat"><span class="top5-stat-label">Peak output</span><span class="top5-stat-val">${b.peak_power_w.toLocaleString()} W</span></div>
+        <div class="top5-stat"><span class="top5-stat-label">Ports</span><span class="top5-stat-val">${ports}</span></div>
       </div>
       <div class="top5-score">
-        <span class="top5-score-label">Value Score</span>
-        <span class="top5-score-val ${scoreClass}">${b.score > 0 ? '+' : ''}${b.score.toLocaleString()}</span>
-      </div>`;
-    return link
-      ? `<a href="${link}" target="_blank" rel="noopener" class="top5-card ${RANK_CLASSES[i]}">${inner}</a>`
-      : `<div class="top5-card ${RANK_CLASSES[i]}">${inner}</div>`;
+        <span class="top5-score-label">Value score</span>
+        <span class="top5-score-val ${scoreClass}">${fmtScore(b.score)}</span>
+      </div>
+      <div class="top5-cta">${buyButton(b)}</div>
+    </article>`;
   }).join('');
 }
 
-function renderTable() {
-  const data   = getFilteredSorted();
+function renderTable(data) {
   const maxAbs = Math.max(...data.map(b => Math.abs(b.score)), 1);
   const tbody  = document.getElementById('tableBody');
   const empty  = document.getElementById('emptyState');
   const isPB   = activeTab === 'power_bank';
+  const total  = ALL_DATA.filter(b => b.category === activeTab).length;
 
-  document.getElementById('resultCount').textContent = `${data.length} of ${ALL_DATA.filter(b=>b.category===activeTab).length}`;
+  document.getElementById('resultCount').textContent = `Showing ${data.length} of ${total}`;
 
-  if (!data.length) { tbody.innerHTML=''; empty.style.display=''; return; }
-  empty.style.display = 'none';
+  if (!data.length) { tbody.innerHTML = ''; empty.hidden = false; return; }
+  empty.hidden = true;
 
-  tbody.innerHTML = data.map((b,i) => {
+  tbody.innerHTML = data.map((b, i) => {
     const scoreClass = b.score > 0 ? 'score-pos' : b.score < 0 ? 'score-neg' : 'score-zero';
     const barClass   = b.score >= 0 ? 'fill-pos' : 'fill-neg';
     const barWidth   = Math.round(Math.abs(b.score) / maxAbs * 100);
 
-    let badges;
-    if (isPB) {
-      badges = [
-        b.has_magsafe                    ? '<span class="badge badge-mag">MagSafe</span>'                          : '',
-        (b.builtin_cables > 0)           ? `<span class="badge badge-cable">${b.builtin_cables} cable${b.builtin_cables > 1 ? 's' : ''}</span>` : '',
-        b.has_display                    ? '<span class="badge badge-disp">display</span>'                         : '',
-        b.has_wall_plug                  ? '<span class="badge badge-wall">wall plug</span>'                       : '',
-      ].filter(Boolean).join('');
-    } else {
-      badges = [
-        b.expandable   ? '<span class="badge badge-exp">exp</span>'  : '',
-        b.app_support  ? '<span class="badge badge-app">app</span>'  : '',
-        b.jump_starter ? '<span class="badge badge-jump">jump</span>': '',
-      ].filter(Boolean).join('');
-    }
+    const badges = (isPB
+      ? [
+          b.has_magsafe         && '<span class="badge badge-purple">MagSafe</span>',
+          b.builtin_cables > 0  && `<span class="badge badge-green">${b.builtin_cables} cable${b.builtin_cables > 1 ? 's' : ''}</span>`,
+          b.has_display         && '<span class="badge badge-amber">display</span>',
+          b.has_wall_plug       && '<span class="badge badge-red">wall plug</span>',
+        ]
+      : [
+          b.expandable   && '<span class="badge badge-purple" title="Capacity can be expanded with add-on batteries">expandable</span>',
+          b.app_support  && '<span class="badge badge-green" title="Companion phone app">app</span>',
+          b.jump_starter && '<span class="badge badge-amber" title="Can jump-start a vehicle">jump start</span>',
+        ]).filter(Boolean).join('');
 
-    const link = amazonUrl(b);
-    const modelLink = link
-      ? `<a href="${link}" target="_blank" rel="noopener">${b.model}<span class="model-link-icon">↗</span></a>`
-      : b.model;
-    const age = priceAgeInfo(b.price_updated_at);
-    const notes = b.notes
-      ? `<span title="${b.notes}">${b.notes}</span>`
-      : '<span style="color:var(--muted)">—</span>';
+    const notes = b.notes ? `<span title="${esc(b.notes)}">${esc(b.notes)}</span>` : '<span class="dash">—</span>';
 
     const cells = isPB
-      ? `<td class="td-num">${b.usb_outlets}</td>`
-      : `<td class="td-num">${b.l2_outlets}</td>
+      ? `<td class="td-num">${(b.capacity_mah || 0).toLocaleString()}</td>
+         <td class="td-num">${b.usb_outlets}</td>`
+      : `<td class="td-num">${b.capacity_wh.toLocaleString()}</td>
+         <td class="td-num">${b.l2_outlets}</td>
          <td class="td-num">${b.outlets_120v}</td>
          <td class="td-num">${b.usb_outlets}</td>`;
 
-    const capCells = isPB
-      ? `<td class="td-num">${(b.capacity_mah || 0).toLocaleString()}</td>
-         <td class="td-num">${b.dollar_per_mah ? '$' + b.dollar_per_mah.toFixed(2) : '—'}</td>`
-      : `<td class="td-num">${b.capacity_wh.toLocaleString()}</td>
-         <td class="td-num">${b.dollar_per_wh.toFixed(2)}</td>`;
-
     return `<tr>
-      <td class="rank-num">${i+1}</td>
-      <td><div class="td-model">${modelLink}</div><div class="td-brand">${b.brand}</div></td>
-      <td class="td-price">$${b.price.toLocaleString()}<span class="price-age ${age.cls}">${age.label}</span></td>
-      ${capCells}
+      <td class="rank-num">${i + 1}</td>
+      <td><div class="td-model">${esc(b.model)}</div><div class="td-brand">${esc(b.brand)}</div></td>
       ${cells}
       <td class="td-num">${b.peak_power_w.toLocaleString()}</td>
-      <td><div class="badge-row">${badges || '<span style="color:var(--muted);font-size:0.7rem;">—</span>'}</div></td>
+      <td><div class="badge-row">${badges || '<span class="dash">—</span>'}</div></td>
       <td>
         <div class="score-bar-wrap">
-          <div class="score-bar"><div class="score-bar-fill ${barClass}" style="width:${barWidth}%"></div></div>
-          <span class="td-score ${scoreClass}">${b.score > 0 ? '+' : ''}${b.score.toLocaleString()}</span>
+          <div class="score-bar" aria-hidden="true"><div class="score-bar-fill ${barClass}" style="width:${barWidth}%"></div></div>
+          <span class="td-score ${scoreClass}">${fmtScore(b.score)}</span>
         </div>
       </td>
       <td class="notes-cell">${notes}</td>
+      <td>${buyButton(b, 'Check price')}</td>
     </tr>`;
   }).join('');
 }
 
 function renderAll() {
-  const data = getFilteredSorted();
+  const data = getFiltered();
+  syncSortUI();
   renderTop5(data);
-  renderTable();
+  renderTable(sortData(data));
 }
+
+loadData();
 </script>
 </body>
 </html>

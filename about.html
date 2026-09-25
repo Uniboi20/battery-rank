@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>About PowerRank & Affiliate Disclosure</title>
+<meta name="description" content="Who runs PowerRank, how products are chosen and ranked, and how the site is funded through affiliate links.">
+<meta name="theme-color" content="#0d0f14">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/page.css">
+</head>
+<body>
+<header>
+  <a class="logo" href="/">⚡ Power<span>Rank</span></a>
+  <a class="back" href="/">← Back to rankings</a>
+</header>
+
+<main>
+  <h1>About PowerRank</h1>
+  <p class="updated">Last updated September 25, 2026</p>
+
+  <p>
+    PowerRank is an independent buying guide for portable power stations and power banks. It started from a simple
+    frustration: most "best of" lists rank by brand recognition or simply recommend the most expensive model. PowerRank
+    instead scores every model with one published formula that weighs capacity, outlets, output, and useful features
+    against price, so you can see which models give you the most for your money.
+  </p>
+
+  <h2>How products are chosen and ranked</h2>
+  <ul>
+    <li>We list widely available models from established brands in each category and add new models as they launch.</li>
+    <li>Specs come from manufacturer product pages and listings, and are entered by hand.</li>
+    <li>Every model is scored by the same formula, which is <a href="/#methodology">described in full on the main page</a>. You can adjust the inputs yourself with the filters.</li>
+    <li>No brand or retailer pays to be included, and no one can pay to change a ranking.</li>
+  </ul>
+
+  <h2 id="disclosure">Affiliate disclosure</h2>
+  <div class="callout" id="associateStatement">
+    <p><strong>PowerRank is a participant in the Amazon Services LLC Associates Program.</strong> As an Amazon Associate I earn from qualifying purchases.</p>
+  </div>
+  <p id="disclosureDetail">
+    Product links on this site that go to Amazon are affiliate links. If you click one and buy something, PowerRank may
+    earn a small commission at no extra cost to you. These commissions help cover the cost of running the site.
+  </p>
+  <p>
+    Commissions never influence rankings. Every product is scored by the same formula whether or not it earns us
+    anything, and the formula is public so you can check our work.
+  </p>
+
+  <h2>About prices</h2>
+  <p>
+    Prices change often, so PowerRank doesn't display them. The value score uses a typical selling price that we research
+    periodically. Your actual price may be different. Always check the current price and availability on the product page
+    before you buy. The price shown on Amazon when you buy is the one that applies.
+  </p>
+
+  <h2>Accuracy</h2>
+  <p>
+    We work to keep specs accurate, but manufacturers revise products and listings change. If you spot an error, please
+    let us know so we can correct it. Nothing on this site is professional electrical advice. Follow the manufacturer's
+    safety instructions, and consult a licensed electrician before you connect any power station to a home's wiring.
+  </p>
+
+  <!-- TODO: add a contact method here (e.g. a dedicated contact email). -->
+</main>
+
+<footer>
+  <nav aria-label="Site">
+    <a href="/">Rankings</a>
+    <a href="/about.html">About</a>
+    <a href="/privacy.html">Privacy policy</a>
+  </nav>
+  © 2026 PowerRank
+</footer>
+
+<script src="/config.js"></script>
+<script>
+  // Until an Associates ID is set in config.js, don't claim membership.
+  if (!AFFILIATE_TAG) {
+    document.getElementById('associateStatement').innerHTML =
+      '<p><strong>PowerRank is not currently affiliated with Amazon or any brand listed on this site.</strong></p>';
+    document.getElementById('disclosureDetail').textContent =
+      'Product links currently go directly to Amazon listings without any tracking. If PowerRank joins an affiliate ' +
+      'program in the future, this page will say so, and PowerRank may earn a commission when you buy through those links.';
+  }
+</script>
+</body>
+</html>

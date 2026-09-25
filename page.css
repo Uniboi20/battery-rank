@@ -1,0 +1,32 @@
+/* Shared styles for the static text pages (about.html, privacy.html). */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:#0d0f14; --surface:#151820; --border:#252836; --text:#e2e4f0; --sub:#8e92b3;
+  --accent:#f5a623; --brand:#8b7ff7;
+  --font-mono:'JetBrains Mono','Fira Mono','Courier New',monospace;
+  --font-sans:'Inter',system-ui,-apple-system,sans-serif;
+}
+html { font-size:15px; }
+body { background:var(--bg); color:var(--text); font-family:var(--font-sans); line-height:1.7; min-height:100vh; }
+:focus-visible { outline:2px solid var(--accent); outline-offset:2px; border-radius:4px; }
+header { border-bottom:1px solid var(--border); background:var(--surface); padding:0 2rem; height:60px; display:flex; align-items:center; gap:1.5rem; }
+.logo { font-family:var(--font-mono); font-size:1.1rem; font-weight:600; color:var(--accent); text-decoration:none; }
+.logo span { color:var(--sub); font-weight:400; }
+header a.back { margin-left:auto; color:var(--sub); font-size:0.82rem; font-family:var(--font-mono); text-decoration:none; }
+header a.back:hover { color:var(--text); }
+main { max-width:760px; margin:0 auto; padding:2.5rem 1.25rem 3rem; }
+h1 { font-size:1.75rem; line-height:1.2; margin-bottom:0.4rem; }
+.updated { color:var(--sub); font-size:0.8rem; font-family:var(--font-mono); margin-bottom:2rem; }
+h2 { font-size:1.1rem; margin:2.25rem 0 0.6rem; scroll-margin-top:1rem; }
+p, li { color:var(--sub); font-size:0.95rem; }
+p { margin-bottom:0.9rem; }
+ul { margin:0 0 0.9rem 1.25rem; }
+li { margin-bottom:0.35rem; }
+strong { color:var(--text); }
+a { color:var(--brand); }
+.callout { background:var(--surface); border:1px solid var(--border); border-left:3px solid var(--accent); border-radius:8px; padding:1rem 1.25rem; margin:1rem 0 1.25rem; }
+.callout p { margin:0; color:var(--text); }
+footer { border-top:1px solid var(--border); padding:1.5rem 2rem; text-align:center; font-size:0.78rem; color:var(--sub); }
+footer nav { display:flex; gap:1.25rem; justify-content:center; flex-wrap:wrap; font-family:var(--font-mono); margin-bottom:0.4rem; }
+footer nav a { color:var(--text); text-decoration:none; }
+@media (max-width:600px) { header { padding:0 1rem; } h1 { font-size:1.45rem; } }

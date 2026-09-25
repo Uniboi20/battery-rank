@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Privacy Policy — PowerRank</title>
+<meta name="description" content="How PowerRank and the third-party services it uses handle visitor data, cookies, and affiliate links.">
+<meta name="theme-color" content="#0d0f14">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/page.css">
+</head>
+<body>
+<header>
+  <a class="logo" href="/">⚡ Power<span>Rank</span></a>
+  <a class="back" href="/">← Back to rankings</a>
+</header>
+
+<main>
+  <h1>Privacy policy</h1>
+  <p class="updated">Last updated September 25, 2026</p>
+
+  <p>
+    This policy explains what information is collected when you visit PowerRank, the websites and services on this
+    domain ("we", "us"), and how it's used. The short version: we don't ask for or store any personal information, and
+    we don't set our own tracking cookies. However, the third-party services described below, including Amazon, may
+    collect information when you use the site or follow a link from it.
+  </p>
+
+  <h2>Information we collect</h2>
+  <p>
+    PowerRank has no accounts, sign-up forms, comments, or newsletters, so we don't collect names, email addresses,
+    or other information you'd provide yourself. We don't use analytics or advertising cookies of our own.
+  </p>
+
+  <h2>Third-party services</h2>
+  <p>To load and run the site, your browser connects to these services. Each receives standard request data such as your IP address, browser type, and the page requested:</p>
+  <ul>
+    <li><strong>Netlify</strong> hosts the site and may keep server logs for security and operations. See <a href="https://www.netlify.com/privacy/" rel="noopener">Netlify's privacy policy</a>.</li>
+    <li><strong>Supabase</strong> serves the product specification data shown in the rankings. See <a href="https://supabase.com/privacy" rel="noopener">Supabase's privacy policy</a>.</li>
+    <li><strong>Google Fonts</strong> serves the typefaces used on the site. See <a href="https://policies.google.com/privacy" rel="noopener">Google's privacy policy</a>.</li>
+  </ul>
+
+  <h2 id="affiliate">Amazon and affiliate links</h2>
+  <p id="associateStatement">
+    PowerRank is a participant in the Amazon Services LLC Associates Program, an affiliate advertising program designed
+    to provide a means for sites to earn advertising fees by advertising and linking to Amazon.com. When you click a
+    product link, you leave PowerRank and go to Amazon.
+  </p>
+  <p>
+    Third parties, including Amazon and other advertisers, may serve content and advertisements, collect information
+    directly from visitors, and place or recognize cookies on visitors' browsers. Amazon uses cookies and similar
+    technologies to record that you came from PowerRank so that qualifying purchases can be credited. We don't receive
+    any personal information about you or what you buy. Amazon's handling of your data is covered by the
+    <a href="https://www.amazon.com/gp/help/customer/display.html?nodeId=GX7NJQ4ZB8MHFRNJ" rel="noopener">Amazon.com Privacy Notice</a>.
+  </p>
+
+  <h2>Your choices</h2>
+  <p>
+    You can block or delete cookies through your browser settings, and most browsers let you block third-party
+    cookies entirely. Blocking cookies won't affect how PowerRank works, but it may stop affiliate purchases from
+    being credited to us.
+  </p>
+
+  <h2>Children's privacy</h2>
+  <p>PowerRank is intended for a general adult audience and doesn't knowingly collect information from children under 13.</p>
+
+  <h2>Changes to this policy</h2>
+  <p>If this policy changes, we'll update the date at the top of this page.</p>
+
+  <!-- TODO: add a contact method for privacy questions (e.g. a dedicated contact email). -->
+</main>
+
+<footer>
+  <nav aria-label="Site">
+    <a href="/">Rankings</a>
+    <a href="/about.html">About</a>
+    <a href="/privacy.html">Privacy policy</a>
+  </nav>
+  © 2026 PowerRank
+</footer>
+
+<script src="/config.js"></script>
+<script>
+  // Until an Associates ID is set in config.js, don't claim membership.
+  if (!AFFILIATE_TAG) {
+    document.getElementById('associateStatement').textContent =
+      'PowerRank is not currently a member of any affiliate program. Product links go directly to Amazon. ' +
+      'If that changes, this section will be updated to describe the program.';
+  }
+</script>
+</body>
+</html>
