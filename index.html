@@ -160,15 +160,39 @@
   .controls { display:flex; gap:0.75rem; flex-wrap:wrap; margin-bottom:1.25rem; align-items:center; }
   .search-wrap { position:relative; flex:1; min-width:200px; max-width:320px; }
   .search-wrap svg { position:absolute; left:10px; top:50%; transform:translateY(-50%); color:var(--sub); pointer-events:none; }
-  input[type=search],select {
+  input[type=search] {
     background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
-    color:var(--text); font-family:var(--font-sans); font-size:0.85rem;
-    padding:0.55rem 0.75rem; outline:none; transition:border-color 0.15s;
+    color:var(--text); font-family:var(--font-sans); font-size:0.85rem; height:40px;
+    padding:0 0.75rem 0 2.2rem; width:100%; outline:none; transition:border-color 0.15s;
   }
-  input[type=search] { padding-left:2.2rem; width:100%; }
-  input[type=search]:focus,select:focus { border-color:var(--brand); }
-  select { cursor:pointer; min-width:140px; }
-  select option { background:var(--surface); }
+  input[type=search]:hover { border-color:var(--muted); }
+  input[type=search]:focus { border-color:var(--brand); }
+
+  /* Dropdowns: styled as a labeled control matching the search box, not the native widget. */
+  .select-wrap {
+    position:relative; display:flex; align-items:center; height:40px;
+    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+    transition:border-color 0.15s; cursor:pointer;
+  }
+  .select-wrap:hover { border-color:var(--muted); }
+  .select-wrap:focus-within { border-color:var(--brand); }
+  .select-label {
+    padding-left:0.75rem; font-family:var(--font-mono); font-size:0.68rem; font-weight:600;
+    color:var(--sub); text-transform:uppercase; letter-spacing:0.08em; pointer-events:none; white-space:nowrap;
+  }
+  .select-wrap::after {
+    content:''; position:absolute; right:0.8rem; top:50%; width:6px; height:6px; margin-top:-5px;
+    border-right:1.5px solid var(--sub); border-bottom:1.5px solid var(--sub); transform:rotate(45deg);
+    pointer-events:none; transition:border-color 0.15s;
+  }
+  .select-wrap:hover::after, .select-wrap:focus-within::after { border-color:var(--accent); }
+  .select-wrap select {
+    appearance:none; -webkit-appearance:none; background:transparent; border:none; outline:none;
+    color:var(--text); font-family:var(--font-sans); font-size:0.85rem; font-weight:500;
+    height:100%; padding:0 2rem 0 0.5rem; cursor:pointer; min-width:120px;
+  }
+  .select-wrap select:focus-visible { outline:none; }
+  .select-wrap select option { background:var(--surface); color:var(--text); }
   .result-count { margin-left:auto; font-size:0.78rem; color:var(--sub); font-family:var(--font-mono); white-space:nowrap; }
 
   /* ── Table ── */
@@ -263,7 +287,8 @@
     .tab-btn { flex:1; padding:0 0.5rem; }
     .hero-title { font-size:1.4rem; }
     .search-wrap { max-width:none; flex-basis:100%; }
-    .controls select { flex:1; }
+    .select-wrap { flex:1; }
+    .select-wrap select { flex:1; min-width:0; }
     .result-count { margin-left:0; }
     .top5-grid { grid-template-columns:1fr; }
     .info-card { padding:1.25rem; }
@@ -346,17 +371,20 @@
         <label for="searchInput" class="sr-only">Search brand or model</label>
         <input type="search" id="searchInput" placeholder="Search brand or model…" oninput="renderAll()">
       </div>
-      <label for="brandFilter" class="sr-only">Brand</label>
-      <select id="brandFilter" onchange="renderAll()"><option value="">All brands</option></select>
-      <label for="sortCol" class="sr-only">Sort by</label>
-      <select id="sortCol" onchange="onSortSelect()">
-        <option value="" hidden>Sort: Custom</option>
-        <option value="score:desc">Sort: Value score</option>
-        <option value="capacity:desc">Sort: Capacity</option>
-        <option value="peak_power_w:desc">Sort: Peak output</option>
-        <option value="price:asc">Sort: Lowest price first</option>
-        <option value="brand_model:asc">Sort: Name (A–Z)</option>
-      </select>
+      <label class="select-wrap">
+        <span class="select-label">Brand</span>
+        <select id="brandFilter" onchange="renderAll()"><option value="">All brands</option></select>
+      </label>
+      <label class="select-wrap">
+        <span class="select-label">Sort</span>
+        <select id="sortCol" onchange="onSortSelect()">
+          <option value="" hidden>Custom</option>
+          <option value="score:desc">Value score</option>
+          <option value="capacity:desc">Capacity</option>
+          <option value="peak_power_w:desc">Peak output</option>
+          <option value="brand_model:asc">Name (A–Z)</option>
+        </select>
+      </label>
       <div class="result-count" id="resultCount" aria-live="polite"></div>
     </div>
 
@@ -745,7 +773,7 @@ function toggleChip(el) {
 
 // ── Sorting ──
 // Single source of truth: sortKey + sortDir. The dropdown and the column headers both write it.
-const DEFAULT_DIR = { brand_model: 'asc', price: 'asc' };
+const DEFAULT_DIR = { brand_model: 'asc' };
 
 function setSort(key) {
   if (sortKey === key) sortDir = sortDir === 'asc' ? 'desc' : 'asc';
