@@ -45,7 +45,14 @@
   .brand { color:var(--sub); font-size:0.72rem; }
   .price-input { width:90px; background:var(--bg); border:1px solid var(--border); border-radius:6px;
                  color:var(--text); font-family:var(--font-mono); padding:0.3rem 0.5rem; }
-  .price-input.dirty { border-color:var(--accent); }
+  .price-input.dirty, .text-input.dirty { border-color:var(--accent); }
+  .price-input.invalid, .text-input.invalid { border-color:var(--negative); }
+  .text-input { background:var(--bg); border:1px solid var(--border); border-radius:6px; color:var(--text);
+                font-family:var(--font-sans); font-size:0.8rem; padding:0.3rem 0.5rem; width:100%; }
+  .brand-input { width:110px; } .model-input { min-width:150px; }
+  .asin-input { width:120px; font-family:var(--font-mono); text-transform:uppercase; }
+  .name-cell { display:flex; gap:0.4rem; align-items:center; }
+  .open-link { color:var(--sub); font-size:0.8rem; }
   .age { font-family:var(--font-mono); font-size:0.7rem; }
   .age-fresh { color:var(--positive); } .age-stale { color:var(--accent); } .age-old { color:var(--negative); }
   .row-status { font-size:0.85rem; width:20px; display:inline-block; text-align:center; }
@@ -62,7 +69,9 @@
 <div class="warn">
   This talks to a Netlify function that writes to Supabase with elevated access, gated by a password only
   you know. Open each Amazon link yourself, check the current price, update the field, and save — one row
-  or all of them. Use Delete to permanently remove a product that's no longer available. Saving a price that hasn't changed still refreshes its "checked" timestamp, so it's fine
+  or all of them. You can also fix a product's brand, model, or ASIN (the 10-character Amazon product ID
+  in its link, e.g. B0DG8JQNS4) — edited fields turn orange until saved. Use Delete to permanently remove a
+  product that's no longer available. Saving a price that hasn't changed still refreshes its "checked" timestamp, so it's fine
   to resave everything even when nothing moved.
 </div>
 
@@ -107,6 +116,12 @@ function ageInfo(iso) {
   return { label: `${days}d ago`, cls: 'age-old' };
 }
 
+function esc(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+}
+
+const ASIN_RE = /^[A-Z0-9]{10}$/;
+
 function amazonUrl(b) {
   return b.asin ? `https://www.amazon.com/dp/${b.asin}` : (b.url || '#');
 }
@@ -134,16 +149,23 @@ function render() {
     return `
       <div class="group-label">${g.label} (${rows.length})</div>
       <table>
-        <thead><tr><th>Battery</th><th>Current price</th><th>Checked</th><th>New price</th><th></th><th></th><th></th></tr></thead>
+        <thead><tr><th>Brand · Model</th><th>ASIN</th><th>Current price</th><th>Checked</th><th>New price</th><th></th><th></th><th></th></tr></thead>
         <tbody>
           ${rows.map(b => {
             const age = ageInfo(b.price_updated_at);
             return `<tr id="row-${b.id}">
-              <td><a href="${amazonUrl(b)}" target="_blank" rel="noopener">${b.brand} ${b.model} ↗</a></td>
+              <td><div class="name-cell">
+                <input class="text-input brand-input" id="brand-${b.id}" value="${esc(b.brand)}" aria-label="Brand" oninput="markDirty(this)">
+                <input class="text-input model-input" id="model-${b.id}" value="${esc(b.model)}" aria-label="Model" oninput="markDirty(this)">
+              </div></td>
+              <td><div class="name-cell">
+                <input class="text-input asin-input" id="asin-${b.id}" value="${esc(b.asin)}" maxlength="10" aria-label="ASIN" oninput="markDirty(this)">
+                <a class="open-link" id="link-${b.id}" href="${esc(amazonUrl(b))}" target="_blank" rel="noopener" title="Open on Amazon">↗</a>
+              </div></td>
               <td>$${Number(b.price).toLocaleString()}</td>
               <td class="age ${age.cls}">${age.label}</td>
               <td><input class="price-input" id="input-${b.id}" type="number" step="0.01" value="${b.price}"
-                    oninput="document.getElementById('input-${b.id}').classList.add('dirty')"></td>
+                    aria-label="New price" oninput="markDirty(this)"></td>
               <td><button class="row-save" onclick="saveRow(${b.id})">Save</button></td>
               <td><button class="row-delete" onclick="deleteRow(${b.id})">Delete</button></td>
               <td class="row-status" id="status-${b.id}"></td>
@@ -154,34 +176,66 @@ function render() {
   }).join('');
 }
 
+function markDirty(el) {
+  el.classList.add('dirty');
+  el.classList.remove('invalid');
+}
+
 async function saveRow(id) {
   const input = document.getElementById(`input-${id}`);
+  const brandIn = document.getElementById(`brand-${id}`);
+  const modelIn = document.getElementById(`model-${id}`);
+  const asinIn = document.getElementById(`asin-${id}`);
   const status = document.getElementById(`status-${id}`);
+
   const price = parseFloat(input.value);
-  if (!(price > 0)) { status.textContent = '✗'; status.style.color = 'var(--negative)'; return; }
+  const brand = brandIn.value.trim();
+  const model = modelIn.value.trim();
+  const asin = asinIn.value.trim().toUpperCase();
+
+  const bad = [
+    !(price > 0) && input,
+    !brand && brandIn,
+    !model && modelIn,
+    !ASIN_RE.test(asin) && asinIn,
+  ].filter(Boolean);
+  if (bad.length) {
+    bad.forEach(el => el.classList.add('invalid'));
+    status.textContent = '✗'; status.style.color = 'var(--negative)';
+    status.title = 'Fix the red fields (ASIN must be 10 letters/digits).';
+    return false;
+  }
+
   status.textContent = '…';
   try {
     const res = await fetch('/.netlify/functions/update-price', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ secret: SECRET, id, price }),
+      body: JSON.stringify({ secret: SECRET, id, price, brand, model, asin }),
     });
     if (!res.ok) throw new Error(await res.text());
     status.textContent = '✓';
     status.style.color = 'var(--positive)';
-    input.classList.remove('dirty');
+    status.title = '';
+    [input, brandIn, modelIn, asinIn].forEach(el => el.classList.remove('dirty'));
+    asinIn.value = asin;
     const row = ROWS.find(b => b.id === id);
-    if (row) { row.price = price; row.price_updated_at = new Date().toISOString(); }
+    if (row) {
+      Object.assign(row, { price, brand, model, asin, price_updated_at: new Date().toISOString() });
+      document.getElementById(`link-${id}`).href = amazonUrl(row);
+    }
     const ageCell = document.querySelector(`#row-${id} .age`);
     if (ageCell) {
       const age = ageInfo(new Date().toISOString());
       ageCell.textContent = age.label;
       ageCell.className = `age ${age.cls}`;
     }
+    return true;
   } catch (err) {
     status.textContent = '✗';
     status.style.color = 'var(--negative)';
     status.title = String(err);
+    return false;
   }
 }
 
@@ -213,11 +267,14 @@ async function deleteRow(id) {
 async function saveAll() {
   const ids = ROWS.map(b => b.id);
   const progress = document.getElementById('progress');
+  let failed = 0;
   for (let i = 0; i < ids.length; i++) {
     progress.textContent = `Saving ${i + 1}/${ids.length}…`;
-    await saveRow(ids[i]);
+    if (!(await saveRow(ids[i]))) failed++;
   }
-  progress.textContent = `Done — saved ${ids.length} rows.`;
+  progress.textContent = failed
+    ? `Saved ${ids.length - failed} rows — ${failed} failed (marked ✗, hover for details).`
+    : `Done — saved ${ids.length} rows.`;
 }
 </script>
 </body>

@@ -1,5 +1,5 @@
 // ============================================================
-// Netlify Function: manual price update endpoint for admin.html
+// Netlify Function: manual price/details update endpoint for admin.html
 // File: netlify/functions/update-price.js
 //
 // On-demand only (no schedule, no automated calls) — this exists so a human
@@ -38,7 +38,7 @@ exports.handler = async function (event) {
     return { statusCode: 400, body: 'Invalid JSON' };
   }
 
-  const { secret, id, price } = payload;
+  const { secret, id, price, brand, model, asin } = payload;
 
   // Constant-time-ish comparison isn't critical here (low-value single-user
   // gate, not a real auth system), but do keep it a straight equality check.
@@ -56,6 +56,24 @@ exports.handler = async function (event) {
     return { statusCode: 400, body: 'Price out of range' };
   }
 
+  // Optional detail edits: only fields that are sent get updated, so older callers that
+  // send just { id, price } keep working.
+  const details = {};
+  for (const [key, val] of Object.entries({ brand, model })) {
+    if (val === undefined) continue;
+    if (typeof val !== 'string' || !val.trim() || val.trim().length > 100) {
+      return { statusCode: 400, body: `Invalid ${key}` };
+    }
+    details[key] = val.trim();
+  }
+  if (asin !== undefined) {
+    const normalized = typeof asin === 'string' ? asin.trim().toUpperCase() : '';
+    if (!/^[A-Z0-9]{10}$/.test(normalized)) {
+      return { statusCode: 400, body: 'Invalid ASIN — must be 10 letters/digits' };
+    }
+    details.asin = normalized;
+  }
+
   const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
   const now = new Date().toISOString();
 
@@ -66,12 +84,12 @@ exports.handler = async function (event) {
   // this path handles both cases itself.
   const { error } = await supabase
     .from('batteries')
-    .update({ price: numericPrice, price_updated_at: now, updated_at: now })
+    .update({ ...details, price: numericPrice, price_updated_at: now, updated_at: now })
     .eq('id', numericId);
 
   if (error) {
     return { statusCode: 500, body: JSON.stringify({ error: error.message }) };
   }
 
-  return { statusCode: 200, body: JSON.stringify({ ok: true, id: numericId, price: numericPrice }) };
+  return { statusCode: 200, body: JSON.stringify({ ok: true, id: numericId, price: numericPrice, ...details }) };
 };
