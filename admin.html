@@ -60,6 +60,33 @@
   .row-delete { padding:0.3rem 0.7rem; font-size:0.72rem; background:transparent; color:var(--negative);
                 border:1px solid rgba(245,101,101,0.4); }
   .row-delete:hover { background:rgba(245,101,101,0.12); opacity:1; }
+  .row-details { padding:0.3rem 0.6rem; font-size:0.72rem; background:transparent; border:1px solid var(--border); color:var(--sub); white-space:nowrap; }
+  .row-details[aria-expanded="true"] { color:var(--accent); border-color:rgba(245,166,35,0.5); }
+
+  /* Expanded editor + add panel */
+  tr.detail-row > td { background:#11141b; padding:1rem 1.1rem 1.1rem; }
+  .panel { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:1.1rem 1.25rem; margin-bottom:1.25rem; }
+  .panel h2 { font-size:0.95rem; margin-bottom:0.25rem; }
+  .panel .hint { color:var(--sub); font-size:0.78rem; margin-bottom:0.9rem; }
+  .form-section { font-family:var(--font-mono); font-size:0.66rem; font-weight:600; color:var(--sub); text-transform:uppercase;
+                  letter-spacing:0.08em; margin:0.9rem 0 0.45rem; }
+  .form-section:first-child { margin-top:0; }
+  .form-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(170px,1fr)); gap:0.6rem 0.9rem; }
+  .field { display:flex; flex-direction:column; gap:0.2rem; font-size:0.72rem; color:var(--sub); }
+  .field.wide { grid-column:1 / -1; }
+  .field .req { color:var(--accent); }
+  .field select, .field textarea { background:var(--bg); border:1px solid var(--border); border-radius:6px; color:var(--text);
+                                   font-family:var(--font-sans); font-size:0.8rem; padding:0.3rem 0.5rem; }
+  .field textarea { min-height:3.2rem; resize:vertical; }
+  .field .text-input, .field select, .field textarea { width:100%; }
+  .field .dirty { border-color:var(--accent); } .field .invalid { border-color:var(--negative); }
+  .check-grid { display:flex; flex-wrap:wrap; gap:0.5rem 1.25rem; }
+  .check { display:flex; align-items:center; gap:0.4rem; font-size:0.8rem; color:var(--text); cursor:pointer; }
+  .check input { accent-color:var(--accent); width:15px; height:15px; }
+  .form-actions { display:flex; gap:0.6rem; align-items:center; margin-top:1rem; flex-wrap:wrap; }
+  .form-msg { font-size:0.78rem; }
+  .form-msg.err { color:var(--negative); } .form-msg.ok { color:var(--positive); }
+  .meta { margin-top:0.8rem; font-family:var(--font-mono); font-size:0.68rem; color:var(--sub); }
 </style>
 </head>
 <body>
@@ -69,7 +96,7 @@
 <div class="warn">
   This talks to a Netlify function that writes to Supabase with elevated access, gated by a password only
   you know. Open each Amazon link yourself, check the current price, update the field, and save — one row
-  or all of them. You can also fix a product's brand, model, or ASIN (the 10-character Amazon product ID
+  or all of them. Use + Add battery for new products, and Details on any row to see and edit every field. You can also fix a product's brand, model, or ASIN (the 10-character Amazon product ID
   in its link, e.g. B0DG8JQNS4) — edited fields turn orange until saved. Use Delete to permanently remove a
   product that's no longer available. Saving a price that hasn't changed still refreshes its "checked" timestamp, so it's fine
   to resave everything even when nothing moved.
@@ -83,10 +110,21 @@
 
 <div id="app">
   <div class="toolbar">
-    <button onclick="saveAll()">Save all rows</button>
+    <button onclick="toggleAdd()" id="addBtn">+ Add battery</button>
+    <button class="secondary" onclick="saveAll()">Save all rows</button>
     <button class="secondary" onclick="loadData()">Reload from database</button>
     <span class="progress" id="progress"></span>
   </div>
+  <section class="panel" id="addPanel" hidden>
+    <h2>Add a battery</h2>
+    <p class="hint">Fields marked <span style="color:var(--accent)">*</span> are required. Price is only used for scoring and the budget filter — it's never shown on the public site.</p>
+    <div id="addForm"></div>
+    <div class="form-actions">
+      <button onclick="createBattery()" id="createBtn">Create battery</button>
+      <button class="secondary" onclick="toggleAdd(false)">Cancel</button>
+      <span class="form-msg" id="addMsg"></span>
+    </div>
+  </section>
   <div id="tables"></div>
 </div>
 
@@ -128,13 +166,244 @@ function amazonUrl(b) {
 
 async function loadData() {
   document.getElementById('progress').textContent = 'Loading…';
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/batteries?select=id,brand,model,asin,url,price,price_updated_at,category&order=price_updated_at.asc.nullsfirst`, {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/batteries?select=*&order=price_updated_at.asc.nullsfirst`, {
     headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` }
   });
   if (!res.ok) { document.getElementById('progress').textContent = 'Load failed.'; return; }
   ROWS = await res.json();
   render();
   document.getElementById('progress').textContent = `${ROWS.length} batteries loaded, oldest-checked first.`;
+}
+
+// ── Full-field editor ──
+// `cats` limits a field to one category. Fields whose column doesn't exist in the
+// database (judged from loaded rows) are skipped so a save can't fail on an unknown column.
+const FIELDS = [
+  { key: 'category', label: 'Category', type: 'select', section: 'Basics', required: true,
+    options: [['power_station', 'Power station'], ['power_bank', 'Power bank']] },
+  { key: 'brand', label: 'Brand', type: 'text', section: 'Basics', required: true },
+  { key: 'model', label: 'Model', type: 'text', section: 'Basics', required: true },
+  { key: 'asin', label: 'ASIN', type: 'asin', section: 'Basics' },
+  { key: 'price', label: 'Price ($)', type: 'num', section: 'Basics', required: true },
+  { key: 'url', label: 'Amazon URL (only if no ASIN)', type: 'text', section: 'Basics', wide: true },
+
+  { key: 'capacity_wh', label: 'Capacity (Wh)', type: 'int', section: 'Specs', cats: ['power_station'], required: true },
+  { key: 'capacity_mah', label: 'Capacity (mAh)', type: 'int', section: 'Specs', cats: ['power_bank'], required: true },
+  { key: 'peak_power_w', label: 'Peak output (W)', type: 'int', section: 'Specs', required: true },
+  { key: 'outlets_120v', label: '120V outlets', type: 'int', section: 'Specs', cats: ['power_station'] },
+  { key: 'l2_outlets', label: 'L2 / 240V outlets', type: 'int', section: 'Specs', cats: ['power_station'] },
+  { key: 'usb_outlets', label: 'USB ports', type: 'int', section: 'Specs', required: true },
+  { key: 'builtin_cables', label: 'Built-in cables (count)', type: 'int', section: 'Specs', cats: ['power_bank'] },
+
+  { key: 'expandable', label: 'Expandable', type: 'bool', section: 'Features', cats: ['power_station'] },
+  { key: 'app_support', label: 'App support', type: 'bool', section: 'Features', cats: ['power_station'] },
+  { key: 'jump_starter', label: 'Jump starter', type: 'bool', section: 'Features', cats: ['power_station'] },
+  { key: 'has_magsafe', label: 'MagSafe', type: 'bool', section: 'Features', cats: ['power_bank'] },
+  { key: 'has_builtin_cable', label: 'Built-in cable', type: 'bool', section: 'Features', cats: ['power_bank'] },
+  { key: 'has_display', label: 'Display', type: 'bool', section: 'Features', cats: ['power_bank'] },
+  { key: 'has_wall_plug', label: 'Wall plug', type: 'bool', section: 'Features', cats: ['power_bank'] },
+
+  { key: 'notes', label: 'Notes (shown on the public site)', type: 'textarea', section: 'Notes', wide: true },
+];
+const FIELD_KEYS = new Set(FIELDS.map(f => f.key));
+// Shown read-only in the editor; everything else unknown is listed there too.
+const SYSTEM_KEYS = ['id', 'price_updated_at', 'updated_at', 'created_at'];
+
+function knownColumns() {
+  const cols = new Set(ROWS.flatMap(r => Object.keys(r)));
+  return cols.size ? cols : null;
+}
+
+function fieldsFor(category) {
+  const cols = knownColumns();
+  return FIELDS.filter(f =>
+    (!f.cats || f.cats.includes(category)) &&
+    (!cols || cols.has(f.key) || f.key === 'category'));
+}
+
+function formHtml(prefix, values) {
+  const cat = values.category || 'power_station';
+  let html = '', section = null;
+  const close = () => { html += '</div>'; };
+  for (const f of fieldsFor(cat)) {
+    if (f.section !== section) {
+      if (section !== null) close();
+      section = f.section;
+      html += `<div class="form-section">${section}</div><div class="${f.type === 'bool' ? 'check-grid' : 'form-grid'}">`;
+    }
+    const id = `${prefix}-f-${f.key}`;
+    const v = values[f.key];
+    const star = f.required ? ' <span class="req">*</span>' : '';
+    const onch = `oninput="markDirty(this)" onchange="markDirty(this)"`;
+    if (f.type === 'bool') {
+      html += `<label class="check"><input type="checkbox" id="${id}" ${v ? 'checked' : ''} ${onch}>${f.label}</label>`;
+    } else if (f.type === 'select') {
+      html += `<label class="field"><span>${f.label}${star}</span><select id="${id}"
+                 onchange="markDirty(this); switchFormCategory('${prefix}')">` +
+        f.options.map(([val, lab]) => `<option value="${val}" ${val === cat ? 'selected' : ''}>${lab}</option>`).join('') +
+        `</select></label>`;
+    } else if (f.type === 'textarea') {
+      html += `<label class="field wide"><span>${f.label}${star}</span><textarea id="${id}" maxlength="500" ${onch}>${esc(v)}</textarea></label>`;
+    } else {
+      const num = f.type === 'num' || f.type === 'int';
+      const attrs = num ? `type="number" min="0" step="${f.type === 'num' ? '0.01' : '1'}"` : 'type="text"';
+      const cls = f.type === 'asin' ? 'text-input asin-input' : 'text-input';
+      html += `<label class="field${f.wide ? ' wide' : ''}"><span>${f.label}${star}</span>
+               <input class="${cls}" id="${id}" ${attrs} value="${esc(v)}" ${f.type === 'asin' ? 'maxlength="10"' : ''} ${onch}></label>`;
+    }
+  }
+  if (section !== null) close();
+  return html;
+}
+
+// Read the form. Returns { values, errors: [inputEl…] }.
+function readForm(prefix) {
+  const cat = document.getElementById(`${prefix}-f-category`).value;
+  const values = {}, errors = [];
+  for (const f of fieldsFor(cat)) {
+    const el = document.getElementById(`${prefix}-f-${f.key}`);
+    if (!el) continue;
+    let v;
+    if (f.type === 'bool') v = el.checked;
+    // Blank optional counts save as 0 so the public table never shows "null".
+    else if (f.type === 'int' && !f.required && el.value === '') v = 0;
+    else if (f.type === 'num' || f.type === 'int') v = el.value === '' ? null : Number(el.value);
+    else v = el.value.trim() === '' ? null : el.value.trim();
+    if (f.type === 'asin' && v) v = v.toUpperCase();
+
+    const bad =
+      (f.required && (v === null || v === '')) ||
+      (f.type === 'asin' && v && !ASIN_RE.test(v)) ||
+      (f.type === 'int' && v !== null && !(Number.isInteger(v) && v >= 0)) ||
+      (f.type === 'num' && v !== null && !(v > 0));
+    if (bad) { el.classList.add('invalid'); errors.push(el); }
+    values[f.key] = v;
+  }
+  const asinEl = document.getElementById(`${prefix}-f-asin`);
+  if (!values.asin && !values.url && asinEl) { asinEl.classList.add('invalid'); errors.push(asinEl); }
+  return { values, errors };
+}
+
+// Changing category swaps which spec/feature fields apply; keep what's been typed.
+function switchFormCategory(prefix) {
+  const container = document.getElementById(`${prefix}-form`);
+  const values = {};
+  for (const f of FIELDS) {
+    const el = document.getElementById(`${prefix}-f-${f.key}`);
+    if (el) values[f.key] = f.type === 'bool' ? el.checked : el.value;
+  }
+  container.innerHTML = formHtml(prefix, values);
+  document.getElementById(`${prefix}-f-category`).classList.add('dirty');
+}
+
+async function postSave(body) {
+  const res = await fetch('/.netlify/functions/save-battery', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ secret: SECRET, ...body }),
+  });
+  const text = await res.text();
+  if (!res.ok) throw new Error(text);
+  return JSON.parse(text).row;
+}
+
+// ── Add ──
+function toggleAdd(show) {
+  const panel = document.getElementById('addPanel');
+  show = show ?? panel.hidden;
+  panel.hidden = !show;
+  document.getElementById('addBtn').hidden = show;
+  if (show) {
+    const defaults = { category: 'power_station' };
+    document.getElementById('addForm').innerHTML = `<div id="new-form">${formHtml('new', defaults)}</div>`;
+    document.getElementById('addMsg').textContent = '';
+    document.getElementById('new-f-brand').focus();
+  }
+}
+
+async function createBattery() {
+  const msg = document.getElementById('addMsg');
+  const { values, errors } = readForm('new');
+  if (errors.length) {
+    msg.className = 'form-msg err';
+    msg.textContent = 'Fix the red fields (ASIN must be 10 letters/digits; add an ASIN or URL).';
+    errors[0].focus();
+    return;
+  }
+  const btn = document.getElementById('createBtn');
+  btn.disabled = true; msg.className = 'form-msg'; msg.textContent = 'Creating…';
+  try {
+    const row = await postSave({ fields: values });
+    ROWS.push(row);
+    render();
+    toggleAdd(false);
+    document.getElementById('progress').textContent = `Added ${row.brand} ${row.model}.`;
+    document.getElementById(`row-${row.id}`)?.scrollIntoView({ block: 'center' });
+  } catch (err) {
+    msg.className = 'form-msg err';
+    msg.textContent = `Create failed: ${err.message || err}`;
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+// ── Expand / edit all fields ──
+function toggleDetails(id) {
+  const detail = document.getElementById(`detail-${id}`);
+  const btn = document.getElementById(`details-btn-${id}`);
+  const open = detail.hidden;
+  detail.hidden = !open;
+  btn.setAttribute('aria-expanded', String(open));
+  btn.textContent = open ? 'Details ▴' : 'Details ▾';
+  if (open) {
+    const row = ROWS.find(b => b.id === id);
+    document.getElementById(`d${id}-form`).innerHTML = formHtml(`d${id}`, row);
+    document.getElementById(`d${id}-msg`).textContent = '';
+  }
+}
+
+function metaHtml(b) {
+  const extra = Object.keys(b).filter(k => !FIELD_KEYS.has(k) && !SYSTEM_KEYS.includes(k));
+  const parts = [
+    `id ${b.id}`,
+    b.price_updated_at && `price checked ${new Date(b.price_updated_at).toLocaleString()}`,
+    b.updated_at && `updated ${new Date(b.updated_at).toLocaleString()}`,
+    b.created_at && `created ${new Date(b.created_at).toLocaleString()}`,
+    ...extra.map(k => `${k}: ${esc(typeof b[k] === 'object' ? JSON.stringify(b[k]) : b[k])}`),
+  ].filter(Boolean);
+  return parts.join(' · ');
+}
+
+async function saveDetails(id) {
+  const row = ROWS.find(b => b.id === id);
+  const msg = document.getElementById(`d${id}-msg`);
+  const { values, errors } = readForm(`d${id}`);
+  if (errors.length) {
+    msg.className = 'form-msg err';
+    msg.textContent = 'Fix the red fields (ASIN must be 10 letters/digits; add an ASIN or URL).';
+    errors[0].focus();
+    return;
+  }
+  // Send only what changed (category always, so the server can check its required fields).
+  const norm = v => (v === undefined || v === '' ? null : v);
+  const changed = Object.fromEntries(Object.entries(values).filter(([k, v]) =>
+    k === 'category' || norm(v) !== norm(row[k]) && !(typeof v === 'boolean' && v === !!row[k])));
+  if (Object.keys(changed).length === 1 && changed.category === row.category) {
+    msg.className = 'form-msg'; msg.textContent = 'No changes to save.';
+    return;
+  }
+  msg.className = 'form-msg'; msg.textContent = 'Saving…';
+  try {
+    const updated = await postSave({ id, fields: changed });
+    Object.assign(row, updated);
+    render();
+    toggleDetails(id);
+    const m = document.getElementById(`d${id}-msg`);
+    m.className = 'form-msg ok'; m.textContent = 'Saved.';
+  } catch (err) {
+    msg.className = 'form-msg err';
+    msg.textContent = `Save failed: ${err.message || err}`;
+  }
 }
 
 function render() {
@@ -149,7 +418,7 @@ function render() {
     return `
       <div class="group-label">${g.label} (${rows.length})</div>
       <table>
-        <thead><tr><th>Brand · Model</th><th>ASIN</th><th>Current price</th><th>Checked</th><th>New price</th><th></th><th></th><th></th></tr></thead>
+        <thead><tr><th>Brand · Model</th><th>ASIN</th><th>Current price</th><th>Checked</th><th>New price</th><th></th><th></th><th></th><th></th></tr></thead>
         <tbody>
           ${rows.map(b => {
             const age = ageInfo(b.price_updated_at);
@@ -167,9 +436,19 @@ function render() {
               <td><input class="price-input" id="input-${b.id}" type="number" step="0.01" value="${b.price}"
                     aria-label="New price" oninput="markDirty(this)"></td>
               <td><button class="row-save" onclick="saveRow(${b.id})">Save</button></td>
+              <td><button class="row-details" id="details-btn-${b.id}" aria-expanded="false" onclick="toggleDetails(${b.id})">Details ▾</button></td>
               <td><button class="row-delete" onclick="deleteRow(${b.id})">Delete</button></td>
               <td class="row-status" id="status-${b.id}"></td>
-            </tr>`;
+            </tr>
+            <tr class="detail-row" id="detail-${b.id}" hidden><td colspan="9">
+              <div id="d${b.id}-form"></div>
+              <div class="form-actions">
+                <button onclick="saveDetails(${b.id})">Save all fields</button>
+                <button class="secondary" onclick="toggleDetails(${b.id})">Close</button>
+                <span class="form-msg" id="d${b.id}-msg"></span>
+              </div>
+              <div class="meta">${metaHtml(b)}</div>
+            </td></tr>`;
           }).join('')}
         </tbody>
       </table>`;
