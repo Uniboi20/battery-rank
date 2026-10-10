@@ -530,12 +530,8 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 
 // Build the Amazon link from the ASIN so the affiliate tag only lives in one place.
 function amazonUrl(b) {
-  if (b.asin) {
-    return `https://www.amazon.com/dp/${encodeURIComponent(b.asin)}` + (AFFILIATE_TAG ? `?tag=${AFFILIATE_TAG}` : '');
-  }
-  if (!b.url) return null;
-  if (!AFFILIATE_TAG || !/amazon\.com/i.test(b.url)) return b.url;
-  const u = new URL(b.url); u.searchParams.set('tag', AFFILIATE_TAG); return u.toString();
+  if (!b.asin) return null;
+  return `https://www.amazon.com/dp/${encodeURIComponent(b.asin)}` + (AFFILIATE_TAG ? `?tag=${AFFILIATE_TAG}` : '');
 }
 
 function buyButton(b, label = 'Check price on Amazon') {

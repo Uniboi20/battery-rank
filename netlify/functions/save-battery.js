@@ -21,7 +21,7 @@ const CATEGORIES = ['power_station', 'power_bank'];
 // column -> type. 'int' and 'num' accept null (cleared field) unless required.
 const COLUMNS = {
   category: 'category',
-  brand: 'text', model: 'text', asin: 'asin', url: 'url', notes: 'longtext',
+  brand: 'text', model: 'text', asin: 'asin', notes: 'longtext',
   price: 'num',
   capacity_wh: 'int', capacity_mah: 'int', peak_power_w: 'int',
   outlets_120v: 'int', l2_outlets: 'int', usb_outlets: 'int', builtin_cables: 'int',
@@ -31,7 +31,7 @@ const COLUMNS = {
 
 // Fields the public site needs to render a row without breaking.
 const REQUIRED = {
-  common: ['category', 'brand', 'model', 'price', 'peak_power_w', 'usb_outlets'],
+  common: ['category', 'brand', 'model', 'asin', 'price', 'peak_power_w', 'usb_outlets'],
   power_station: ['capacity_wh'],
   power_bank: ['capacity_mah'],
 };
@@ -54,11 +54,6 @@ function clean(key, type, val) {
       const a = typeof val === 'string' ? val.trim().toUpperCase() : '';
       return /^[A-Z0-9]{10}$/.test(a) ? { value: a } : { error: 'Invalid ASIN — must be 10 letters/digits' };
     }
-    case 'url':
-      if (typeof val !== 'string' || !/^https:\/\/(www\.)?amazon\.com\//i.test(val.trim())) {
-        return { error: 'URL must be an https://www.amazon.com/ link' };
-      }
-      return { value: val.trim() };
     case 'num': {
       const n = Number(val);
       return n > 0 && n < 10000 ? { value: Math.round(n * 100) / 100 } : { error: `${key} out of range` };
@@ -115,9 +110,6 @@ exports.handler = async function (event) {
     const required = [...REQUIRED.common, ...(REQUIRED[row.category] || [])];
     const missing = required.filter(k => isMissing(row[k]));
     if (missing.length) return { statusCode: 400, body: `Missing required: ${missing.join(', ')}` };
-    if (isMissing(row.asin) && isMissing(row.url)) {
-      return { statusCode: 400, body: 'Add an ASIN (or an Amazon URL) so the product can be linked' };
-    }
 
     const { data, error } = await supabase
       .from('batteries')

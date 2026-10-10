@@ -161,7 +161,7 @@ function esc(s) {
 const ASIN_RE = /^[A-Z0-9]{10}$/;
 
 function amazonUrl(b) {
-  return b.asin ? `https://www.amazon.com/dp/${b.asin}` : (b.url || '#');
+  return b.asin ? `https://www.amazon.com/dp/${b.asin}` : '#';
 }
 
 async function loadData() {
@@ -183,9 +183,8 @@ const FIELDS = [
     options: [['power_station', 'Power station'], ['power_bank', 'Power bank']] },
   { key: 'brand', label: 'Brand', type: 'text', section: 'Basics', required: true },
   { key: 'model', label: 'Model', type: 'text', section: 'Basics', required: true },
-  { key: 'asin', label: 'ASIN', type: 'asin', section: 'Basics' },
+  { key: 'asin', label: 'ASIN', type: 'asin', section: 'Basics', required: true },
   { key: 'price', label: 'Price ($)', type: 'num', section: 'Basics', required: true },
-  { key: 'url', label: 'Amazon URL (only if no ASIN)', type: 'text', section: 'Basics', wide: true },
 
   { key: 'capacity_wh', label: 'Capacity (Wh)', type: 'int', section: 'Specs', cats: ['power_station'], required: true },
   { key: 'capacity_mah', label: 'Capacity (mAh)', type: 'int', section: 'Specs', cats: ['power_bank'], required: true },
@@ -279,8 +278,6 @@ function readForm(prefix) {
     if (bad) { el.classList.add('invalid'); errors.push(el); }
     values[f.key] = v;
   }
-  const asinEl = document.getElementById(`${prefix}-f-asin`);
-  if (!values.asin && !values.url && asinEl) { asinEl.classList.add('invalid'); errors.push(asinEl); }
   return { values, errors };
 }
 
@@ -326,7 +323,7 @@ async function createBattery() {
   const { values, errors } = readForm('new');
   if (errors.length) {
     msg.className = 'form-msg err';
-    msg.textContent = 'Fix the red fields (ASIN must be 10 letters/digits; add an ASIN or URL).';
+    msg.textContent = 'Fix the red fields (ASIN is required — 10 letters/digits).';
     errors[0].focus();
     return;
   }
@@ -380,7 +377,7 @@ async function saveDetails(id) {
   const { values, errors } = readForm(`d${id}`);
   if (errors.length) {
     msg.className = 'form-msg err';
-    msg.textContent = 'Fix the red fields (ASIN must be 10 letters/digits; add an ASIN or URL).';
+    msg.textContent = 'Fix the red fields (ASIN is required — 10 letters/digits).';
     errors[0].focus();
     return;
   }
