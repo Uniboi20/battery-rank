@@ -4,294 +4,390 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PowerRank — Power Station & Power Bank Buying Guide</title>
-<meta name="description" content="An independent buying guide for portable power stations and power banks. PowerRank scores each model on capacity, ports, and peak output relative to price, so you can find the best value for your needs — not just the most expensive option.">
+<meta name="description" content="Tell us what you want to power and PowerRank shows which portable power stations and power banks can handle it, how long they'll last, and which give you the most for your money.">
 <meta name="robots" content="index, follow">
-<meta name="theme-color" content="#0d0f14">
+<meta name="theme-color" content="#0f1117" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f6f6f9" media="(prefers-color-scheme: light)">
 <meta property="og:title" content="PowerRank — Power Station & Power Bank Buying Guide">
-<meta property="og:description" content="Independent value rankings for portable power stations and power banks, scored on capacity, ports, and output relative to price.">
+<meta property="og:description" content="Pick what you want to power. See which batteries can handle it, how long they'll last, and which are the best value.">
 <meta property="og:type" content="website">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@600&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  /* Colors follow the device's light/dark setting. Secondary text stays well above
+     WCAG AA contrast in both — the old gray-on-black was the #1 readability complaint. */
   :root {
-    --bg:       #0d0f14;
-    --surface:  #151820;
-    --surface-2:#1a1d2b;
-    --border:   #252836;
-    --muted:    #3a3d52;
-    --faint:    #6b7090;
-    --text:     #e2e4f0;
-    --sub:      #8e92b3;
-    --accent:   #f5a623;
-    --positive: #3dd68c;
-    --negative: #f56565;
-    --brand:    #8b7ff7;
-    --font-mono: 'JetBrains Mono','Fira Mono','Courier New',monospace;
-    --font-sans: 'Inter',system-ui,-apple-system,sans-serif;
-    --radius: 8px; --radius-lg: 14px;
+    --bg:         #0f1117;
+    --surface:    #171a23;
+    --surface-2:  #1f2331;
+    --border:     #2e3345;
+    --border-strong:#454b63;
+    --text:       #f0f2f9;
+    --sub:        #c3c7dd;
+    --faint:      #9a9fbb;
+    --accent:     #f5a623;
+    --accent-soft:rgba(245,166,35,0.12);
+    --accent-line:rgba(245,166,35,0.45);
+    --on-accent:  #1a1205;
+    --positive:   #45dc95;
+    --negative:   #ff8080;
+    --brand:      #a49bfa;
+    --brand-soft: rgba(139,127,247,0.16);
+    --brand-solid:#7b6ef0;
+    --gold:       #f5c542;
+    --silver:     #c3ced4;
+    --bronze:     #dd9150;
+    --rank1-bg:   linear-gradient(135deg,#171a23 0%,#221f12 100%);
+    --font-sans:  'Inter',system-ui,-apple-system,sans-serif;
+    --font-mono:  'JetBrains Mono','Fira Mono',monospace;
+    --radius: 10px; --radius-lg: 16px;
+    color-scheme: dark;
   }
-  html { font-size: 15px; scroll-behavior: smooth; }
-  body { background:var(--bg); color:var(--text); font-family:var(--font-sans); min-height:100vh; line-height:1.5; }
+  @media (prefers-color-scheme: light) {
+    :root {
+      --bg:         #f6f6f9;
+      --surface:    #ffffff;
+      --surface-2:  #f0f1f6;
+      --border:     #dcdee8;
+      --border-strong:#b9bccc;
+      --text:       #15172a;
+      --sub:        #42465c;
+      --faint:      #61657d;
+      --accent:     #b56a00;
+      --accent-soft:rgba(245,166,35,0.14);
+      --accent-line:rgba(205,125,0,0.5);
+      --on-accent:  #1a1205;
+      --positive:   #11804d;
+      --negative:   #c23636;
+      --brand:      #5144d6;
+      --brand-soft: rgba(91,78,224,0.1);
+      --brand-solid:#5b4ee0;
+      --gold:       #a87900;
+      --silver:     #66737a;
+      --bronze:     #a35a1c;
+      --rank1-bg:   linear-gradient(135deg,#ffffff 0%,#fff7e3 100%);
+      color-scheme: light;
+    }
+  }
+
+  html { font-size: 100%; scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+  body { background:var(--bg); color:var(--text); font-family:var(--font-sans); min-height:100vh; line-height:1.55; font-size:1rem; }
   a { color:var(--brand); }
   :focus-visible { outline:2px solid var(--accent); outline-offset:2px; border-radius:4px; }
   .sr-only { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
+  strong { color:var(--text); font-weight:600; }
 
   /* ── Header ── */
   header {
     border-bottom:1px solid var(--border); padding:0 2rem;
     background:var(--surface); position:sticky; top:0; z-index:100;
-    display:flex; align-items:center; gap:1.5rem; min-height:60px;
+    display:flex; align-items:center; gap:1.5rem; min-height:64px;
   }
-  .logo { font-family:var(--font-mono); font-size:1.1rem; font-weight:600; color:var(--accent); letter-spacing:-0.02em; white-space:nowrap; text-decoration:none; }
-  .logo span { color:var(--sub); font-weight:400; }
-  .header-meta { margin-left:auto; font-size:0.78rem; color:var(--sub); font-family:var(--font-mono); white-space:nowrap; }
-
-  /* ── Tab switcher ── */
+  .logo { font-family:var(--font-mono); font-size:1.15rem; font-weight:600; color:var(--accent); letter-spacing:-0.02em; white-space:nowrap; text-decoration:none; }
+  .logo span { color:var(--sub); }
+  .header-meta { margin-left:auto; font-size:0.875rem; color:var(--sub); white-space:nowrap; }
   .tab-bar { display:flex; gap:0; margin-left:1rem; align-self:stretch; }
   .tab-btn {
-    padding:0 1.25rem; border:none; background:none;
-    color:var(--sub); font-family:var(--font-mono); font-size:0.78rem;
-    font-weight:600; text-transform:uppercase; letter-spacing:0.07em;
-    cursor:pointer; border-bottom:2px solid transparent;
-    transition:color 0.15s,border-color 0.15s; white-space:nowrap;
+    padding:0 1.25rem; border:none; background:none; color:var(--sub);
+    font-family:var(--font-sans); font-size:1rem; font-weight:600;
+    cursor:pointer; border-bottom:3px solid transparent; white-space:nowrap;
+    transition:color 0.15s,border-color 0.15s;
   }
   .tab-btn:hover { color:var(--text); }
-  .tab-btn[aria-selected="true"] { color:var(--accent); border-bottom-color:var(--accent); }
+  .tab-btn[aria-selected="true"] { color:var(--text); border-bottom-color:var(--accent); }
 
-  /* ── Disclosure strip ── */
   .disclosure-bar {
     background:var(--surface-2); border-bottom:1px solid var(--border);
-    font-size:0.75rem; color:var(--sub); text-align:center; padding:0.45rem 1rem;
+    font-size:0.875rem; color:var(--sub); text-align:center; padding:0.5rem 1rem;
   }
   .disclosure-bar a { color:var(--text); }
 
-  /* ── Layout ── */
-  main { max-width:1400px; margin:0 auto; padding:2rem; }
+  main { max-width:1280px; margin:0 auto; padding:2rem; }
 
   /* ── Hero ── */
-  .hero { display:flex; flex-direction:column; gap:1.5rem; margin-bottom:2rem; }
-  .hero-title { font-size:1.75rem; font-weight:700; color:var(--text); line-height:1.2; letter-spacing:-0.01em; }
+  .hero { margin-bottom:1.5rem; }
+  .hero-title { font-size:2rem; font-weight:700; line-height:1.2; letter-spacing:-0.015em; }
   .hero-title em { font-style:normal; color:var(--accent); }
-  .hero-sub { font-size:0.9rem; color:var(--sub); margin-top:0.4rem; max-width:70ch; }
-  .hero-sub a { color:var(--text); }
+  .hero-sub { font-size:1.125rem; color:var(--sub); margin-top:0.5rem; max-width:62ch; }
 
-  /* ── Filter Panel ── */
-  .filter-panel {
-    background:var(--surface); border:1px solid var(--border);
-    border-radius:var(--radius-lg); padding:1.1rem 1.5rem 1.1rem; width:100%;
+  /* ── Cards / panels ── */
+  .panel { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); padding:1.5rem; }
+  .step-title { font-size:1.25rem; font-weight:700; margin-bottom:0.25rem; }
+  .step-sub { color:var(--sub); margin-bottom:1.1rem; }
+  .step-num {
+    display:inline-grid; place-items:center; width:1.75rem; height:1.75rem; border-radius:50%;
+    background:var(--accent); color:var(--on-accent); font-size:0.95rem; font-weight:700;
+    margin-right:0.5rem; vertical-align:2px;
   }
-  .filter-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:0.9rem; }
-  .filter-title { font-family:var(--font-mono); font-size:0.68rem; font-weight:600; color:var(--brand); letter-spacing:0.1em; text-transform:uppercase; }
+
+  /* ── Appliance picker ── */
+  .appliance-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(185px,1fr)); gap:0.6rem; }
+  .appliance {
+    display:flex; align-items:center; gap:0.65rem; text-align:left;
+    background:var(--bg); border:1.5px solid var(--border); border-radius:var(--radius);
+    padding:0.7rem 0.8rem; min-height:60px; cursor:pointer; color:var(--text);
+    font-family:inherit; transition:border-color 0.15s,background 0.15s;
+  }
+  .appliance:hover { border-color:var(--border-strong); }
+  .appliance[aria-pressed="true"] { border-color:var(--accent); background:var(--accent-soft); }
+  .appliance-icon { font-size:1.5rem; line-height:1; flex:none; }
+  .appliance-name { display:block; font-size:0.95rem; font-weight:600; line-height:1.25; }
+  .appliance-watts { display:block; font-size:0.875rem; color:var(--sub); margin-top:1px; }
+  .appliance[aria-pressed="true"] .appliance-watts { color:var(--text); }
+  .appliance-check {
+    margin-left:auto; flex:none; width:20px; height:20px; border-radius:50%;
+    border:1.5px solid var(--border-strong); display:grid; place-items:center; font-size:0.75rem; color:transparent;
+  }
+  .appliance[aria-pressed="true"] .appliance-check { background:var(--accent); border-color:var(--accent); color:var(--on-accent); }
+
+  .duration-row { display:flex; flex-wrap:wrap; align-items:center; gap:0.5rem; margin-top:1.25rem; }
+  .duration-label { font-weight:600; margin-right:0.35rem; }
+  .seg { display:flex; flex-wrap:wrap; gap:0.4rem; }
+  .seg button {
+    background:var(--bg); border:1.5px solid var(--border); color:var(--text); border-radius:999px;
+    padding:0.45rem 1rem; font-size:0.95rem; font-family:inherit; cursor:pointer; min-height:40px;
+  }
+  .seg button:hover { border-color:var(--border-strong); }
+  .seg button[aria-pressed="true"] { border-color:var(--accent); background:var(--accent-soft); font-weight:600; }
+
+  .need-summary {
+    margin-top:1.25rem; padding:1rem 1.15rem; border-radius:var(--radius);
+    background:var(--surface-2); border-left:4px solid var(--accent); font-size:1rem;
+  }
+  .need-summary .need-figs { display:flex; flex-wrap:wrap; gap:0.5rem 2rem; margin-bottom:0.35rem; }
+  .need-fig { display:flex; flex-direction:column; }
+  .need-fig b { font-size:1.4rem; font-weight:700; color:var(--accent); }
+  .need-fig span { font-size:0.875rem; color:var(--sub); }
+  .need-summary p { color:var(--sub); }
+  .need-summary.warn { border-left-color:var(--negative); }
+  .need-actions { margin-top:0.6rem; }
   .link-btn {
-    background:none; border:none; color:var(--sub); font-family:var(--font-mono);
-    font-size:0.72rem; cursor:pointer; text-decoration:underline; text-underline-offset:3px;
+    background:none; border:none; color:var(--sub); font-family:inherit; font-size:0.95rem;
+    cursor:pointer; text-decoration:underline; text-underline-offset:3px; padding:0;
   }
   .link-btn:hover { color:var(--text); }
-  .filter-sliders { display:grid; grid-template-columns:1fr 1px 1fr 1px 1fr; gap:0 1.5rem; align-items:start; }
-  .slider-divider { background:var(--border); width:1px; height:100%; }
-  .filter-chips-row {
-    display:flex; gap:0.5rem; flex-wrap:wrap; align-items:center;
-    margin-top:1rem; padding-top:0.85rem; border-top:1px solid var(--border);
-  }
-  .filter-chips-label, .slider-label { font-size:0.72rem; font-family:var(--font-mono); color:var(--text); text-transform:uppercase; letter-spacing:0.06em; font-weight:600; }
-  .filter-chips-label { margin-right:0.25rem; }
-  .slider-row { display:flex; flex-direction:column; gap:0.3rem; }
-  .slider-help { font-size:0.72rem; color:var(--sub); }
-  .slider-value { font-family:var(--font-mono); font-size:1.3rem; font-weight:600; color:var(--accent); white-space:nowrap; }
-  input[type=range] { width:100%; accent-color:var(--accent); cursor:pointer; margin:0.35rem 0 0; }
-  .slider-hints { display:flex; justify-content:space-between; font-size:0.68rem; color:var(--faint); font-family:var(--font-mono); }
 
-  /* ── Chip ── */
+  /* ── Fine-tune (sliders) ── */
+  .tune { margin-top:1.25rem; border-top:1px solid var(--border); padding-top:1rem; }
+  .tune > summary {
+    cursor:pointer; font-weight:600; color:var(--sub); list-style:none; display:flex; align-items:center; gap:0.5rem;
+  }
+  .tune > summary::-webkit-details-marker { display:none; }
+  .tune > summary::before { content:'▸'; color:var(--accent); transition:transform 0.15s; }
+  .tune[open] > summary::before { transform:rotate(90deg); }
+  .tune > summary:hover { color:var(--text); }
+  .filter-sliders { display:grid; grid-template-columns:repeat(3,1fr); gap:1.5rem; margin-top:1.1rem; }
+  .slider-row { display:flex; flex-direction:column; gap:0.2rem; }
+  .slider-label { font-weight:600; font-size:1rem; }
+  .slider-help { font-size:0.875rem; color:var(--sub); }
+  .slider-value { font-size:1.35rem; font-weight:700; color:var(--accent); margin-top:0.2rem; }
+  input[type=range] { width:100%; accent-color:var(--accent); cursor:pointer; margin:0.35rem 0 0; height:28px; }
+  .slider-hints { display:flex; justify-content:space-between; font-size:0.8125rem; color:var(--faint); }
+  .filter-chips-row { display:flex; gap:0.5rem; flex-wrap:wrap; align-items:center; margin-top:1.25rem; }
+  .filter-chips-label { font-weight:600; margin-right:0.25rem; }
   .chip {
-    background:var(--surface); border:1px solid var(--border); border-radius:20px;
-    padding:0.3rem 0.85rem; font-size:0.78rem; cursor:pointer; color:var(--sub);
-    transition:all 0.15s; white-space:nowrap; font-family:var(--font-mono);
+    background:var(--bg); border:1.5px solid var(--border); border-radius:999px;
+    padding:0.4rem 0.95rem; font-size:0.95rem; cursor:pointer; color:var(--text); font-family:inherit; min-height:38px;
   }
-  .chip:hover { border-color:var(--brand); color:var(--text); }
-  .chip[aria-pressed="true"] { background:var(--brand); border-color:var(--brand); color:#fff; }
+  .chip:hover { border-color:var(--border-strong); }
+  .chip[aria-pressed="true"] { background:var(--brand-solid); border-color:var(--brand-solid); color:#fff; }
+  .tune-foot { margin-top:1rem; }
 
-  /* ── Section labels ── */
-  .section-label {
-    font-family:var(--font-mono); font-size:0.7rem; font-weight:600;
-    color:var(--sub); text-transform:uppercase; letter-spacing:0.1em;
-    margin-bottom:0.85rem; display:flex; align-items:center; gap:0.5rem;
-  }
-  .section-label::after { content:''; flex:1; height:1px; background:var(--border); }
+  /* ── Section headings ── */
+  .section-head { display:flex; align-items:baseline; gap:1rem; flex-wrap:wrap; margin:2.5rem 0 1rem; }
+  .section-title { font-size:1.4rem; font-weight:700; }
+  .section-note { color:var(--sub); font-size:0.95rem; }
 
   /* ── Top 5 ── */
-  .top5-section { margin-bottom:2.25rem; }
-  .top5-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:0.75rem; }
+  .top5-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:0.85rem; }
   .top5-card {
-    background:var(--surface); border:1px solid var(--border);
-    border-radius:var(--radius-lg); padding:1rem 1.1rem 1.1rem;
-    display:flex; flex-direction:column; transition:border-color 0.15s;
+    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg);
+    padding:1.1rem 1.15rem 1.15rem; display:flex; flex-direction:column;
   }
-  .top5-card:hover { border-color:var(--brand); }
-  .top5-card.rank-1 { border-color:rgba(245,197,66,0.45); background:linear-gradient(135deg,#151820 0%,#1c1a10 100%); }
-  .top5-card.rank-2 { border-color:rgba(176,190,197,0.35); }
-  .top5-card.rank-3 { border-color:rgba(205,127,50,0.35); }
-  .top5-rank { font-family:var(--font-mono); font-size:0.68rem; font-weight:700; letter-spacing:0.06em; margin-bottom:0.6rem; color:var(--sub); }
-  .rank-1 .top5-rank { color:#f5c542; } .rank-2 .top5-rank { color:#b0bec5; } .rank-3 .top5-rank { color:#cd7f32; }
-  .top5-brand { font-size:0.75rem; color:var(--sub); margin-bottom:0.1rem; }
-  .top5-model { font-size:1rem; font-weight:700; color:var(--text); line-height:1.2; margin-bottom:0.75rem; }
-  .top5-stats { display:flex; flex-direction:column; gap:0.3rem; }
-  .top5-stat { display:flex; justify-content:space-between; align-items:baseline; gap:0.5rem; }
-  .top5-stat-label { font-size:0.7rem; color:var(--sub); font-family:var(--font-mono); }
-  .top5-stat-val { font-family:var(--font-mono); font-size:0.82rem; font-weight:600; color:var(--text); text-align:right; }
-  .top5-score { margin-top:0.75rem; padding-top:0.65rem; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
-  .top5-score-label { font-size:0.68rem; font-family:var(--font-mono); color:var(--sub); text-transform:uppercase; letter-spacing:0.06em; }
-  .top5-score-val { font-family:var(--font-mono); font-size:1rem; font-weight:700; }
-  .top5-cta { margin-top:auto; padding-top:0.85rem; display:flex; }
+  .top5-card.rank-1 { border-color:var(--gold); background:var(--rank1-bg); }
+  .top5-rank { font-size:0.875rem; font-weight:700; margin-bottom:0.5rem; color:var(--sub); }
+  .rank-1 .top5-rank { color:var(--gold); } .rank-2 .top5-rank { color:var(--silver); } .rank-3 .top5-rank { color:var(--bronze); }
+  .top5-brand { font-size:0.9rem; color:var(--sub); }
+  .top5-model { font-size:1.15rem; font-weight:700; line-height:1.25; margin-bottom:0.8rem; }
+  .top5-highlight {
+    background:var(--accent-soft); border-radius:8px; padding:0.55rem 0.7rem; margin-bottom:0.8rem;
+    font-size:0.95rem; line-height:1.35;
+  }
+  .top5-highlight b { color:var(--text); font-weight:700; }
+  .top5-stats { display:flex; flex-direction:column; gap:0.35rem; }
+  .top5-stat { display:flex; justify-content:space-between; align-items:baseline; gap:0.5rem; font-size:0.95rem; }
+  .top5-stat-label { color:var(--sub); }
+  .top5-stat-val { font-weight:600; text-align:right; }
+  .top5-value { margin-top:0.9rem; padding-top:0.8rem; border-top:1px solid var(--border); }
+  .top5-cta { margin-top:auto; padding-top:0.9rem; display:flex; }
   .top5-cta .buy-btn { flex:1; justify-content:center; }
+
+  /* ── Value rating (replaces the old "+312" score, which read like a price) ── */
+  .value { display:inline-flex; align-items:center; gap:0.5rem; white-space:nowrap; }
+  .value-meter { display:inline-flex; gap:3px; }
+  .value-meter i { width:7px; height:16px; border-radius:2px; background:var(--border); }
+  .value-label { font-weight:600; font-size:0.95rem; }
+  .v5 i:nth-child(-n+5), .v4 i:nth-child(-n+4) { background:var(--positive); }
+  .v3 i:nth-child(-n+3) { background:var(--brand); }
+  .v2 i:nth-child(-n+2) { background:var(--accent); }
+  .v1 i:nth-child(-n+1) { background:var(--negative); }
+  .v5 .value-label, .v4 .value-label { color:var(--positive); }
+  .v1 .value-label { color:var(--negative); }
 
   /* ── Amazon button ── */
   .buy-btn {
     display:inline-flex; align-items:center; gap:0.35rem;
-    background:rgba(245,166,35,0.1); border:1px solid rgba(245,166,35,0.4); color:var(--accent);
-    border-radius:var(--radius); padding:0.4rem 0.7rem; font-size:0.75rem; font-weight:600;
-    text-decoration:none; white-space:nowrap; transition:background 0.15s,border-color 0.15s;
+    background:var(--accent); border:1px solid var(--accent); color:var(--on-accent);
+    border-radius:var(--radius); padding:0.6rem 0.9rem; font-size:0.95rem; font-weight:600;
+    text-decoration:none; white-space:nowrap; min-height:44px; transition:filter 0.15s;
   }
-  .buy-btn:hover { background:rgba(245,166,35,0.2); border-color:var(--accent); }
+  @media (prefers-color-scheme: light) { .buy-btn { background:#f5a623; border-color:#e2961a; } }
+  .buy-btn:hover { filter:brightness(1.08); }
 
   /* ── Controls ── */
-  .controls { display:flex; gap:0.75rem; flex-wrap:wrap; margin-bottom:1.25rem; align-items:center; }
-  .search-wrap { position:relative; flex:1; min-width:200px; max-width:320px; }
-  .search-wrap svg { position:absolute; left:10px; top:50%; transform:translateY(-50%); color:var(--sub); pointer-events:none; }
+  .controls { display:flex; gap:0.75rem; flex-wrap:wrap; margin-bottom:1rem; align-items:center; }
+  .search-wrap { position:relative; flex:1; min-width:220px; max-width:340px; }
+  .search-wrap svg { position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--sub); pointer-events:none; }
   input[type=search] {
-    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
-    color:var(--text); font-family:var(--font-sans); font-size:0.85rem; height:40px;
-    padding:0 0.75rem 0 2.2rem; width:100%; outline:none; transition:border-color 0.15s;
+    background:var(--surface); border:1.5px solid var(--border); border-radius:var(--radius);
+    color:var(--text); font-family:inherit; font-size:1rem; height:46px;
+    padding:0 0.85rem 0 2.4rem; width:100%; outline:none;
   }
-  input[type=search]:hover { border-color:var(--muted); }
+  input[type=search]::placeholder { color:var(--faint); }
   input[type=search]:focus { border-color:var(--brand); }
-
-  /* Dropdowns: styled as a labeled control matching the search box, not the native widget. */
   .select-wrap {
-    position:relative; display:flex; align-items:center; height:40px;
-    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
-    transition:border-color 0.15s; cursor:pointer;
+    position:relative; display:flex; align-items:center; height:46px;
+    background:var(--surface); border:1.5px solid var(--border); border-radius:var(--radius); cursor:pointer;
   }
-  .select-wrap:hover { border-color:var(--muted); }
   .select-wrap:focus-within { border-color:var(--brand); }
-  .select-label {
-    padding-left:0.75rem; font-family:var(--font-mono); font-size:0.68rem; font-weight:600;
-    color:var(--sub); text-transform:uppercase; letter-spacing:0.08em; pointer-events:none; white-space:nowrap;
-  }
+  .select-label { padding-left:0.85rem; font-size:0.9rem; color:var(--sub); pointer-events:none; white-space:nowrap; }
   .select-wrap::after {
-    content:''; position:absolute; right:0.8rem; top:50%; width:6px; height:6px; margin-top:-5px;
-    border-right:1.5px solid var(--sub); border-bottom:1.5px solid var(--sub); transform:rotate(45deg);
-    pointer-events:none; transition:border-color 0.15s;
+    content:''; position:absolute; right:0.9rem; top:50%; width:7px; height:7px; margin-top:-5px;
+    border-right:2px solid var(--sub); border-bottom:2px solid var(--sub); transform:rotate(45deg); pointer-events:none;
   }
-  .select-wrap:hover::after, .select-wrap:focus-within::after { border-color:var(--accent); }
   .select-wrap select {
     appearance:none; -webkit-appearance:none; background:transparent; border:none; outline:none;
-    color:var(--text); font-family:var(--font-sans); font-size:0.85rem; font-weight:500;
-    height:100%; padding:0 2rem 0 0.5rem; cursor:pointer; min-width:120px;
+    color:var(--text); font-family:inherit; font-size:1rem; font-weight:600;
+    height:100%; padding:0 2.2rem 0 0.4rem; cursor:pointer; min-width:120px;
   }
-  .select-wrap select:focus-visible { outline:none; }
   .select-wrap select option { background:var(--surface); color:var(--text); }
-  .result-count { margin-left:auto; font-size:0.78rem; color:var(--sub); font-family:var(--font-mono); white-space:nowrap; }
+  .result-count { margin-left:auto; color:var(--sub); white-space:nowrap; }
 
   /* ── Table ── */
-  .table-wrap { overflow-x:auto; border:1px solid var(--border); border-radius:var(--radius-lg); background:var(--surface); }
-  table { width:100%; border-collapse:collapse; font-size:0.83rem; }
+  .table-wrap { border:1px solid var(--border); border-radius:var(--radius-lg); background:var(--surface); overflow-x:auto; }
+  table { width:100%; border-collapse:collapse; font-size:0.95rem; }
   th {
-    background:var(--surface-2); color:var(--sub); font-size:0.7rem; font-weight:600;
-    text-transform:uppercase; letter-spacing:0.07em; padding:0;
-    text-align:left; white-space:nowrap; border-bottom:1px solid var(--border);
-    font-family:var(--font-mono); position:sticky; top:0;
+    background:var(--surface-2); color:var(--sub); font-size:0.875rem; font-weight:600;
+    padding:0; text-align:left; white-space:nowrap; border-bottom:1px solid var(--border);
   }
   th > span, th > button { display:block; padding:0.85rem 1rem; }
-  th button {
-    width:100%; background:none; border:none; color:inherit; font:inherit; letter-spacing:inherit;
-    text-transform:inherit; text-align:inherit; cursor:pointer; transition:color 0.15s;
-  }
+  th button { width:100%; background:none; border:none; color:inherit; font:inherit; text-align:inherit; cursor:pointer; }
   th button:hover { color:var(--text); }
-  th[aria-sort] button { color:var(--accent); }
+  th[aria-sort] button { color:var(--text); }
   th.td-num, th.td-num button { text-align:right; }
   .sort-arrow { margin-left:4px; opacity:0.5; }
-  th[aria-sort] .sort-arrow { opacity:1; }
-  td { padding:0.8rem 1rem; border-bottom:1px solid var(--border); vertical-align:middle; }
+  th[aria-sort] .sort-arrow { opacity:1; color:var(--accent); }
+  td { padding:0.9rem 1rem; border-bottom:1px solid var(--border); vertical-align:middle; }
   tbody tr:last-child td { border-bottom:none; }
-  tbody tr:hover td { background:rgba(139,127,247,0.05); }
-  .td-brand { color:var(--sub); font-size:0.75rem; }
-  .td-model { font-weight:600; color:var(--text); }
-  .td-num { font-family:var(--font-mono); text-align:right; color:var(--text); }
-  .td-score { font-family:var(--font-mono); font-weight:600; text-align:right; min-width:3.5rem; }
-  .score-pos { color:var(--positive); } .score-neg { color:var(--negative); } .score-zero { color:var(--sub); }
-  .badge-row { display:flex; gap:4px; flex-wrap:wrap; }
-  .badge { font-size:0.68rem; font-family:var(--font-mono); padding:2px 6px; border-radius:4px; white-space:nowrap; }
-  .badge-purple { background:rgba(139,127,247,0.15); color:#b3a9f8; border:1px solid rgba(139,127,247,0.3); }
-  .badge-green  { background:rgba(61,214,140,0.1);  color:var(--positive); border:1px solid rgba(61,214,140,0.25); }
-  .badge-amber  { background:rgba(245,166,35,0.1);  color:var(--accent);   border:1px solid rgba(245,166,35,0.25); }
-  .badge-red    { background:rgba(245,101,101,0.1); color:var(--negative); border:1px solid rgba(245,101,101,0.25); }
-  .rank-num { font-family:var(--font-mono); font-size:0.75rem; color:var(--sub); text-align:center; width:40px; }
-  table.ranked tbody tr:nth-child(1) .rank-num { color:#f5c542; font-weight:700; }
-  table.ranked tbody tr:nth-child(2) .rank-num { color:#b0bec5; font-weight:600; }
-  table.ranked tbody tr:nth-child(3) .rank-num { color:#cd7f32; font-weight:600; }
-  .score-bar-wrap { display:flex; align-items:center; gap:8px; min-width:130px; }
-  .score-bar { flex:1; height:4px; background:var(--border); border-radius:2px; overflow:hidden; }
-  .score-bar-fill { height:100%; border-radius:2px; transition:width 0.3s ease; }
-  .fill-pos { background:var(--positive); } .fill-neg { background:var(--negative); }
-  .notes-cell { color:var(--sub); font-size:0.75rem; max-width:180px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  tbody tr:hover td { background:var(--brand-soft); }
+  .td-model { font-weight:600; font-size:1rem; }
+  .td-brand { color:var(--sub); font-size:0.875rem; }
+  .td-extras { color:var(--sub); font-size:0.875rem; margin-top:2px; }
+  .td-num { text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .td-sub { display:block; color:var(--sub); font-size:0.8125rem; }
+  .td-runtime { font-weight:600; }
+  .rank-num { color:var(--sub); text-align:center; width:44px; font-weight:600; }
+  table.ranked tbody tr:nth-child(1) .rank-num { color:var(--gold); }
+  table.ranked tbody tr:nth-child(2) .rank-num { color:var(--silver); }
+  table.ranked tbody tr:nth-child(3) .rank-num { color:var(--bronze); }
   .dash { color:var(--faint); }
   .status-cell { padding:3rem 2rem; text-align:center; color:var(--sub); }
-  .status-cell button { margin-top:0.75rem; }
-  .btn {
-    background:var(--brand); color:#fff; border:none; border-radius:var(--radius);
-    padding:0.5rem 1rem; font-size:0.82rem; font-weight:600; cursor:pointer;
-  }
-  .empty { padding:4rem 2rem; text-align:center; color:var(--sub); }
-  .empty-title { font-weight:600; color:var(--text); margin-bottom:0.25rem; }
-  .empty .link-btn { margin-top:0.75rem; font-size:0.8rem; }
-  .table-note { font-size:0.75rem; color:var(--sub); margin-top:0.75rem; }
+  .btn { background:var(--brand-solid); color:#fff; border:none; border-radius:var(--radius); padding:0.6rem 1.1rem; font-size:1rem; font-weight:600; cursor:pointer; margin-top:0.75rem; }
+  .empty { padding:3.5rem 2rem; text-align:center; color:var(--sub); }
+  .empty-title { font-weight:700; color:var(--text); font-size:1.1rem; margin-bottom:0.25rem; }
+  .empty .link-btn { margin-top:0.75rem; }
+  .table-note { font-size:0.9rem; color:var(--sub); margin-top:0.85rem; }
 
   /* ── Info sections ── */
-  .info-section { margin-top:3rem; }
-  .info-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); padding:1.5rem 1.75rem; }
-  .info-card p { color:var(--sub); font-size:0.88rem; line-height:1.7; margin-bottom:0.9rem; max-width:90ch; }
-  .info-card p:last-child { margin-bottom:0; }
-  .info-card strong { color:var(--text); }
-  .method-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:0.9rem; margin:1.25rem 0 1.4rem; }
-  .method-card { background:var(--bg); border:1px solid var(--border); border-radius:var(--radius); padding:0.9rem 1rem; }
-  .method-card h3 { font-family:var(--font-mono); font-size:0.72rem; font-weight:600; color:var(--accent); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:0.45rem; }
-  .method-card p { font-size:0.8rem; line-height:1.6; margin:0; }
+  .info-card p, .info-card li { color:var(--sub); font-size:1rem; line-height:1.7; max-width:75ch; }
+  .info-card p + p { margin-top:0.85rem; }
   .faq details { border-bottom:1px solid var(--border); }
   .faq details:last-child { border-bottom:none; }
-  .faq summary { cursor:pointer; padding:0.9rem 0; font-weight:600; font-size:0.92rem; color:var(--text); list-style:none; display:flex; justify-content:space-between; gap:1rem; }
+  .faq summary {
+    cursor:pointer; padding:1.05rem 0; font-weight:600; font-size:1.05rem; color:var(--text);
+    list-style:none; display:flex; justify-content:space-between; gap:1rem;
+  }
   .faq summary::-webkit-details-marker { display:none; }
-  .faq summary::after { content:'+'; color:var(--accent); font-family:var(--font-mono); }
+  .faq summary::after { content:'+'; color:var(--accent); font-size:1.3rem; line-height:1; }
   .faq details[open] summary::after { content:'−'; }
-  .faq details p { padding-bottom:0.9rem; }
+  .faq details > :not(summary) { margin-bottom:1rem; }
+  .size-table { border-collapse:collapse; width:100%; max-width:640px; font-size:0.95rem; }
+  .size-table th, .size-table td { padding:0.6rem 0.75rem; border-bottom:1px solid var(--border); text-align:left; }
+  .size-table th { background:none; color:var(--sub); font-size:0.875rem; }
+  .size-table td:last-child { white-space:nowrap; font-weight:600; color:var(--text); }
+  .size-table td:first-child { color:var(--sub); }
+  .method-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:0.9rem; margin:1rem 0; }
+  .method-card { background:var(--bg); border:1px solid var(--border); border-radius:var(--radius); padding:1rem; }
+  .method-card h3 { font-size:1rem; font-weight:700; margin-bottom:0.35rem; }
+  .method-card p { font-size:0.9rem; line-height:1.6; }
+  .formula > summary { cursor:pointer; color:var(--brand); font-weight:600; margin-top:1rem; }
 
-  footer { margin-top:3rem; padding:1.75rem 2rem; border-top:1px solid var(--border); font-size:0.78rem; color:var(--sub); text-align:center; line-height:1.7; }
-  footer nav { display:flex; gap:1.25rem; justify-content:center; flex-wrap:wrap; margin-bottom:0.6rem; font-family:var(--font-mono); }
-  footer nav a { color:var(--text); text-decoration:none; }
-  footer nav a:hover { color:var(--accent); }
-  footer p { max-width:80ch; margin:0 auto 0.4rem; }
+  footer { margin-top:3rem; padding:2rem; border-top:1px solid var(--border); font-size:0.9rem; color:var(--sub); text-align:center; line-height:1.7; }
+  footer nav { display:flex; gap:1.5rem; justify-content:center; flex-wrap:wrap; margin-bottom:0.75rem; }
+  footer nav a { color:var(--text); }
+  footer p { max-width:75ch; margin:0 auto 0.4rem; }
 
-  @media(max-width:1100px) { .top5-grid { grid-template-columns:repeat(3,1fr); } }
+  @media(max-width:1150px) { .top5-grid { grid-template-columns:repeat(3,1fr); } }
   @media(max-width:900px) {
-    .filter-sliders { grid-template-columns:1fr; gap:1rem; }
-    .slider-divider { width:100%; height:1px; }
+    .filter-sliders { grid-template-columns:1fr; }
     .top5-grid { grid-template-columns:repeat(2,1fr); }
     main { padding:1.25rem 1rem; } header { padding:0 1rem; }
     .header-meta { display:none; }
   }
-  @media(max-width:600px) {
+
+  /* Phones and iPads: the table becomes a stack of cards — no sideways scrolling to read a row. */
+  @media(max-width:900px) {
+    .table-wrap { border:none; background:none; }
+    #resultsTable thead { display:none; }
+    #resultsTable, #resultsTable tbody { display:block; }
+    #resultsTable tbody { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:0.75rem; }
+    #resultsTable tbody tr {
+      display:grid; grid-template-columns:1fr 1fr; gap:0.65rem 1rem; align-content:start;
+      background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); padding:1rem;
+    }
+    #resultsTable tbody tr:hover td { background:none; }
+    #resultsTable td { border:none; padding:0; text-align:left; }
+    #resultsTable td[data-label]::before {
+      content:attr(data-label); display:block; font-size:0.8125rem; color:var(--sub); font-weight:500;
+    }
+    #resultsTable td.rank-num { width:auto; text-align:left; font-size:0.875rem; margin-bottom:-0.4rem; }
+    #resultsTable td.rank-num, #resultsTable td.cell-model, #resultsTable td.cell-value,
+    #resultsTable td.cell-buy, #resultsTable td.status-cell { grid-column:1 / -1; }
+    #resultsTable td.cell-buy { margin-top:auto; }
+    #resultsTable td.cell-buy .buy-btn { width:100%; justify-content:center; }
+    #resultsTable td.status-cell { text-align:center; padding:1rem; }
+  }
+  @media(max-width:720px) {
     header { flex-wrap:wrap; gap:0; padding-top:0.6rem; }
-    .tab-bar { margin-left:0; width:100%; min-height:44px; }
+    .tab-bar { margin-left:0; width:100%; min-height:48px; }
     .tab-btn { flex:1; padding:0 0.5rem; }
-    .hero-title { font-size:1.4rem; }
+    .hero-title { font-size:1.6rem; }
+    .hero-sub { font-size:1.05rem; }
+    .panel { padding:1.15rem; }
+    .appliance-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:0.5rem; }
+    .appliance { padding:0.6rem 0.65rem; gap:0.5rem; }
+    .appliance-check { display:none; }
     .search-wrap { max-width:none; flex-basis:100%; }
     .select-wrap { flex:1; }
     .select-wrap select { flex:1; min-width:0; }
-    .result-count { margin-left:0; }
+    .result-count { margin-left:0; flex-basis:100%; }
     .top5-grid { grid-template-columns:1fr; }
-    .info-card { padding:1.25rem; }
+
+    .need-fig b { font-size:1.25rem; }
   }
   @media (prefers-reduced-motion: reduce) { * { transition:none !important; scroll-behavior:auto !important; } }
 </style>
@@ -317,55 +413,67 @@
 
 <main id="main">
   <div class="hero">
-    <div class="hero-text">
-      <h1 class="hero-title" id="heroTitle">Find the <em>best value</em> portable power station</h1>
-      <p class="hero-sub" id="heroSub">Scored by capacity, outlets, and output relative to price. Adjust filters to recalculate rankings instantly.</p>
-    </div>
-
-    <section class="filter-panel" aria-label="Filters">
-      <div class="filter-head">
-        <span class="filter-title">Filters</span>
-        <button class="link-btn" onclick="resetFilters()">Reset filters</button>
-      </div>
-      <div class="filter-sliders">
-        <div class="slider-row">
-          <label class="slider-label" for="powerSlider">Max power needed</label>
-          <div class="slider-help" id="powerHelp">Your largest device's wattage. Output beyond this doesn't add to the score.</div>
-          <div class="slider-value" id="powerDisplay" aria-live="polite">1,800 W</div>
-          <input type="range" id="powerSlider" min="100" max="7200" step="100" value="1800" oninput="onSliderChange()">
-          <div class="slider-hints" id="powerHints"><span>100 W</span><span>7,200 W</span></div>
-        </div>
-        <div class="slider-divider"></div>
-        <div class="slider-row">
-          <label class="slider-label" for="priceSlider">Budget</label>
-          <div class="slider-help">Hides models typically priced above your budget.</div>
-          <div class="slider-value" id="priceDisplay" aria-live="polite">Any</div>
-          <input type="range" id="priceSlider" min="100" max="5000" step="50" value="5000" oninput="onSliderChange()">
-          <div class="slider-hints" id="priceHints"><span>$100</span><span>$5,000+</span></div>
-        </div>
-        <div class="slider-divider"></div>
-        <div class="slider-row">
-          <label class="slider-label" for="capacitySlider" id="capLabel">Min capacity</label>
-          <div class="slider-help" id="capHelp">Total stored energy. More capacity = longer runtime.</div>
-          <div class="slider-value" id="capacityDisplay" aria-live="polite">Any</div>
-          <input type="range" id="capacitySlider" min="0" max="4000" step="100" value="0" oninput="onSliderChange()">
-          <div class="slider-hints" id="capHints"><span>0 Wh</span><span>4,000 Wh</span></div>
-        </div>
-      </div>
-      <div class="filter-chips-row" id="chipsRow" role="group" aria-label="Required features"></div>
-    </section>
+    <h1 class="hero-title" id="heroTitle"></h1>
+    <p class="hero-sub" id="heroSub"></p>
   </div>
 
-  <section class="top5-section" aria-labelledby="top5Label">
-    <h2 class="section-label" id="top5Label">Top 5 by value score</h2>
+  <section class="panel" aria-labelledby="pickerTitle">
+    <h2 class="step-title" id="pickerTitle"><span class="step-num">1</span><span id="pickerTitleText"></span></h2>
+    <p class="step-sub" id="pickerSub"></p>
+    <div class="appliance-grid" id="applianceGrid" role="group" aria-labelledby="pickerTitle"></div>
+
+    <div class="duration-row" id="durationRow">
+      <span class="duration-label" id="durationLabel">For how long?</span>
+      <div class="seg" role="group" aria-labelledby="durationLabel" id="durationSeg"></div>
+    </div>
+
+    <div class="need-summary" id="needSummary" aria-live="polite" hidden></div>
+
+    <details class="tune" id="tune">
+      <summary>Fine-tune your search (budget, size, features)</summary>
+      <div class="filter-sliders">
+        <div class="slider-row">
+          <label class="slider-label" for="priceSlider">Budget</label>
+          <div class="slider-help">Hides models that typically cost more than this.</div>
+          <div class="slider-value" id="priceDisplay" aria-live="polite">Any</div>
+          <input type="range" id="priceSlider" min="100" max="5000" step="50" value="5000" oninput="onSliderChange()">
+          <div class="slider-hints" id="priceHints"></div>
+        </div>
+        <div class="slider-row">
+          <label class="slider-label" for="powerSlider" id="powerLabel">Most power needed at once</label>
+          <div class="slider-help" id="powerHelp"></div>
+          <div class="slider-value" id="powerDisplay" aria-live="polite"></div>
+          <input type="range" id="powerSlider" min="100" max="7200" step="100" value="1800" oninput="onSliderChange()">
+          <div class="slider-hints" id="powerHints"></div>
+        </div>
+        <div class="slider-row">
+          <label class="slider-label" for="capacitySlider" id="capLabel">Minimum battery size</label>
+          <div class="slider-help" id="capHelp"></div>
+          <div class="slider-value" id="capacityDisplay" aria-live="polite">Any</div>
+          <input type="range" id="capacitySlider" min="0" max="5000" step="100" value="0" oninput="onSliderChange()">
+          <div class="slider-hints" id="capHints"></div>
+        </div>
+      </div>
+      <div class="filter-chips-row" id="chipsRow" role="group" aria-label="Must-have features"></div>
+      <div class="tune-foot"><button class="link-btn" onclick="resetAll()">Start over</button></div>
+    </details>
+  </section>
+
+  <section aria-labelledby="top5Label" id="top5Section">
+    <div class="section-head">
+      <h2 class="section-title" id="top5Label"><span class="step-num">2</span>Our top picks for you</h2>
+      <span class="section-note" id="top5Note"></span>
+    </div>
     <div class="top5-grid" id="top5Grid"></div>
   </section>
 
   <section aria-labelledby="allLabel">
-    <h2 class="section-label" id="allLabel">All results</h2>
+    <div class="section-head">
+      <h2 class="section-title" id="allLabel">Compare them all</h2>
+    </div>
     <div class="controls">
       <div class="search-wrap">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
           <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
         </svg>
         <label for="searchInput" class="sr-only">Search brand or model</label>
@@ -373,133 +481,127 @@
       </div>
       <label class="select-wrap">
         <span class="select-label">Brand</span>
-        <select id="brandFilter" onchange="renderAll()"><option value="">All brands</option></select>
+        <select id="brandFilter" onchange="renderAll()"><option value="">All</option></select>
       </label>
       <label class="select-wrap">
-        <span class="select-label">Sort</span>
-        <select id="sortCol" onchange="onSortSelect()">
-          <option value="" hidden>Custom</option>
-          <option value="score:desc">Value score</option>
-          <option value="capacity:desc">Capacity</option>
-          <option value="peak_power_w:desc">Peak output</option>
-          <option value="brand_model:asc">Name (A–Z)</option>
-        </select>
+        <span class="select-label">Sort by</span>
+        <select id="sortCol" onchange="onSortSelect()"></select>
       </label>
       <div class="result-count" id="resultCount" aria-live="polite"></div>
     </div>
 
     <div class="table-wrap">
       <table id="resultsTable">
-        <caption class="sr-only">All results, ranked</caption>
+        <caption class="sr-only">All results</caption>
         <thead><tr id="tableHead"></tr></thead>
         <tbody id="tableBody">
-          <tr><td class="status-cell" colspan="12">Loading batteries…</td></tr>
+          <tr><td class="status-cell" colspan="9">Loading batteries…</td></tr>
         </tbody>
       </table>
       <div id="emptyState" class="empty" hidden>
-        <div class="empty-title">No matches found</div>
-        <div>Try loosening your filters or clearing the search.</div>
-        <button class="link-btn" onclick="resetFilters()">Reset all filters</button>
+        <div class="empty-title">Nothing matches all of that</div>
+        <div id="emptyMsg">Try a shorter time, fewer items, or a bigger budget.</div>
+        <button class="link-btn" onclick="resetAll()">Start over</button>
       </div>
     </div>
     <p class="table-note">
-      Prices change frequently, so we don't list them here — use the <strong>Check price</strong> button to see the
-      current price and availability on Amazon.
+      Prices change often, so we don't list them here. Tap <strong>Check price</strong> to see today's price on Amazon.
     </p>
   </section>
 
-  <section class="info-section" id="methodology" aria-labelledby="methodLabel">
-    <h2 class="section-label" id="methodLabel">How the value score is calculated</h2>
-    <div class="info-card">
-      <p>
-        Most "best battery" lists quietly default to the most expensive option on the shelf. PowerRank does the
-        opposite on purpose: <strong>price is one of the inputs to the score, not an afterthought.</strong> Every
-        listed spec earns points, then a typical selling price is subtracted. A model with great specs at a high
-        price and a model with modest specs at a low price can land in exactly the same place — that's the point.
-        The score tells you where the balance falls, not just which one has the biggest number on the box.
-      </p>
-      <div class="method-grid">
-        <div class="method-card">
-          <h3>Capacity</h3>
-          <p>Weighted on a curve, not a straight line (capacity<sup>0.585</sup>) — so jumping from 500 Wh to
-          1,000 Wh is worth more to the score than jumping from 2,000 Wh to 2,500 Wh. The first bump solves real
-          problems; later bumps are diminishing returns for most people.</p>
-        </div>
-        <div class="method-card">
-          <h3>Ports & outlets</h3>
-          <p>Each AC outlet, 120V/L2 port, and USB port adds a fixed amount, reflecting day-to-day usefulness —
-          more things you can plug in at once without an adapter.</p>
-        </div>
-        <div class="method-card">
-          <h3>Peak output</h3>
-          <p>Scored relative to the "max power needed" slider, not in isolation. A unit only earns credit for
-          headroom up to what you said you need — wattage you'll never use doesn't inflate the score.</p>
-        </div>
-        <div class="method-card">
-          <h3>Feature bonuses</h3>
-          <p>Expandable capacity, companion app support, jump-starting, MagSafe, built-in cables, a display, and a
-          built-in wall plug each add a modest, fixed bonus reflecting real convenience.</p>
-        </div>
-        <div class="method-card">
-          <h3>Price</h3>
-          <p>A typical selling price we research periodically is subtracted from everything above. A positive
-          score means the spec sheet outweighs the price; negative means the price is outrunning what you get.
-          Actual prices change often, so always check the current price before buying — it may shift a
-          model's real-world value.</p>
-        </div>
-      </div>
-      <p>
-        This is one opinionated formula, not an objective truth — the exact weights are judgment calls, and
-        reasonable people could weigh capacity vs. ports vs. price differently depending on how they'll use a
-        battery. Use the filters and sort options above to see the ranking shift as your priorities change.
-        No brand pays to be listed or to change its ranking.
-      </p>
+  <section id="guide" aria-labelledby="guideLabel">
+    <div class="section-head"><h2 class="section-title" id="guideLabel">Questions people ask</h2></div>
+    <div class="panel info-card faq">
+      <details open>
+        <summary>How much battery do I need?</summary>
+        <p>The easiest way: tap the things you want to run at the top of this page, and we'll do the math for you.
+        If you just want a rough idea:</p>
+        <table class="size-table">
+          <thead><tr><th>If you want to…</th><th>Look for about</th></tr></thead>
+          <tbody>
+            <tr><td>Charge phones and run a few lights or a fan for a night</td><td>300–500 Wh</td></tr>
+            <tr><td>Keep a fridge, lights, and Wi-Fi going through a one-day outage</td><td>1,500–2,500 Wh</td></tr>
+            <tr><td>Run a CPAP machine every night while camping</td><td>500 Wh+</td></tr>
+            <tr><td>Get through a multi-day outage, or run bigger things like a space heater</td><td>3,000 Wh+</td></tr>
+          </tbody>
+        </table>
+      </details>
+      <details>
+        <summary>What do "W" and "Wh" mean?</summary>
+        <p><strong>Watts (W)</strong> are how much power something uses <em>while it's on</em> — like how fast water
+        flows from a tap. A power station has a limit on how many watts it can supply at once, so it can't run a
+        1,500 W space heater if its limit is 1,000 W.</p>
+        <p><strong>Watt-hours (Wh)</strong> are the size of the battery — like the size of the water tank. A
+        1,000 Wh battery can run a 100 W device for roughly 8–9 hours (a bit is lost along the way).</p>
+      </details>
+      <details>
+        <summary>How do I find out how many watts my own stuff uses?</summary>
+        <p>Look for a sticker or stamp on the back or bottom of the device, or on its power brick. It usually lists
+        watts (W) directly. If it only shows volts (V) and amps (A), multiply them: 120 V × 2 A = 240 W.
+        The numbers on this page are typical averages, so yours may be a little higher or lower.</p>
+      </details>
+      <details>
+        <summary>Why do some things need so much more power to start?</summary>
+        <p>Things with motors — fridges, freezers, pumps, air conditioners, power tools — briefly pull two to three
+        times their normal power when they switch on. Most power stations can handle short bursts above their limit,
+        but if you're running one of these, it's worth choosing a model with some room to spare.</p>
+      </details>
+      <details>
+        <summary>What's mAh on a power bank?</summary>
+        <p>It's another way of measuring battery size, used for small chargers. Bigger is more charges. A
+        10,000 mAh power bank charges a typical phone about twice; 20,000 mAh about four times.</p>
+      </details>
+      <details>
+        <summary>Can I bring one on a plane?</summary>
+        <p>Most power banks up to about 26,800 mAh (100 Wh) are allowed in your carry-on — never in checked bags.
+        Power stations are almost always too big to fly. Check your airline's rules before you travel.</p>
+      </details>
+      <details>
+        <summary>Does the battery type matter?</summary>
+        <p>Look for <strong>LiFePO4</strong> (sometimes written "LFP") in the description. These batteries last for
+        thousands of charges and are very safe. Older or lighter models may use other types that wear out sooner.</p>
+      </details>
     </div>
   </section>
 
-  <section class="info-section" id="guide" aria-labelledby="guideLabel">
-    <h2 class="section-label" id="guideLabel">Buying guide</h2>
-    <div class="info-card faq">
-      <details>
-        <summary>How much capacity do I need?</summary>
-        <p>Add up the watts of what you want to run and multiply by the hours you need. A rough runtime estimate is
-        <strong>capacity (Wh) × 0.85 ÷ load (W)</strong> — the 0.85 accounts for inverter losses. For example, a
-        1,000 Wh station running a 60 W fridge averages around 14 hours. For whole-day backup of several devices,
-        most people land between 1,000 and 2,000 Wh.</p>
-      </details>
-      <details>
-        <summary>What's the difference between peak output and continuous output?</summary>
-        <p>Continuous (rated) output is what the inverter can supply indefinitely. Peak or surge output is a brief
-        burst for motors and compressors that draw extra power when they start. Size the continuous rating to your
-        largest device, and make sure the surge rating covers startup spikes for things like fridges, pumps, and
-        power tools. The "max power needed" slider lets you tell the score how much output actually matters to you.</p>
-      </details>
-      <details>
-        <summary>What do L2, 120V, and USB outlets mean in the table?</summary>
-        <p><strong>120V</strong> is the standard household AC outlet. <strong>L2</strong> counts 240V-capable or
-        high-amp outlets (such as TT-30 or L14-30 connectors) used for RVs, EVs, and transfer switches — only larger
-        stations have them. <strong>USB</strong> counts USB-A and USB-C ports combined.</p>
-      </details>
-      <details>
-        <summary>Why are power banks rated in mAh instead of Wh?</summary>
-        <p>Power banks are traditionally labeled by their cell capacity in milliamp-hours at the cell's nominal
-        voltage (usually 3.6–3.85 V). To convert: <strong>Wh = mAh × voltage ÷ 1,000</strong>, so a 20,000 mAh bank
-        holds roughly 72–77 Wh. Expect to get about 60–70% of the rated mAh into your phone because of conversion
-        losses.</p>
-      </details>
-      <details>
-        <summary>Can I bring a power bank or power station on a plane?</summary>
-        <p>In the US, the FAA allows lithium batteries up to 100 Wh in carry-on bags without approval, and 100–160 Wh
-        with airline approval. Spare lithium batteries aren't allowed in checked luggage. Most power banks up to about
-        26,800 mAh fall under 100 Wh; portable power stations are almost always too large to fly. Check your airline's
-        current rules before traveling.</p>
-      </details>
-      <details>
-        <summary>Does battery chemistry matter?</summary>
-        <p>Most newer power stations use LiFePO4 (lithium iron phosphate) cells, which are typically rated for
-        3,000+ charge cycles and are more thermally stable. Older or lighter models may use NMC cells, which are
-        lighter for the same capacity but usually rated for fewer cycles. If you'll cycle the unit often, LiFePO4
-        is generally worth it.</p>
+  <section id="methodology" aria-labelledby="methodLabel">
+    <div class="section-head"><h2 class="section-title" id="methodLabel">How we decide what's a good value</h2></div>
+    <div class="panel info-card">
+      <p>We give each battery points for the things that matter: how much it holds, how many things you can plug
+      in, whether it has enough power for what you need, and handy extras like a phone app. Then we compare that to
+      what it typically costs. <strong>Batteries that give you more for your money rank higher</strong> — the most
+      expensive one isn't automatically the best.</p>
+      <p>The value rating (from "Top value" down to "Pricey for what you get") shows where each one lands compared
+      with everything else in the list. No brand pays to be listed or to change its ranking.</p>
+      <details class="formula">
+        <summary>Show the exact formula</summary>
+        <div class="method-grid">
+          <div class="method-card">
+            <h3>Capacity</h3>
+            <p>Weighted on a curve (capacity<sup>0.585</sup>), so going from 500 Wh to 1,000 Wh counts for more than
+            going from 2,000 Wh to 2,500 Wh.</p>
+          </div>
+          <div class="method-card">
+            <h3>Ports & outlets</h3>
+            <p>Each wall outlet, 240V/high-amp outlet, and USB port adds a fixed amount.</p>
+          </div>
+          <div class="method-card">
+            <h3>Power output</h3>
+            <p>Scored against the power you said you need. Extra power beyond that doesn't add to the score.</p>
+          </div>
+          <div class="method-card">
+            <h3>Extras</h3>
+            <p>Expandable capacity, app support, jump-starting, MagSafe, built-in cables, a display, and a built-in
+            wall plug each add a small fixed bonus.</p>
+          </div>
+          <div class="method-card">
+            <h3>Price</h3>
+            <p>A typical selling price we check periodically is subtracted from the total. The value rating is
+            based on where that result ranks within the category.</p>
+          </div>
+        </div>
+        <p>This is one opinionated formula, not an objective truth. Reasonable people could weigh things
+        differently, so use the filters to see how the ranking shifts.</p>
       </details>
     </div>
   </section>
@@ -510,12 +612,12 @@
     <a href="/about.html">About</a>
     <a href="/about.html#disclosure">Affiliate disclosure</a>
     <a href="/privacy.html">Privacy policy</a>
-    <a href="#methodology">Methodology</a>
+    <a href="#methodology">How we rank</a>
   </nav>
   <p id="footerDisclosure">As an Amazon Associate I earn from qualifying purchases. This doesn't affect our rankings,
   which come from the formula described above.</p>
-  <p>Value score is unitless: positive = specs outweigh price, negative = price outweighs specs. Specs come from
-  manufacturer listings and may change; confirm details on the product page before buying.</p>
+  <p>Wattages and run times are estimates based on typical devices. Specs come from manufacturer listings and may
+  change, so confirm details on the product page before buying.</p>
   <p>© <span id="year">2026</span> PowerRank</p>
 </footer>
 
@@ -567,6 +669,48 @@ const PS = { exp: 0.585, mult: 7, l2: 75, v120: 30, usb: 15, outExp: 1.58, outCa
 const PB = { exp: 0.585, mult: 0.0618, usb: 10, outExp: 1.58, outCap: 50, outDefault: 30,
              magsafe: 20, cablePerUnit: 5, display: 10, wallplug: 10 };
 
+// ── Appliance picker ──
+// Typical figures, rounded. `watts` = draw while running (what the station must supply at once);
+// `avg` = average draw over a day, accounting for things that cycle on and off (fridge
+// compressor, heater thermostat) or only run briefly (coffee maker, microwave).
+const INVERTER_EFFICIENCY = 0.85;
+const APPLIANCES = [
+  { id: 'phone',   icon: '📱', name: 'Phones & tablets',   watts: 20,   avg: 5 },
+  { id: 'lights',  icon: '💡', name: 'A few lamps (LED)',  watts: 30,   avg: 10 },
+  { id: 'wifi',    icon: '📶', name: 'Wi-Fi router',       watts: 15,   avg: 12 },
+  { id: 'laptop',  icon: '💻', name: 'Laptop',             watts: 60,   avg: 20 },
+  { id: 'tv',      icon: '📺', name: 'TV',                 watts: 100,  avg: 25 },
+  { id: 'cpap',    icon: '😴', name: 'CPAP machine',       watts: 40,   avg: 15 },
+  { id: 'fan',     icon: '🌀', name: 'Fan',                watts: 75,   avg: 40 },
+  { id: 'fridge',  icon: '🧊', name: 'Refrigerator',       watts: 200,  avg: 50 },
+  { id: 'freezer', icon: '❄️', name: 'Chest freezer',      watts: 100,  avg: 40 },
+  { id: 'coffee',  icon: '☕', name: 'Coffee maker',       watts: 1000, avg: 40 },
+  { id: 'burner',  icon: '🍳', name: 'One stove burner',   watts: 1500, avg: 120 },
+  { id: 'micro',   icon: '🍿', name: 'Microwave',          watts: 1100, avg: 50 },
+  { id: 'sump',    icon: '💧', name: 'Sump pump',          watts: 800,  avg: 100 },
+  { id: 'ac',      icon: '🏠', name: 'Window A/C',         watts: 900,  avg: 500 },
+  { id: 'heater',  icon: '🔥', name: 'Space heater',       watts: 1500, avg: 750 },
+  { id: 'tools',   icon: '🔨', name: 'Power tools',        watts: 1200, avg: 100 },
+];
+const DURATIONS = [
+  { hours: 4,  label: 'A few hours' },
+  { hours: 12, label: 'Overnight' },
+  { hours: 24, label: 'A full day' },
+  { hours: 72, label: 'Three days' },
+];
+
+// Power banks: typical battery size (Wh) and fastest useful charging speed (W) per device.
+// A bank delivers roughly 65% of its rated capacity after voltage conversion losses.
+const PB_EFFICIENCY = 0.65;
+const DEVICES = [
+  { id: 'phone',   icon: '📱', name: 'Phone',             wh: 13, watts: 15 },
+  { id: 'tablet',  icon: '📲', name: 'Tablet',            wh: 30, watts: 20 },
+  { id: 'laptop',  icon: '💻', name: 'Laptop',            wh: 55, watts: 45 },
+  { id: 'earbuds', icon: '🎧', name: 'Earbuds or watch',  wh: 2,  watts: 5 },
+  { id: 'game',    icon: '🎮', name: 'Handheld game',     wh: 16, watts: 15 },
+  { id: 'camera',  icon: '📷', name: 'Camera',            wh: 10, watts: 10 },
+];
+
 // ── UI state ──
 let maxPower    = 1800;
 let maxPrice    = 5000;
@@ -574,58 +718,58 @@ let minCapacity = 0;
 let sortKey     = 'score';
 let sortDir     = 'desc';
 let activeChips = new Set();
+let picked      = new Set();
+let hours       = 24;
+let needWatts   = 0;   // power stations: watts the picked items draw at once (hard filter)
+let avgLoad     = 0;   // power stations: average draw of the picked items, for run time
 
 // ── Tab config ──
 const TAB_CONFIG = {
   power_station: {
-    title: 'Find the <em>best value</em> portable power station',
-    sub:   'Scored by capacity, outlets, and output relative to price. Adjust filters to recalculate rankings instantly.',
+    title: 'Find the right <em>backup battery</em>, without the math',
+    sub:   'Tap what you want to keep running. We\'ll show which portable power stations can handle it, how long they\'ll last, and which give you the most for your money.',
+    pickerTitle: 'What do you want to keep running?',
+    pickerSub: 'Tap everything you might use at the same time. The number is how much power each one typically uses.',
     noun: 'power stations',
     powerDefault: 1800, powerMin: 100, powerMax: 7200, powerStep: 100,
+    powerHelp: 'Set automatically when you pick items above.',
     priceMin: 100, priceMax: 5000, priceStep: 50,
-    capMin: 0, capMax: 4000, capStep: 100, capUnit: 'Wh',
+    capMin: 0, capMax: 5000, capStep: 100, capUnit: 'Wh',
+    capHelp: 'Bigger batteries run your things for longer.',
     chips: [
-      { key: 'expandable',   label: 'Expandable' },
-      { key: 'app_support',  label: 'App Support' },
-      { key: 'jump_starter', label: 'Jump Starter' },
+      { key: 'expandable',   label: 'Can add extra batteries' },
+      { key: 'app_support',  label: 'Phone app' },
+      { key: 'jump_starter', label: 'Can jump-start a car' },
     ],
-    headers: [
-      { label: '#', cls: 'rank-num' },
-      { label: 'Battery', sort: 'brand_model' },
-      { label: 'Wh', sort: 'capacity', num: true, title: 'Capacity in watt-hours' },
-      { label: 'L2', num: true, title: '240V / high-amp outlets' },
-      { label: '120V', num: true, title: 'Standard AC outlets' },
-      { label: 'USB', num: true, title: 'USB-A + USB-C ports' },
-      { label: 'Peak W', sort: 'peak_power_w', num: true, title: 'Peak (surge) output in watts' },
-      { label: 'Features' },
-      { label: 'Score', sort: 'score' },
-      { label: 'Notes' },
-      { label: 'Price' },
+    sorts: [
+      { value: 'score:desc',        label: 'Best value' },
+      { value: 'capacity:desc',     label: 'Biggest battery' },
+      { value: 'peak_power_w:desc', label: 'Most power' },
+      { value: 'brand_model:asc',   label: 'Name (A–Z)' },
     ],
   },
   power_bank: {
-    title: 'Find the <em>best value</em> power bank',
-    sub:   'Compact batteries scored by capacity, ports, and charging speed relative to price. Adjust filters to recalculate.',
+    title: 'Find the right <em>portable charger</em>, without the math',
+    sub:   'Tap what you want to charge. We\'ll show how many charges each power bank gives you, and which give you the most for your money.',
+    pickerTitle: 'What do you want to charge?',
+    pickerSub: 'Pick one or more. We\'ll show roughly how many full charges each power bank gives.',
     noun: 'power banks',
     powerDefault: 30, powerMin: 5, powerMax: 150, powerStep: 5,
+    powerHelp: 'Faster chargers fill your devices quicker. Phones need about 15 W, laptops 45 W or more.',
     priceMin: 10, priceMax: 200, priceStep: 5,
     capMin: 1000, capMax: 30000, capStep: 1000, capUnit: 'mAh',
+    capHelp: '10,000 mAh charges a typical phone about twice.',
     chips: [
-      { key: 'has_magsafe',       label: 'MagSafe' },
-      { key: 'has_builtin_cable', label: 'Built-in Cable' },
-      { key: 'has_display',       label: 'Display' },
-      { key: 'has_wall_plug',     label: 'Wall Plug' },
+      { key: 'has_magsafe',       label: 'Sticks to iPhone (MagSafe)' },
+      { key: 'has_builtin_cable', label: 'Built-in cable' },
+      { key: 'has_display',       label: 'Battery display' },
+      { key: 'has_wall_plug',     label: 'Folding wall plug' },
     ],
-    headers: [
-      { label: '#', cls: 'rank-num' },
-      { label: 'Battery', sort: 'brand_model' },
-      { label: 'mAh', sort: 'capacity', num: true, title: 'Capacity in milliamp-hours' },
-      { label: 'USB', num: true, title: 'USB-A + USB-C ports' },
-      { label: 'Peak W', sort: 'peak_power_w', num: true, title: 'Max charging output in watts' },
-      { label: 'Features' },
-      { label: 'Score', sort: 'score' },
-      { label: 'Notes' },
-      { label: 'Price' },
+    sorts: [
+      { value: 'score:desc',        label: 'Best value' },
+      { value: 'capacity:desc',     label: 'Most charges' },
+      { value: 'peak_power_w:desc', label: 'Fastest charging' },
+      { value: 'brand_model:asc',   label: 'Name (A–Z)' },
     ],
   },
 };
@@ -651,7 +795,7 @@ async function loadData() {
 function setTableStatus(msg, retry = false) {
   document.getElementById('emptyState').hidden = true;
   document.getElementById('tableBody').innerHTML =
-    `<tr><td class="status-cell" colspan="12">${esc(msg)}${retry ? '<br><button class="btn" onclick="loadData()">Retry</button>' : ''}</td></tr>`;
+    `<tr><td class="status-cell" colspan="9">${esc(msg)}${retry ? '<br><button class="btn" onclick="loadData()">Try again</button>' : ''}</td></tr>`;
 }
 
 // ── Score functions ──
@@ -684,6 +828,55 @@ function calcScore(b, pw) {
   return activeTab === 'power_station' ? calcPS(b, pw) : calcPB(b, pw);
 }
 
+// ── Value rating ──
+// The raw score is dollar-denominated and was easily misread as a price, so we show where each
+// model ranks within its category instead: a word plus a 5-bar meter.
+const VALUE_LEVELS = [
+  { min: 0.90, level: 5, label: 'Top value' },
+  { min: 0.65, level: 4, label: 'Great value' },
+  { min: 0.35, level: 3, label: 'Good value' },
+  { min: 0.15, level: 2, label: 'Fair value' },
+  { min: 0,    level: 1, label: 'Pricey for what you get' },
+];
+function valueLevels(items) {
+  const sorted = [...items].sort((a, b) => a.score - b.score);
+  const n = sorted.length;
+  const out = new Map();
+  sorted.forEach((b, i) => {
+    // Ties share the highest percentile of their group.
+    let j = i; while (j + 1 < n && sorted[j + 1].score === b.score) j++;
+    const pct = n > 1 ? j / (n - 1) : 1;
+    out.set(b.id, VALUE_LEVELS.find(v => pct >= v.min));
+  });
+  return out;
+}
+function valueHtml(v) {
+  return `<span class="value v${v.level}"><span class="value-meter" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>` +
+         `<span class="value-label">${v.label}</span></span>`;
+}
+
+// ── Plain-language helpers ──
+function fmtHours(h) {
+  if (h < 1) return 'under an hour';
+  if (h < 48) { const r = Math.round(h); return `about ${r} hour${r === 1 ? '' : 's'}`; }
+  const d = Math.round(h / 24 * 2) / 2;
+  return `about ${d} days`;
+}
+function bankWh(b) { return (b.capacity_mah || 0) * 3.7 / 1000; }
+function fmtCharges(n) {
+  if (n < 0.95) return `${Math.round(n * 100)}% of a charge`;
+  const r = n < 3 ? Math.round(n * 2) / 2 : Math.round(n);
+  return `${r} charge${r === 1 ? '' : 's'}`;
+}
+function pickedDevices() {
+  const list = DEVICES.filter(d => picked.has(d.id));
+  return list.length ? list : [DEVICES[0]];   // phone as the friendly default
+}
+function chargesLine(b, devices) {
+  return devices.map(d => `${d.name.toLowerCase()}: <b>${fmtCharges(bankWh(b) * PB_EFFICIENCY / d.wh)}</b>`).join(' · ');
+}
+function runtimeHours(b) { return avgLoad ? b.capacity_wh * INVERTER_EFFICIENCY / avgLoad : null; }
+
 // ── Tab switch ──
 function switchTab(tab) {
   activeTab = tab;
@@ -692,14 +885,15 @@ function switchTab(tab) {
   history.replaceState(null, '', tab === 'power_bank' ? '#power-banks' : location.pathname);
 
   const cfg = TAB_CONFIG[tab];
+  const isPB = tab === 'power_bank';
   document.getElementById('heroTitle').innerHTML = cfg.title;
   document.getElementById('heroSub').textContent = cfg.sub;
-  document.getElementById('capHelp').textContent = tab === 'power_bank'
-    ? 'Rated cell capacity. 10,000 mAh ≈ 2 phone charges.'
-    : 'Total stored energy. More capacity = longer runtime.';
-  document.getElementById('powerHelp').textContent = tab === 'power_bank'
-    ? 'The fastest charging you need (e.g. 20 W phone, 65–100 W laptop).'
-    : 'Your largest device\'s wattage. Output beyond this doesn\'t add to the score.';
+  document.getElementById('pickerTitleText').textContent = cfg.pickerTitle;
+  document.getElementById('pickerSub').textContent = cfg.pickerSub;
+  document.getElementById('capHelp').textContent = cfg.capHelp;
+  document.getElementById('powerHelp').textContent = cfg.powerHelp;
+  document.getElementById('powerLabel').textContent = isPB ? 'Charging speed needed' : 'Most power needed at once';
+  document.getElementById('durationRow').hidden = isPB;
 
   const ps = document.getElementById('powerSlider');
   ps.min = cfg.powerMin; ps.max = cfg.powerMax; ps.step = cfg.powerStep;
@@ -720,26 +914,114 @@ function switchTab(tab) {
       `<button type="button" class="chip" aria-pressed="false" data-key="${c.key}" onclick="toggleChip(this)">${c.label}</button>`
     ).join('');
 
+  document.getElementById('sortCol').innerHTML =
+    '<option value="" hidden>Custom</option>' + cfg.sorts.map(s => `<option value="${s.value}">${s.label}</option>`).join('');
+
+  const items = isPB ? DEVICES : APPLIANCES;
+  document.getElementById('applianceGrid').innerHTML = items.map(a => `
+    <button type="button" class="appliance" aria-pressed="false" data-id="${a.id}" onclick="togglePick(this)">
+      <span class="appliance-icon" aria-hidden="true">${a.icon}</span>
+      <span><span class="appliance-name">${a.name}</span><span class="appliance-watts">${a.watts.toLocaleString()} W</span></span>
+      <span class="appliance-check" aria-hidden="true">✓</span>
+    </button>`).join('');
+  document.getElementById('durationSeg').innerHTML = DURATIONS.map(d =>
+    `<button type="button" aria-pressed="false" data-hours="${d.hours}" onclick="setHours(${d.hours})">${d.label}</button>`).join('');
+
   const tabData = ALL_DATA.filter(b => b.category === tab);
   const brands  = [...new Set(tabData.map(b => b.brand))].sort((a, b) => a.localeCompare(b));
   document.getElementById('brandFilter').innerHTML =
-    '<option value="">All brands</option>' + brands.map(br => `<option value="${esc(br)}">${esc(br)}</option>`).join('');
+    '<option value="">All</option>' + brands.map(br => `<option value="${esc(br)}">${esc(br)}</option>`).join('');
 
   document.getElementById('headerMeta').textContent = `${tabData.length} ${cfg.noun} compared`;
 
-  resetFilters();
+  resetAll();
 }
 
-function resetFilters() {
+function resetAll() {
   const cfg = TAB_CONFIG[activeTab];
-  document.getElementById('powerSlider').value = cfg.powerDefault;
+  picked = new Set();
+  hours = 24;
+  document.querySelectorAll('.appliance').forEach(a => a.setAttribute('aria-pressed', 'false'));
   document.getElementById('priceSlider').value = cfg.priceMax;
-  document.getElementById('capacitySlider').value = cfg.capMin;
   document.getElementById('searchInput').value = '';
   document.getElementById('brandFilter').value = '';
   activeChips = new Set();
   document.querySelectorAll('.chip').forEach(c => c.setAttribute('aria-pressed', 'false'));
   sortKey = 'score'; sortDir = 'desc';
+  applyNeeds();
+}
+
+// ── Picker → filters ──
+function togglePick(el) {
+  const id = el.dataset.id;
+  picked.has(id) ? picked.delete(id) : picked.add(id);
+  el.setAttribute('aria-pressed', String(picked.has(id)));
+  applyNeeds();
+}
+
+function setHours(h) { hours = h; applyNeeds(); }
+
+// Translate the picked items into slider values, then re-render. The sliders stay editable
+// under "Fine-tune" for anyone who knows their numbers.
+function applyNeeds() {
+  const cfg = TAB_CONFIG[activeTab];
+  const box = document.getElementById('needSummary');
+  const powerEl = document.getElementById('powerSlider');
+  const capEl = document.getElementById('capacitySlider');
+  document.querySelectorAll('#durationSeg button').forEach(b =>
+    b.setAttribute('aria-pressed', String(+b.dataset.hours === hours)));
+  box.classList.remove('warn');
+
+  if (activeTab === 'power_bank') {
+    avgLoad = 0;
+    const devs = DEVICES.filter(d => picked.has(d.id));
+    needWatts = devs.length ? Math.max(...devs.map(d => d.watts)) : 0;
+    capEl.value = cfg.capMin;
+    if (!devs.length) {
+      powerEl.value = cfg.powerDefault;
+      box.hidden = true;
+    } else {
+      powerEl.value = Math.max(cfg.powerMin, Math.ceil(needWatts / cfg.powerStep) * cfg.powerStep);
+      box.hidden = false;
+      box.innerHTML = `<p>We're only showing power banks strong enough to charge ${devs.length > 1 ? 'these' : 'this'}
+        properly (<strong>${needWatts} W</strong> or more), and roughly how many full charges each one gives.</p>`;
+    }
+    onSliderChange();
+    return;
+  }
+
+  const items = APPLIANCES.filter(a => picked.has(a.id));
+  if (!items.length) {
+    needWatts = 0; avgLoad = 0;
+    powerEl.value = cfg.powerDefault;
+    capEl.value = cfg.capMin;
+    box.hidden = true;
+    onSliderChange();
+    return;
+  }
+
+  needWatts = items.reduce((s, a) => s + a.watts, 0);
+  avgLoad   = items.reduce((s, a) => s + a.avg, 0);
+  const needWh  = Math.ceil(avgLoad * hours / INVERTER_EFFICIENCY / 100) * 100;
+  const biggest = Math.max(...ALL_DATA.filter(b => b.category === 'power_station').map(b => b.capacity_wh));
+  const durLabel = DURATIONS.find(d => d.hours === hours).label.toLowerCase();
+  const tooBig = needWh > biggest;
+
+  powerEl.value = Math.min(cfg.powerMax, Math.max(cfg.powerMin, Math.ceil(needWatts / 100) * 100));
+  // Too big for any one unit: narrow to the largest tier so the picks are the longest-lasting.
+  capEl.value = tooBig ? Math.floor(biggest * 0.6 / 100) * 100 : Math.min(cfg.capMax, needWh);
+
+  box.hidden = false;
+  box.classList.toggle('warn', tooBig);
+  box.innerHTML = `
+    <div class="need-figs">
+      <div class="need-fig"><b>${needWatts.toLocaleString()} W</b><span>power to run them all at once</span></div>
+      <div class="need-fig"><b>${needWh.toLocaleString()} Wh</b><span>battery size for ${esc(durLabel)}</span></div>
+    </div>
+    <p>${tooBig
+      ? `That's more than any single battery here can hold. We're showing the biggest ones, with how long each
+         would actually last. Try a shorter time or fewer items.`
+      : `We're only showing batteries that can do this, and how long each one would last.`}</p>`;
   onSliderChange();
 }
 
@@ -754,7 +1036,7 @@ function onSliderChange() {
   document.getElementById('priceDisplay').textContent =
     maxPrice >= cfg.priceMax ? 'Any' : `Up to $${maxPrice.toLocaleString()}`;
   document.getElementById('capacityDisplay').textContent =
-    minCapacity <= cfg.capMin ? 'Any' : `${minCapacity.toLocaleString()} ${cfg.capUnit}+`;
+    minCapacity <= cfg.capMin ? 'Any' : `${minCapacity.toLocaleString()} ${cfg.capUnit} or more`;
 
   renderAll();
 }
@@ -783,16 +1065,39 @@ function onSortSelect() {
   renderAll();
 }
 
+function tableHeaders() {
+  const isPB = activeTab === 'power_bank';
+  if (isPB) return [
+    { label: '#', cls: 'rank-num' },
+    { label: 'Power bank', sort: 'brand_model' },
+    { label: 'Charges', sort: 'capacity', num: true, title: 'Approximate full charges of the device(s) you picked' },
+    { label: 'Charging speed', sort: 'peak_power_w', num: true, title: 'Fastest output in watts' },
+    { label: 'Ports', num: true },
+    { label: 'Value', sort: 'score' },
+    { label: '' },
+  ];
+  return [
+    { label: '#', cls: 'rank-num' },
+    { label: 'Power station', sort: 'brand_model' },
+    avgLoad
+      ? { label: 'Runs your stuff', sort: 'capacity', num: true, title: 'Estimated run time for the items you picked' }
+      : { label: 'Battery size', sort: 'capacity', num: true, title: 'Capacity in watt-hours' },
+    { label: 'Max power', sort: 'peak_power_w', num: true, title: 'Most watts it can supply at once' },
+    { label: 'Outlets', num: true },
+    { label: 'Value', sort: 'score' },
+    { label: '' },
+  ];
+}
+
 function syncSortUI() {
   const sel = document.getElementById('sortCol');
   const val = `${sortKey}:${sortDir}`;
   sel.value = [...sel.options].some(o => o.value === val) ? val : '';
 
-  const cfg = TAB_CONFIG[activeTab];
-  document.getElementById('tableHead').innerHTML = cfg.headers.map(h => {
+  document.getElementById('tableHead').innerHTML = tableHeaders().map(h => {
     const cls   = [h.num ? 'td-num' : '', h.cls || ''].filter(Boolean).join(' ');
     const title = h.title ? ` title="${h.title}"` : '';
-    if (!h.sort) return `<th scope="col"${cls ? ` class="${cls}"` : ''}${title}><span>${h.label}</span></th>`;
+    if (!h.sort) return `<th scope="col"${cls ? ` class="${cls}"` : ''}${title}><span>${h.label || '<span class="sr-only">Link</span>'}</span></th>`;
     const active = h.sort === sortKey;
     const aria   = active ? ` aria-sort="${sortDir === 'asc' ? 'ascending' : 'descending'}"` : '';
     const arrow  = active ? (sortDir === 'asc' ? '↑' : '↓') : '↕';
@@ -803,27 +1108,37 @@ function syncSortUI() {
   document.getElementById('resultsTable').classList.toggle('ranked', sortKey === 'score' && sortDir === 'desc');
 }
 
+let VALUE_BY_ID = new Map();
+
 function getFiltered() {
   const search = document.getElementById('searchInput').value.trim().toLowerCase();
   const brand  = document.getElementById('brandFilter').value;
   const isPB   = activeTab === 'power_bank';
   const cfg    = TAB_CONFIG[activeTab];
 
-  return ALL_DATA
+  const scored = ALL_DATA
     .filter(b => b.category === activeTab)
     .map(b => ({
       ...b,
       score: calcScore(b, maxPower),
       capacity: isPB ? (b.capacity_mah || 0) : b.capacity_wh,
-    }))
-    .filter(b => {
-      if (search && !`${b.brand} ${b.model}`.toLowerCase().includes(search)) return false;
-      if (brand && b.brand !== brand) return false;
-      if (maxPrice < cfg.priceMax && b.price > maxPrice) return false;
-      if (b.capacity < minCapacity) return false;
-      for (const key of activeChips) { if (!b[key]) return false; }
-      return true;
-    });
+    }));
+  const fits = scored.filter(b => {
+    if (maxPrice < cfg.priceMax && b.price > maxPrice) return false;
+    if (b.capacity < minCapacity) return false;
+    if (needWatts && b.peak_power_w < needWatts) return false;
+    for (const key of activeChips) { if (!b[key]) return false; }
+    return true;
+  });
+  // Ratings compare the batteries that can do the job you described. Search and brand are
+  // left out so looking up one model doesn't automatically make it "Top value".
+  VALUE_BY_ID = valueLevels(fits);
+
+  return fits.filter(b => {
+    if (search && !`${b.brand} ${b.model}`.toLowerCase().includes(search)) return false;
+    if (brand && b.brand !== brand) return false;
+    return true;
+  });
 }
 
 function sortData(data) {
@@ -837,40 +1152,62 @@ function sortData(data) {
 
 const RANK_CLASSES = ['rank-1','rank-2','rank-3','rank-4','rank-5'];
 
-function fmtScore(s) { return `${s > 0 ? '+' : ''}${s.toLocaleString()}`; }
+function outletsText(b) {
+  const wall = b.outlets_120v + b.l2_outlets;
+  return `${wall} wall · ${b.usb_outlets} USB`;
+}
+function extrasText(b) {
+  const isPB = activeTab === 'power_bank';
+  return (isPB
+    ? [b.has_magsafe && 'MagSafe', b.builtin_cables > 0 && `${b.builtin_cables} built-in cable${b.builtin_cables > 1 ? 's' : ''}`,
+       b.has_display && 'display', b.has_wall_plug && 'wall plug']
+    : [b.expandable && 'expandable', b.app_support && 'phone app', b.jump_starter && 'jump-starts cars']
+  ).filter(Boolean).join(' · ');
+}
 
 function renderTop5(data) {
   const top5 = [...data].sort((a, b) => b.score - a.score).slice(0, 5);
   const grid = document.getElementById('top5Grid');
-  document.getElementById('top5Label').parentElement.hidden = !top5.length;
+  document.getElementById('top5Section').hidden = !top5.length;
   const isPB = activeTab === 'power_bank';
+  document.getElementById('top5Note').textContent = top5.length
+    ? 'The most for your money, based on what you picked' : '';
 
   grid.innerHTML = top5.map((b, i) => {
-    const scoreClass = b.score >= 0 ? 'score-pos' : 'score-neg';
-    const cap = isPB ? `${(b.capacity_mah || 0).toLocaleString()} mAh` : `${b.capacity_wh.toLocaleString()} Wh`;
-    const ports = isPB
-      ? `${b.usb_outlets} USB`
-      : `${b.outlets_120v + b.l2_outlets} AC · ${b.usb_outlets} USB`;
+    let highlight, stats;
+    if (isPB) {
+      highlight = `Charges your ${chargesLine(b, pickedDevices())}`;
+      stats = [
+        ['Size', `${(b.capacity_mah || 0).toLocaleString()} mAh`],
+        ['Charging speed', `${b.peak_power_w} W`],
+        ['Ports', `${b.usb_outlets} USB`],
+      ];
+    } else {
+      const rt = runtimeHours(b);
+      highlight = rt
+        ? `Runs your stuff for <b>${fmtHours(rt)}</b>`
+        : `Runs a fridge for <b>${fmtHours(b.capacity_wh * INVERTER_EFFICIENCY / 50)}</b>`;
+      stats = [
+        ['Battery size', `${b.capacity_wh.toLocaleString()} Wh`],
+        ['Max power', `${b.peak_power_w.toLocaleString()} W`],
+        ['Outlets', outletsText(b)],
+      ];
+    }
     return `<article class="top5-card ${RANK_CLASSES[i]}">
-      <div class="top5-rank">#${i + 1}</div>
+      <div class="top5-rank">#${i + 1} pick</div>
       <div class="top5-brand">${esc(b.brand)}</div>
       <h3 class="top5-model">${esc(b.model)}</h3>
+      <div class="top5-highlight">${highlight}</div>
       <div class="top5-stats">
-        <div class="top5-stat"><span class="top5-stat-label">Capacity</span><span class="top5-stat-val">${cap}</span></div>
-        <div class="top5-stat"><span class="top5-stat-label">Peak output</span><span class="top5-stat-val">${b.peak_power_w.toLocaleString()} W</span></div>
-        <div class="top5-stat"><span class="top5-stat-label">Ports</span><span class="top5-stat-val">${ports}</span></div>
+        ${stats.map(([l, v]) => `<div class="top5-stat"><span class="top5-stat-label">${l}</span><span class="top5-stat-val">${v}</span></div>`).join('')}
       </div>
-      <div class="top5-score">
-        <span class="top5-score-label">Value score</span>
-        <span class="top5-score-val ${scoreClass}">${fmtScore(b.score)}</span>
-      </div>
+      <div class="top5-value">${valueHtml(VALUE_BY_ID.get(b.id))}</div>
       <div class="top5-cta">${buyButton(b)}</div>
     </article>`;
   }).join('');
 }
 
 function renderTable(data) {
-  const maxAbs = Math.max(...data.map(b => Math.abs(b.score)), 1);
   const tbody  = document.getElementById('tableBody');
   const empty  = document.getElementById('emptyState');
   const isPB   = activeTab === 'power_bank';
@@ -880,49 +1217,37 @@ function renderTable(data) {
 
   if (!data.length) { tbody.innerHTML = ''; empty.hidden = false; return; }
   empty.hidden = true;
+  const devices = pickedDevices();
 
   tbody.innerHTML = data.map((b, i) => {
-    const scoreClass = b.score > 0 ? 'score-pos' : b.score < 0 ? 'score-neg' : 'score-zero';
-    const barClass   = b.score >= 0 ? 'fill-pos' : 'fill-neg';
-    const barWidth   = Math.round(Math.abs(b.score) / maxAbs * 100);
+    const extras = extrasText(b);
+    const notes = [extras, b.notes].filter(Boolean).map(esc).join(' · ');
 
-    const badges = (isPB
-      ? [
-          b.has_magsafe         && '<span class="badge badge-purple">MagSafe</span>',
-          b.builtin_cables > 0  && `<span class="badge badge-green">${b.builtin_cables} cable${b.builtin_cables > 1 ? 's' : ''}</span>`,
-          b.has_display         && '<span class="badge badge-amber">display</span>',
-          b.has_wall_plug       && '<span class="badge badge-red">wall plug</span>',
-        ]
-      : [
-          b.expandable   && '<span class="badge badge-purple" title="Capacity can be expanded with add-on batteries">expandable</span>',
-          b.app_support  && '<span class="badge badge-green" title="Companion phone app">app</span>',
-          b.jump_starter && '<span class="badge badge-amber" title="Can jump-start a vehicle">jump start</span>',
-        ]).filter(Boolean).join('');
-
-    const notes = b.notes ? `<span title="${esc(b.notes)}">${esc(b.notes)}</span>` : '<span class="dash">—</span>';
-
-    const cells = isPB
-      ? `<td class="td-num">${(b.capacity_mah || 0).toLocaleString()}</td>
-         <td class="td-num">${b.usb_outlets}</td>`
-      : `<td class="td-num">${b.capacity_wh.toLocaleString()}</td>
-         <td class="td-num">${b.l2_outlets}</td>
-         <td class="td-num">${b.outlets_120v}</td>
-         <td class="td-num">${b.usb_outlets}</td>`;
+    let cells;
+    if (isPB) {
+      const first = devices[0];
+      cells = `
+        <td class="td-num" data-label="${esc(first.name)} charges"><span class="td-runtime">${fmtCharges(bankWh(b) * PB_EFFICIENCY / first.wh)}</span>
+          <span class="td-sub">${(b.capacity_mah || 0).toLocaleString()} mAh</span></td>
+        <td class="td-num" data-label="Charging speed">${b.peak_power_w} W</td>
+        <td class="td-num" data-label="Ports">${b.usb_outlets} USB</td>`;
+    } else {
+      const rt = runtimeHours(b);
+      cells = `
+        <td class="td-num" data-label="${rt ? 'Runs your stuff' : 'Battery size'}">${rt
+          ? `<span class="td-runtime">${fmtHours(rt)}</span><span class="td-sub">${b.capacity_wh.toLocaleString()} Wh</span>`
+          : `${b.capacity_wh.toLocaleString()} Wh`}</td>
+        <td class="td-num" data-label="Max power">${b.peak_power_w.toLocaleString()} W</td>
+        <td class="td-num" data-label="Outlets" title="${b.outlets_120v} standard + ${b.l2_outlets} high-power outlets">${outletsText(b)}</td>`;
+    }
 
     return `<tr>
-      <td class="rank-num">${i + 1}</td>
-      <td><div class="td-model">${esc(b.model)}</div><div class="td-brand">${esc(b.brand)}</div></td>
+      <td class="rank-num">#${i + 1}</td>
+      <td class="cell-model"><div class="td-model">${esc(b.model)}</div><div class="td-brand">${esc(b.brand)}</div>
+        ${notes ? `<div class="td-extras">${notes}</div>` : ''}</td>
       ${cells}
-      <td class="td-num">${b.peak_power_w.toLocaleString()}</td>
-      <td><div class="badge-row">${badges || '<span class="dash">—</span>'}</div></td>
-      <td>
-        <div class="score-bar-wrap">
-          <div class="score-bar" aria-hidden="true"><div class="score-bar-fill ${barClass}" style="width:${barWidth}%"></div></div>
-          <span class="td-score ${scoreClass}">${fmtScore(b.score)}</span>
-        </div>
-      </td>
-      <td class="notes-cell">${notes}</td>
-      <td>${buyButton(b, 'Check price')}</td>
+      <td class="cell-value" data-label="Value">${valueHtml(VALUE_BY_ID.get(b.id))}</td>
+      <td class="cell-buy">${buyButton(b, 'Check price')}</td>
     </tr>`;
   }).join('');
 }
