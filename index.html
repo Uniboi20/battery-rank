@@ -719,7 +719,7 @@ let sortKey     = 'score';
 let sortDir     = 'desc';
 let activeChips = new Set();
 let picked      = new Set();
-let hours       = 24;
+let hours       = 4;
 let needWatts   = 0;   // power stations: watts the picked items draw at once (hard filter)
 let avgLoad     = 0;   // power stations: average draw of the picked items, for run time
 
@@ -940,7 +940,7 @@ function switchTab(tab) {
 function resetAll() {
   const cfg = TAB_CONFIG[activeTab];
   picked = new Set();
-  hours = 24;
+  hours = 4;
   document.querySelectorAll('.appliance').forEach(a => a.setAttribute('aria-pressed', 'false'));
   document.getElementById('priceSlider').value = cfg.priceMax;
   document.getElementById('searchInput').value = '';
