@@ -340,6 +340,12 @@
   .empty-title { font-weight:700; color:var(--text); font-size:1.1rem; margin-bottom:0.25rem; }
   .empty .link-btn { margin-top:0.75rem; }
   .table-note { font-size:0.9rem; color:var(--sub); margin-top:0.85rem; }
+  .show-more { margin-top:0.85rem; text-align:center; }
+  .show-more button {
+    background:var(--surface); border:1.5px solid var(--border); color:var(--text); border-radius:var(--radius);
+    padding:0.6rem 1.4rem; font-size:0.95rem; font-weight:600; font-family:inherit; cursor:pointer; min-height:44px;
+  }
+  .show-more button:hover { border-color:var(--border-strong); }
 
   /* ── Info sections ── */
   .info-card p, .info-card li { color:var(--sub); font-size:1rem; line-height:1.7; max-width:75ch; }
@@ -385,7 +391,7 @@
     #resultsTable, #resultsTable tbody { display:block; }
     #resultsTable tbody { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:0.75rem; }
     #resultsTable tbody tr {
-      display:grid; grid-template-columns:1fr 1fr; gap:0.65rem 1rem; align-content:start;
+      display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:0.6rem 1rem; align-content:start;
       background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); padding:1rem;
     }
     #resultsTable tbody tr:hover td { background:none; }
@@ -394,9 +400,12 @@
       content:attr(data-label); display:block; font-size:0.8125rem; color:var(--sub); font-weight:500;
     }
     #resultsTable td.rank-num { width:auto; text-align:left; font-size:0.875rem; margin-bottom:-0.4rem; }
-    #resultsTable td.rank-num, #resultsTable td.cell-model, #resultsTable td.cell-value,
-    #resultsTable td.cell-buy, #resultsTable td.status-cell { grid-column:1 / -1; }
-    #resultsTable td.cell-buy { margin-top:auto; }
+    #resultsTable td.rank-num, #resultsTable td.cell-model, #resultsTable td.status-cell { grid-column:1 / -1; }
+    /* The value meter sits beside Outlets and speaks for itself, so no label. */
+    #resultsTable td.cell-value { align-self:end; }
+    #resultsTable td.cell-value::before { display:none; }
+    #resultsTable td.cell-value .value { white-space:normal; }
+    #resultsTable td.cell-buy { grid-column:1 / -1; }
     #resultsTable td.cell-buy .buy-btn { width:100%; justify-content:center; }
     #resultsTable td.status-cell { text-align:center; padding:1rem; }
   }
@@ -414,8 +423,16 @@
     .select-wrap { flex:1; }
     .select-wrap select { flex:1; min-width:0; }
     .result-count { margin-left:0; flex-basis:100%; }
-    .top5-grid { grid-template-columns:1fr; }
-    .tier-grid { grid-template-columns:1fr; }
+    /* Top picks become a swipeable row, with the next card peeking in from the right. */
+    .top5-grid { display:flex; overflow-x:auto; scroll-snap-type:x mandatory; gap:0.75rem;
+                 margin:0 -1rem; padding:0 1rem 0.5rem; scroll-padding:0 1rem; scrollbar-width:none; }
+    .top5-grid::-webkit-scrollbar { display:none; }
+    .top5-card { flex:0 0 82%; scroll-snap-align:start; }
+    .top5-empty { flex:1 0 100%; }
+    /* One compact line per tier: name on the left, price on the right. */
+    .tier-grid { grid-template-columns:1fr; gap:0.45rem; }
+    .tier { flex-direction:row; justify-content:space-between; align-items:center; padding:0.65rem 0.9rem; }
+    .tier-desc { display:none; }
 
     .need-fig b { font-size:1.25rem; }
   }
@@ -437,7 +454,7 @@
      Rewritten by applyDisclosure() if AFFILIATE_TAG is empty so the site never claims a
      relationship it doesn't have. -->
 <div class="disclosure-bar" id="disclosureBar">
-  PowerRank is reader-supported. As an Amazon Associate I earn from qualifying purchases.
+  As an Amazon Associate I earn from qualifying purchases.
   <a href="/about.html#disclosure">Learn more</a>
 </div>
 
@@ -484,7 +501,6 @@
 
   <section class="panel budget-panel" aria-labelledby="budgetLabel">
     <h2 class="step-title" id="budgetLabel"><span class="step-num">2</span>What's your budget?</h2>
-    <p class="step-sub">Based on typical prices. Tap <strong>Check price</strong> on any pick to see today's price on Amazon.</p>
     <div class="tier-grid" role="group" aria-labelledby="budgetLabel" id="budgetSeg"></div>
     <details class="tune price-tune" id="priceTune">
       <summary>Or set your own price limit</summary>
@@ -501,7 +517,6 @@
   <section aria-labelledby="top5Label" id="top5Section">
     <div class="section-head">
       <h2 class="section-title" id="top5Label"><span class="step-num">3</span>Our top picks for you</h2>
-      <span class="section-note" id="top5Note"></span>
     </div>
     <div class="top5-grid" id="top5Grid"></div>
   </section>
@@ -543,15 +558,14 @@
         <button class="link-btn" onclick="resetAll()">Start over</button>
       </div>
     </div>
-    <p class="table-note">
-      Prices change often, so we don't list them here. Tap <strong>Check price</strong> to see today's price on Amazon.
-    </p>
+    <div class="show-more" id="showMore" hidden><button type="button" onclick="showAllRows = true; renderAll()"></button></div>
+    <p class="table-note">Prices change often. Tap <strong>Check price</strong> for today's price on Amazon.</p>
   </section>
 
   <section id="guide" aria-labelledby="guideLabel">
     <div class="section-head"><h2 class="section-title" id="guideLabel">Questions people ask</h2></div>
     <div class="panel info-card faq">
-      <details open>
+      <details>
         <summary>How much battery do I need?</summary>
         <p>The easiest way: tap the things you want to run at the top of this page, and we'll do the math for you.
         If you just want a rough idea:</p>
@@ -606,12 +620,8 @@
   <section id="methodology" aria-labelledby="methodLabel">
     <div class="section-head"><h2 class="section-title" id="methodLabel">How we decide what's a good value</h2></div>
     <div class="panel info-card">
-      <p>We give each battery points for the things that matter: how much it holds, how many things you can plug
-      in, whether it has enough power for what you need, and handy extras like a phone app. Then we compare that to
-      what it typically costs. <strong>Batteries that give you more for your money rank higher</strong> — the most
-      expensive one isn't automatically the best.</p>
-      <p>The value rating (from "Top value" down to "Pricey for what you get") shows where each one lands compared
-      with everything else in the list. No brand pays to be listed or to change its ranking.</p>
+      <p>We score each battery on size, outlets, power, and extras, then compare that to its typical price.
+      <strong>More for your money ranks higher.</strong> No brand pays to be listed or ranked.</p>
       <details class="formula">
         <summary>Show the exact formula</summary>
         <div class="method-grid">
@@ -764,17 +774,17 @@ let avgLoad     = 0;   // power stations: average draw of the picked items, for 
 const TAB_CONFIG = {
   power_station: {
     title: 'Find the right <em>backup battery</em>, without the math',
-    sub:   'Tap what you want to keep running. We\'ll show which portable power stations can handle it, how long they\'ll last, and which give you the most for your money.',
+    sub:   'Pick what you need to power. We\'ll find the best value for you.',
     pickerTitle: 'What do you want to keep running?',
-    pickerSub: 'Tap everything you might use at the same time. The number is how much power each one typically uses.',
+    pickerSub: 'Pick everything you\'ll use at the same time.',
     noun: 'power stations',
     powerDefault: 1800, powerMin: 100, powerMax: 7200, powerStep: 100,
     powerHelp: 'Set automatically when you pick items above.',
     priceMin: 100, priceMax: 5000, priceStep: 50,
     tiers: [
-      { label: 'Budget',       max: 450, desc: 'Smaller batteries for phones, lights, Wi-Fi, and short outages.' },
-      { label: 'Mid-range',    max: 750, desc: 'Bigger batteries that can keep a fridge going overnight.' },
-      { label: 'Best overall', max: null, tag: 'Premium', desc: 'The best value at any price, including whole-home backup.' },
+      { label: 'Budget',       max: 450, desc: 'Phones, lights, short outages' },
+      { label: 'Mid-range',    max: 750, desc: 'A fridge overnight' },
+      { label: 'Best overall', max: null, tag: 'Premium', desc: 'Best value at any price' },
     ],
     capMin: 0, capMax: 5000, capStep: 100, capUnit: 'Wh',
     capHelp: 'Bigger batteries run your things for longer.',
@@ -792,17 +802,17 @@ const TAB_CONFIG = {
   },
   power_bank: {
     title: 'Find the right <em>portable charger</em>, without the math',
-    sub:   'Tap what you want to charge. We\'ll show how many charges each power bank gives you, and which give you the most for your money.',
+    sub:   'Pick what you need to charge. We\'ll find the best value for you.',
     pickerTitle: 'What do you want to charge?',
-    pickerSub: 'Pick one or more. We\'ll show roughly how many full charges each power bank gives.',
+    pickerSub: 'Pick one or more.',
     noun: 'power banks',
     powerDefault: 30, powerMin: 5, powerMax: 150, powerStep: 5,
     powerHelp: 'Faster chargers fill your devices quicker. Phones need about 15 W, laptops 45 W or more.',
     priceMin: 10, priceMax: 200, priceStep: 5,
     tiers: [
-      { label: 'Budget',       max: 50,  desc: 'Simple chargers for everyday carry.' },
-      { label: 'Mid-range',    max: 100, desc: 'More charges, faster charging, or extras like MagSafe.' },
-      { label: 'Best overall', max: null, tag: 'Premium', desc: 'The best value at any price.' },
+      { label: 'Budget',       max: 50,  desc: 'Everyday carry' },
+      { label: 'Mid-range',    max: 100, desc: 'Faster, bigger, MagSafe' },
+      { label: 'Best overall', max: null, tag: 'Premium', desc: 'Best value at any price' },
     ],
     capMin: 1000, capMax: 30000, capStep: 1000, capUnit: 'mAh',
     capHelp: '10,000 mAh charges a typical phone about twice.',
@@ -994,6 +1004,7 @@ function switchTab(tab) {
 
 function resetAll() {
   const cfg = TAB_CONFIG[activeTab];
+  showAllRows = false;
   picked = new Set();
   hours = 4;
   document.querySelectorAll('.appliance').forEach(a => a.setAttribute('aria-pressed', 'false'));
@@ -1055,8 +1066,8 @@ function applyNeeds() {
     } else {
       powerEl.value = Math.max(cfg.powerMin, Math.ceil(needWatts / cfg.powerStep) * cfg.powerStep);
       box.hidden = false;
-      box.innerHTML = `<p>We're only showing power banks strong enough to charge ${devs.length > 1 ? 'these' : 'this'}
-        properly (<strong>${needWatts} W</strong> or more), and roughly how many full charges each one gives.</p>`;
+      box.innerHTML = `<div class="need-figs">
+        <div class="need-fig"><b>${needWatts} W</b><span>charging speed needed</span></div></div>`;
     }
     onSliderChange();
     return;
@@ -1087,13 +1098,10 @@ function applyNeeds() {
   box.classList.toggle('warn', tooBig);
   box.innerHTML = `
     <div class="need-figs">
-      <div class="need-fig"><b>${needWatts.toLocaleString()} W</b><span>power to run them all at once</span></div>
-      <div class="need-fig"><b>${needWh.toLocaleString()} Wh</b><span>battery size for ${esc(durLabel)}</span></div>
+      <div class="need-fig"><b>${needWatts.toLocaleString()} W</b><span>power at once</span></div>
+      <div class="need-fig"><b>${needWh.toLocaleString()} Wh</b><span>battery for ${esc(durLabel)}</span></div>
     </div>
-    <p>${tooBig
-      ? `That's more than any single battery here can hold. We're showing the biggest ones, with how long each
-         would actually last. Try a shorter time or fewer items.`
-      : `We're only showing batteries that can do this, and how long each one would last.`}</p>`;
+    ${tooBig ? `<p>More than any one battery holds, so these are the biggest. Try a shorter time or fewer items.</p>` : ''}`;
   onSliderChange();
 }
 
@@ -1263,7 +1271,6 @@ function renderTop5(data) {
   document.getElementById('top5Section').hidden = !top5.length && next === null;
   if (next !== null) {
     const t = cfg.tiers[next];
-    document.getElementById('top5Note').textContent = '';
     grid.innerHTML = `<div class="top5-empty" role="status">
       <b>Nothing under $${maxPrice.toLocaleString()} can do all of that.</b>
       The closest options are ${t.max ? `${t.label} (under $${t.max.toLocaleString()})` : 'in our Best overall picks'}.
@@ -1272,8 +1279,7 @@ function renderTop5(data) {
     </div>`;
     return;
   }
-  document.getElementById('top5Note').textContent = top5.length
-    ? 'The most for your money, based on what you picked' : '';
+
 
   grid.innerHTML = top5.map((b, i) => {
     let highlight, stats;
@@ -1309,13 +1315,22 @@ function renderTop5(data) {
   }).join('');
 }
 
+// The full list is long, especially as cards on phones, so start with the top rows.
+const ROW_LIMIT = 10;
+let showAllRows = false;
+
 function renderTable(data) {
   const tbody  = document.getElementById('tableBody');
   const empty  = document.getElementById('emptyState');
   const isPB   = activeTab === 'power_bank';
   const total  = ALL_DATA.filter(b => b.category === activeTab).length;
 
-  document.getElementById('resultCount').textContent = `Showing ${data.length} of ${total}`;
+  document.getElementById('resultCount').textContent = `${data.length} of ${total} match`;
+
+  const more = document.getElementById('showMore');
+  more.hidden = showAllRows || data.length <= ROW_LIMIT;
+  more.firstElementChild.textContent = `Show all ${data.length}`;
+  if (!showAllRows) data = data.slice(0, ROW_LIMIT);
 
   if (!data.length) { tbody.innerHTML = ''; empty.hidden = false; return; }
   empty.hidden = true;
