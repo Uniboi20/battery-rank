@@ -98,7 +98,8 @@
   you know. Open each Amazon link yourself, check the current price, update the field, and save — one row
   or all of them. Use + Add battery for new products, and Details on any row to see and edit every field. You can also fix a product's brand, model, or ASIN (the 10-character Amazon product ID
   in its link, e.g. B0DG8JQNS4) — edited fields turn orange until saved. Use Delete to permanently remove a
-  product that's no longer available. Saving a price that hasn't changed still refreshes its "checked" timestamp, so it's fine
+  product that's no longer available. Click ↗ to load a product in a separate Amazon window; after that, type the
+  price and press Enter to save and move to the next row, which loads in the same window. Saving a price that hasn't changed still refreshes its "checked" timestamp, so it's fine
   to resave everything even when nothing moved.
 </div>
 
@@ -431,13 +432,14 @@ function render() {
               </div></td>
               <td><div class="name-cell">
                 <input class="text-input asin-input" id="asin-${b.id}" value="${esc(b.asin)}" maxlength="10" aria-label="ASIN" oninput="markDirty(this)">
-                <a class="open-link" id="link-${b.id}" href="${esc(amazonUrl(b))}" target="_blank" rel="noopener" title="Open on Amazon">↗</a>
+                <a class="open-link" id="link-${b.id}" href="${esc(amazonUrl(b))}" target="_blank" rel="noopener" title="Open in the Amazon window"
+                   onclick="return openAmazon(${b.id})">↗</a>
               </div></td>
               <td>$${Number(b.price).toLocaleString()}</td>
               <td class="age ${age.cls}">${age.label}</td>
               <td><input class="price-input" id="input-${b.id}" type="number" step="0.01" value="${b.price}"
                     aria-label="New price" oninput="markDirty(this)"
-                    onkeydown="if (event.key === 'Enter') { event.preventDefault(); saveRow(${b.id}); }"></td>
+                    onkeydown="if (event.key === 'Enter') { event.preventDefault(); saveAndNext(${b.id}); }"></td>
               <td><button class="row-save" onclick="saveRow(${b.id})">Save</button></td>
               <td><button class="row-details" id="details-btn-${b.id}" aria-expanded="false" onclick="toggleDetails(${b.id})">Details ▾</button></td>
               <td><button class="row-delete" onclick="deleteRow(${b.id})">Delete</button></td>
@@ -456,6 +458,43 @@ function render() {
         </tbody>
       </table>`;
   }).join('');
+}
+
+// ── Amazon window ──
+// All product links load in one reusable popup window, so you can keep it beside this page.
+// After the first open, later links just change its address, which doesn't pull focus away from here.
+let amazonWin = null;
+
+function openAmazon(id) {
+  const row = ROWS.find(b => b.id === id);
+  if (!row || !row.asin) return true;
+  const url = amazonUrl(row);
+  if (amazonWin && !amazonWin.closed) {
+    try { amazonWin.location.href = url; } catch { amazonWin = null; }
+  }
+  if (!amazonWin || amazonWin.closed) {
+    const w = Math.min(1100, Math.round(screen.availWidth / 2));
+    amazonWin = window.open('about:blank', 'powerrank-amazon',
+      `popup,width=${w},height=${screen.availHeight},left=${screen.availWidth - w},top=0`);
+    if (!amazonWin) return true; // popup blocked: fall back to a normal new tab
+    amazonWin.opener = null; // Amazon can't reach back into this page
+    amazonWin.location.href = url;
+  }
+  const input = document.getElementById(`input-${id}`);
+  if (input) { input.focus(); input.select(); }
+  return false;
+}
+
+// Enter in a price box: save that row, then jump to the next row's price and load it on Amazon.
+function saveAndNext(id) {
+  const inputs = [...document.querySelectorAll('#tables .price-input')];
+  const next = inputs[inputs.findIndex(el => el.id === `input-${id}`) + 1];
+  saveRow(id);
+  if (next) {
+    const nextId = Number(next.id.slice('input-'.length));
+    openAmazon(nextId);
+    next.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  }
 }
 
 function markDirty(el) {
