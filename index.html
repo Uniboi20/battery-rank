@@ -207,7 +207,8 @@
   .tune > summary::before { content:'▸'; color:var(--accent); transition:transform 0.15s; }
   .tune[open] > summary::before { transform:rotate(90deg); }
   .tune > summary:hover { color:var(--text); }
-  .filter-sliders { display:grid; grid-template-columns:repeat(3,1fr); gap:1.5rem; margin-top:1.1rem; }
+  .filter-sliders { display:grid; grid-template-columns:repeat(2,1fr); gap:1.5rem; margin-top:1.1rem; }
+  .price-tune .slider-row { max-width:420px; margin-top:1.1rem; }
   .slider-row { display:flex; flex-direction:column; gap:0.2rem; }
   .slider-label { font-weight:600; font-size:1rem; }
   .slider-help { font-size:0.875rem; color:var(--sub); }
@@ -459,15 +460,8 @@
     <div class="need-summary" id="needSummary" aria-live="polite" hidden></div>
 
     <details class="tune" id="tune">
-      <summary>Fine-tune your search (budget, size, features)</summary>
+      <summary>Fine-tune your search (power, size, features)</summary>
       <div class="filter-sliders">
-        <div class="slider-row">
-          <label class="slider-label" for="priceSlider">Budget</label>
-          <div class="slider-help">Hides models that typically cost more than this.</div>
-          <div class="slider-value" id="priceDisplay" aria-live="polite">Any</div>
-          <input type="range" id="priceSlider" min="100" max="5000" step="50" value="5000" oninput="onSliderChange()">
-          <div class="slider-hints" id="priceHints"></div>
-        </div>
         <div class="slider-row">
           <label class="slider-label" for="powerSlider" id="powerLabel">Most power needed at once</label>
           <div class="slider-help" id="powerHelp"></div>
@@ -492,6 +486,16 @@
     <h2 class="step-title" id="budgetLabel"><span class="step-num">2</span>What's your budget?</h2>
     <p class="step-sub">Based on typical prices. Tap <strong>Check price</strong> on any pick to see today's price on Amazon.</p>
     <div class="tier-grid" role="group" aria-labelledby="budgetLabel" id="budgetSeg"></div>
+    <details class="tune price-tune" id="priceTune">
+      <summary>Or set your own price limit</summary>
+      <div class="slider-row">
+        <label class="slider-label" for="priceSlider">Max price</label>
+        <div class="slider-help">Hides models that typically cost more than this.</div>
+        <div class="slider-value" id="priceDisplay" aria-live="polite">Any</div>
+        <input type="range" id="priceSlider" min="100" max="5000" step="50" value="5000" oninput="onSliderChange()">
+        <div class="slider-hints" id="priceHints"></div>
+      </div>
+    </details>
   </section>
 
   <section aria-labelledby="top5Label" id="top5Section">
