@@ -154,6 +154,17 @@
   .seg button:hover { border-color:var(--border-strong); }
   .seg button[aria-pressed="true"] { border-color:var(--accent); background:var(--accent-soft); font-weight:600; }
 
+  .seg-sub { color:var(--sub); font-weight:400; font-size:0.85rem; margin-left:0.3rem; }
+  .price-tag { display:inline-block; font-size:0.8rem; color:var(--sub); border:1px solid var(--border);
+               border-radius:999px; padding:0.05rem 0.55rem; white-space:nowrap; }
+  .top5-rank { display:flex; justify-content:space-between; align-items:center; gap:0.5rem; }
+  .top5-rank .price-tag { font-weight:500; }
+  .td-brand .price-tag { margin-left:0.4rem; font-size:0.75rem; }
+  .top5-empty { grid-column:1 / -1; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg);
+                padding:1.25rem 1.35rem; color:var(--sub); }
+  .top5-empty b { color:var(--text); }
+  .top5-empty .btn { display:inline-block; }
+
   .need-summary {
     margin-top:1.25rem; padding:1rem 1.15rem; border-radius:var(--radius);
     background:var(--surface-2); border-left:4px solid var(--accent); font-size:1rem;
@@ -203,7 +214,7 @@
   .section-note { color:var(--sub); font-size:0.95rem; }
 
   /* ── Top 5 ── */
-  .top5-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:0.85rem; }
+  .top5-grid { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:0.85rem; }
   .top5-card {
     background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg);
     padding:1.1rem 1.15rem 1.15rem; display:flex; flex-direction:column;
@@ -212,7 +223,7 @@
   .top5-rank { font-size:0.875rem; font-weight:700; margin-bottom:0.5rem; color:var(--sub); }
   .rank-1 .top5-rank { color:var(--gold); } .rank-2 .top5-rank { color:var(--silver); } .rank-3 .top5-rank { color:var(--bronze); }
   .top5-brand { font-size:0.9rem; color:var(--sub); }
-  .top5-model { font-size:1.15rem; font-weight:700; line-height:1.25; margin-bottom:0.8rem; }
+  .top5-model { font-size:1.15rem; font-weight:700; line-height:1.25; margin-bottom:0.8rem; overflow-wrap:anywhere; }
   .top5-highlight {
     background:var(--accent-soft); border-radius:8px; padding:0.55rem 0.7rem; margin-bottom:0.8rem;
     font-size:0.95rem; line-height:1.35;
@@ -223,8 +234,9 @@
   .top5-stat-label { color:var(--sub); }
   .top5-stat-val { font-weight:600; text-align:right; }
   .top5-value { margin-top:0.9rem; padding-top:0.8rem; border-top:1px solid var(--border); }
+  .top5-value .value { white-space:normal; }
   .top5-cta { margin-top:auto; padding-top:0.9rem; display:flex; }
-  .top5-cta .buy-btn { flex:1; justify-content:center; }
+  .top5-cta .buy-btn { flex:1; min-width:0; justify-content:center; text-align:center; white-space:normal; }
 
   /* ── Value rating (replaces the old "+312" score, which read like a price) ── */
   .value { display:inline-flex; align-items:center; gap:0.5rem; white-space:nowrap; }
@@ -341,10 +353,10 @@
   footer nav a { color:var(--text); }
   footer p { max-width:75ch; margin:0 auto 0.4rem; }
 
-  @media(max-width:1150px) { .top5-grid { grid-template-columns:repeat(3,1fr); } }
+  @media(max-width:1150px) { .top5-grid { grid-template-columns:repeat(3,minmax(0,1fr)); } }
   @media(max-width:900px) {
     .filter-sliders { grid-template-columns:1fr; }
-    .top5-grid { grid-template-columns:repeat(2,1fr); }
+    .top5-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
     main { padding:1.25rem 1rem; } header { padding:0 1rem; }
     .header-meta { display:none; }
   }
@@ -425,6 +437,11 @@
     <div class="duration-row" id="durationRow">
       <span class="duration-label" id="durationLabel">For how long?</span>
       <div class="seg" role="group" aria-labelledby="durationLabel" id="durationSeg"></div>
+    </div>
+
+    <div class="duration-row" id="budgetRow">
+      <span class="duration-label" id="budgetLabel">What's your budget?</span>
+      <div class="seg" role="group" aria-labelledby="budgetLabel" id="budgetSeg"></div>
     </div>
 
     <div class="need-summary" id="needSummary" aria-live="polite" hidden></div>
@@ -734,6 +751,11 @@ const TAB_CONFIG = {
     powerDefault: 1800, powerMin: 100, powerMax: 7200, powerStep: 100,
     powerHelp: 'Set automatically when you pick items above.',
     priceMin: 100, priceMax: 5000, priceStep: 50,
+    tiers: [
+      { label: 'Budget',       max: 500 },
+      { label: 'Mid-range',    max: 1000 },
+      { label: 'Best overall', max: null, tag: 'Premium' },
+    ],
     capMin: 0, capMax: 5000, capStep: 100, capUnit: 'Wh',
     capHelp: 'Bigger batteries run your things for longer.',
     chips: [
@@ -757,6 +779,11 @@ const TAB_CONFIG = {
     powerDefault: 30, powerMin: 5, powerMax: 150, powerStep: 5,
     powerHelp: 'Faster chargers fill your devices quicker. Phones need about 15 W, laptops 45 W or more.',
     priceMin: 10, priceMax: 200, priceStep: 5,
+    tiers: [
+      { label: 'Budget',       max: 40 },
+      { label: 'Mid-range',    max: 75 },
+      { label: 'Best overall', max: null, tag: 'Premium' },
+    ],
     capMin: 1000, capMax: 30000, capStep: 1000, capUnit: 'mAh',
     capHelp: '10,000 mAh charges a typical phone about twice.',
     chips: [
@@ -924,6 +951,9 @@ function switchTab(tab) {
       <span><span class="appliance-name">${a.name}</span><span class="appliance-watts">${a.watts.toLocaleString()} W</span></span>
       <span class="appliance-check" aria-hidden="true">✓</span>
     </button>`).join('');
+  document.getElementById('budgetSeg').innerHTML = cfg.tiers.map((t, i) =>
+    `<button type="button" aria-pressed="false" data-tier="${i}" onclick="setBudget(${i})">${t.label}` +
+    `<span class="seg-sub">${t.max ? `under $${t.max.toLocaleString()}` : 'any price'}</span></button>`).join('');
   document.getElementById('durationSeg').innerHTML = DURATIONS.map(d =>
     `<button type="button" aria-pressed="false" data-hours="${d.hours}" onclick="setHours(${d.hours})">${d.label}</button>`).join('');
 
@@ -960,6 +990,23 @@ function togglePick(el) {
 }
 
 function setHours(h) { hours = h; applyNeeds(); }
+
+// Budget tiers just move the Budget slider under "Fine-tune", so the two always agree.
+function setBudget(i) {
+  const cfg = TAB_CONFIG[activeTab];
+  document.getElementById('priceSlider').value = cfg.tiers[i].max || cfg.priceMax;
+  onSliderChange();
+}
+
+// Which price range a battery usually falls in, shown as a tag instead of a price
+// (Associates rules: hand-checked prices are never displayed).
+const TIER_SIGNS = ['$', '$$', '$$$'];
+function priceTagHtml(b) {
+  const tiers = TAB_CONFIG[activeTab].tiers;
+  const i = tiers.findIndex(t => !t.max || b.price <= t.max);
+  return `<span class="price-tag" title="Usual price range. Tap Check price for today's price on Amazon.">` +
+         `${TIER_SIGNS[i]} ${tiers[i].tag || tiers[i].label}</span>`;
+}
 
 // Translate the picked items into slider values, then re-render. The sliders stay editable
 // under "Fine-tune" for anyone who knows their numbers.
@@ -1035,6 +1082,8 @@ function onSliderChange() {
   document.getElementById('powerDisplay').textContent = `${maxPower.toLocaleString()} W`;
   document.getElementById('priceDisplay').textContent =
     maxPrice >= cfg.priceMax ? 'Any' : `Up to $${maxPrice.toLocaleString()}`;
+  document.querySelectorAll('#budgetSeg button').forEach(btn =>
+    btn.setAttribute('aria-pressed', String((cfg.tiers[+btn.dataset.tier].max || cfg.priceMax) === maxPrice)));
   document.getElementById('capacityDisplay').textContent =
     minCapacity <= cfg.capMin ? 'Any' : `${minCapacity.toLocaleString()} ${cfg.capUnit} or more`;
 
@@ -1123,13 +1172,7 @@ function getFiltered() {
       score: calcScore(b, maxPower),
       capacity: isPB ? (b.capacity_mah || 0) : b.capacity_wh,
     }));
-  const fits = scored.filter(b => {
-    if (maxPrice < cfg.priceMax && b.price > maxPrice) return false;
-    if (b.capacity < minCapacity) return false;
-    if (needWatts && b.peak_power_w < needWatts) return false;
-    for (const key of activeChips) { if (!b[key]) return false; }
-    return true;
-  });
+  const fits = scored.filter(b => fitsNeeds(b, maxPrice));
   // Ratings compare the batteries that can do the job you described. Search and brand are
   // left out so looking up one model doesn't automatically make it "Top value".
   VALUE_BY_ID = valueLevels(fits);
@@ -1139,6 +1182,27 @@ function getFiltered() {
     if (brand && b.brand !== brand) return false;
     return true;
   });
+}
+
+function fitsNeeds(b, priceCap) {
+  const cfg = TAB_CONFIG[activeTab];
+  const capacity = activeTab === 'power_bank' ? (b.capacity_mah || 0) : b.capacity_wh;
+  if (priceCap < cfg.priceMax && b.price > priceCap) return false;
+  if (capacity < minCapacity) return false;
+  if (needWatts && b.peak_power_w < needWatts) return false;
+  for (const key of activeChips) { if (!b[key]) return false; }
+  return true;
+}
+
+// When the budget is what rules everything out, point to the cheapest tier that has an answer
+// instead of a dead end.
+function budgetFallback() {
+  const cfg = TAB_CONFIG[activeTab];
+  if (maxPrice >= cfg.priceMax) return null;
+  const tab = ALL_DATA.filter(b => b.category === activeTab);
+  const i = cfg.tiers.findIndex(t => (t.max || cfg.priceMax) > maxPrice &&
+    tab.some(b => fitsNeeds(b, t.max || cfg.priceMax)));
+  return i < 0 ? null : i;
 }
 
 function sortData(data) {
@@ -1168,8 +1232,21 @@ function extrasText(b) {
 function renderTop5(data) {
   const top5 = [...data].sort((a, b) => b.score - a.score).slice(0, 5);
   const grid = document.getElementById('top5Grid');
-  document.getElementById('top5Section').hidden = !top5.length;
   const isPB = activeTab === 'power_bank';
+  const cfg = TAB_CONFIG[activeTab];
+  const next = top5.length ? null : budgetFallback();
+  document.getElementById('top5Section').hidden = !top5.length && next === null;
+  if (next !== null) {
+    const t = cfg.tiers[next];
+    document.getElementById('top5Note').textContent = '';
+    grid.innerHTML = `<div class="top5-empty" role="status">
+      <b>Nothing under $${maxPrice.toLocaleString()} can do all of that.</b>
+      The closest options are ${t.max ? `${t.label} (under $${t.max.toLocaleString()})` : 'in our Best overall picks'}.
+      You can also try a shorter time or fewer items.<br>
+      <button class="btn" onclick="setBudget(${next})">Show ${t.label} picks</button>
+    </div>`;
+    return;
+  }
   document.getElementById('top5Note').textContent = top5.length
     ? 'The most for your money, based on what you picked' : '';
 
@@ -1194,7 +1271,7 @@ function renderTop5(data) {
       ];
     }
     return `<article class="top5-card ${RANK_CLASSES[i]}">
-      <div class="top5-rank">#${i + 1} pick</div>
+      <div class="top5-rank"><span>#${i + 1} pick</span>${priceTagHtml(b)}</div>
       <div class="top5-brand">${esc(b.brand)}</div>
       <h3 class="top5-model">${esc(b.model)}</h3>
       <div class="top5-highlight">${highlight}</div>
@@ -1243,7 +1320,7 @@ function renderTable(data) {
 
     return `<tr>
       <td class="rank-num">#${i + 1}</td>
-      <td class="cell-model"><div class="td-model">${esc(b.model)}</div><div class="td-brand">${esc(b.brand)}</div>
+      <td class="cell-model"><div class="td-model">${esc(b.model)}</div><div class="td-brand">${esc(b.brand)}${priceTagHtml(b)}</div>
         ${notes ? `<div class="td-extras">${notes}</div>` : ''}</td>
       ${cells}
       <td class="cell-value" data-label="Value">${valueHtml(VALUE_BY_ID.get(b.id))}</td>
