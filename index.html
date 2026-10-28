@@ -124,6 +124,22 @@
     margin-right:0.5rem; vertical-align:2px;
   }
 
+  /* ── Budget tiers ── */
+  .budget-panel { margin-top:1rem; }
+  .tier-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:0.6rem; }
+  .tier {
+    display:flex; flex-direction:column; gap:0.15rem; text-align:left;
+    background:var(--bg); border:1.5px solid var(--border); border-radius:var(--radius);
+    padding:0.8rem 0.95rem; cursor:pointer; color:var(--text); font-family:inherit;
+    transition:border-color 0.15s,background 0.15s;
+  }
+  .tier:hover { border-color:var(--border-strong); }
+  .tier[aria-pressed="true"] { border-color:var(--accent); background:var(--accent-soft); }
+  .tier-name { font-size:1rem; font-weight:700; }
+  .tier-range { font-size:0.95rem; color:var(--accent); font-weight:600; }
+  .tier-desc { font-size:0.875rem; color:var(--sub); line-height:1.35; margin-top:0.2rem; }
+  .tier[aria-pressed="true"] .tier-desc { color:var(--text); }
+
   /* ── Appliance picker ── */
   .appliance-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(185px,1fr)); gap:0.6rem; }
   .appliance {
@@ -398,6 +414,7 @@
     .select-wrap select { flex:1; min-width:0; }
     .result-count { margin-left:0; flex-basis:100%; }
     .top5-grid { grid-template-columns:1fr; }
+    .tier-grid { grid-template-columns:1fr; }
 
     .need-fig b { font-size:1.25rem; }
   }
@@ -439,11 +456,6 @@
       <div class="seg" role="group" aria-labelledby="durationLabel" id="durationSeg"></div>
     </div>
 
-    <div class="duration-row" id="budgetRow">
-      <span class="duration-label" id="budgetLabel">What's your budget?</span>
-      <div class="seg" role="group" aria-labelledby="budgetLabel" id="budgetSeg"></div>
-    </div>
-
     <div class="need-summary" id="needSummary" aria-live="polite" hidden></div>
 
     <details class="tune" id="tune">
@@ -476,9 +488,15 @@
     </details>
   </section>
 
+  <section class="panel budget-panel" aria-labelledby="budgetLabel">
+    <h2 class="step-title" id="budgetLabel"><span class="step-num">2</span>What's your budget?</h2>
+    <p class="step-sub">Based on typical prices. Tap <strong>Check price</strong> on any pick to see today's price on Amazon.</p>
+    <div class="tier-grid" role="group" aria-labelledby="budgetLabel" id="budgetSeg"></div>
+  </section>
+
   <section aria-labelledby="top5Label" id="top5Section">
     <div class="section-head">
-      <h2 class="section-title" id="top5Label"><span class="step-num">2</span>Our top picks for you</h2>
+      <h2 class="section-title" id="top5Label"><span class="step-num">3</span>Our top picks for you</h2>
       <span class="section-note" id="top5Note"></span>
     </div>
     <div class="top5-grid" id="top5Grid"></div>
@@ -537,7 +555,7 @@
           <thead><tr><th>If you want to…</th><th>Look for about</th></tr></thead>
           <tbody>
             <tr><td>Charge phones and run a few lights or a fan for a night</td><td>300–500 Wh</td></tr>
-            <tr><td>Keep a fridge, lights, and Wi-Fi going through a one-day outage</td><td>1,500–2,500 Wh</td></tr>
+            <tr><td>Keep a fridge, lights, and Wi-Fi going through a one-day outage</td><td>2,500–3,000 Wh</td></tr>
             <tr><td>Run a CPAP machine every night while camping</td><td>500 Wh+</td></tr>
             <tr><td>Get through a multi-day outage, or run bigger things like a space heater</td><td>3,000 Wh+</td></tr>
           </tbody>
@@ -688,26 +706,24 @@ const PB = { exp: 0.585, mult: 0.0618, usb: 10, outExp: 1.58, outCap: 50, outDef
 
 // ── Appliance picker ──
 // Typical figures, rounded. `watts` = draw while running (what the station must supply at once);
-// `avg` = average draw over a day, accounting for things that cycle on and off (fridge
-// compressor, heater thermostat) or only run briefly (coffee maker, microwave).
+// `hrs` = hours a day it actually draws that much. Things that cycle on and off (fridge
+// compressor, heater and A/C thermostats) count only the time they're running, and things
+// used in short bursts (coffee maker, microwave) count only those minutes.
 const INVERTER_EFFICIENCY = 0.85;
 const APPLIANCES = [
-  { id: 'phone',   icon: '📱', name: 'Phones & tablets',   watts: 20,   avg: 5 },
-  { id: 'lights',  icon: '💡', name: 'A few lamps (LED)',  watts: 30,   avg: 10 },
-  { id: 'wifi',    icon: '📶', name: 'Wi-Fi router',       watts: 15,   avg: 12 },
-  { id: 'laptop',  icon: '💻', name: 'Laptop',             watts: 60,   avg: 20 },
-  { id: 'tv',      icon: '📺', name: 'TV',                 watts: 100,  avg: 25 },
-  { id: 'cpap',    icon: '😴', name: 'CPAP machine',       watts: 40,   avg: 15 },
-  { id: 'fan',     icon: '🌀', name: 'Fan',                watts: 75,   avg: 40 },
-  { id: 'fridge',  icon: '🧊', name: 'Refrigerator',       watts: 200,  avg: 50 },
-  { id: 'freezer', icon: '❄️', name: 'Chest freezer',      watts: 100,  avg: 40 },
-  { id: 'coffee',  icon: '☕', name: 'Coffee maker',       watts: 1000, avg: 40 },
-  { id: 'burner',  icon: '🍳', name: 'One stove burner',   watts: 1500, avg: 120 },
-  { id: 'micro',   icon: '🍿', name: 'Microwave',          watts: 1100, avg: 50 },
-  { id: 'sump',    icon: '💧', name: 'Sump pump',          watts: 800,  avg: 100 },
-  { id: 'ac',      icon: '🏠', name: 'Window A/C',         watts: 900,  avg: 500 },
-  { id: 'heater',  icon: '🔥', name: 'Space heater',       watts: 1500, avg: 750 },
-  { id: 'tools',   icon: '🔨', name: 'Power tools',        watts: 1200, avg: 100 },
+  { id: 'phone',   icon: '📱', name: 'Phones & tablets',   watts: 20,   hrs: 6 },    // a few devices charging
+  { id: 'lights',  icon: '💡', name: 'A few lamps (LED)',  watts: 30,   hrs: 8 },    // evenings
+  { id: 'wifi',    icon: '📶', name: 'Wi-Fi router',       watts: 15,   hrs: 20 },   // on all day, usually below its max
+  { id: 'laptop',  icon: '💻', name: 'Laptop',             watts: 60,   hrs: 5 },    // full draw only while charging
+  { id: 'tv',      icon: '📺', name: 'TV',                 watts: 100,  hrs: 4 },
+  { id: 'cpap',    icon: '😴', name: 'CPAP machine',       watts: 40,   hrs: 8 },    // one night, no heated humidifier
+  { id: 'fan',     icon: '🌀', name: 'Fan',                watts: 75,   hrs: 12 },
+  { id: 'fridge',  icon: '🧊', name: 'Refrigerator',       watts: 300,  hrs: 6 },    // compressor runs ~¼ of the time: ~1.8 kWh/day
+  { id: 'coffee',  icon: '☕', name: 'Coffee maker',       watts: 1000, hrs: 0.25 }, // a pot or two
+  { id: 'burner',  icon: '🍳', name: 'One stove burner',   watts: 1500, hrs: 0.75 }, // cooking a couple of meals
+  { id: 'micro',   icon: '🍿', name: 'Microwave',          watts: 1500, hrs: 0.25 }, // what it pulls from the wall, ~15 min/day
+  { id: 'ac',      icon: '🏠', name: 'Window A/C',         watts: 900,  hrs: 12 },   // compressor about half the day
+  { id: 'heater',  icon: '🔥', name: 'Space heater',       watts: 1500, hrs: 12 },   // thermostat about half the day
 ];
 const DURATIONS = [
   { hours: 4,  label: 'A few hours' },
@@ -752,9 +768,9 @@ const TAB_CONFIG = {
     powerHelp: 'Set automatically when you pick items above.',
     priceMin: 100, priceMax: 5000, priceStep: 50,
     tiers: [
-      { label: 'Budget',       max: 500 },
-      { label: 'Mid-range',    max: 1000 },
-      { label: 'Best overall', max: null, tag: 'Premium' },
+      { label: 'Budget',       max: 450, desc: 'Smaller batteries for phones, lights, Wi-Fi, and short outages.' },
+      { label: 'Mid-range',    max: 750, desc: 'Bigger batteries that can keep a fridge going overnight.' },
+      { label: 'Best overall', max: null, tag: 'Premium', desc: 'The best value at any price, including whole-home backup.' },
     ],
     capMin: 0, capMax: 5000, capStep: 100, capUnit: 'Wh',
     capHelp: 'Bigger batteries run your things for longer.',
@@ -780,9 +796,9 @@ const TAB_CONFIG = {
     powerHelp: 'Faster chargers fill your devices quicker. Phones need about 15 W, laptops 45 W or more.',
     priceMin: 10, priceMax: 200, priceStep: 5,
     tiers: [
-      { label: 'Budget',       max: 40 },
-      { label: 'Mid-range',    max: 75 },
-      { label: 'Best overall', max: null, tag: 'Premium' },
+      { label: 'Budget',       max: 50,  desc: 'Simple chargers for everyday carry.' },
+      { label: 'Mid-range',    max: 100, desc: 'More charges, faster charging, or extras like MagSafe.' },
+      { label: 'Best overall', max: null, tag: 'Premium', desc: 'The best value at any price.' },
     ],
     capMin: 1000, capMax: 30000, capStep: 1000, capUnit: 'mAh',
     capHelp: '10,000 mAh charges a typical phone about twice.',
@@ -902,6 +918,8 @@ function pickedDevices() {
 function chargesLine(b, devices) {
   return devices.map(d => `${d.name.toLowerCase()}: <b>${fmtCharges(bankWh(b) * PB_EFFICIENCY / d.wh)}</b>`).join(' · ');
 }
+const FRIDGE = APPLIANCES.find(a => a.id === 'fridge');
+const FRIDGE_AVG_W = FRIDGE.watts * FRIDGE.hrs / 24;
 function runtimeHours(b) { return avgLoad ? b.capacity_wh * INVERTER_EFFICIENCY / avgLoad : null; }
 
 // ── Tab switch ──
@@ -952,8 +970,11 @@ function switchTab(tab) {
       <span class="appliance-check" aria-hidden="true">✓</span>
     </button>`).join('');
   document.getElementById('budgetSeg').innerHTML = cfg.tiers.map((t, i) =>
-    `<button type="button" aria-pressed="false" data-tier="${i}" onclick="setBudget(${i})">${t.label}` +
-    `<span class="seg-sub">${t.max ? `under $${t.max.toLocaleString()}` : 'any price'}</span></button>`).join('');
+    `<button type="button" class="tier" aria-pressed="false" data-tier="${i}" onclick="setBudget(${i})">
+      <span class="tier-name">${t.label}</span>
+      <span class="tier-range">${t.max ? `Up to $${t.max.toLocaleString()}` : 'Any price'}</span>
+      <span class="tier-desc">${t.desc}</span>
+    </button>`).join('');
   document.getElementById('durationSeg').innerHTML = DURATIONS.map(d =>
     `<button type="button" aria-pressed="false" data-hours="${d.hours}" onclick="setHours(${d.hours})">${d.label}</button>`).join('');
 
@@ -1048,7 +1069,7 @@ function applyNeeds() {
   }
 
   needWatts = items.reduce((s, a) => s + a.watts, 0);
-  avgLoad   = items.reduce((s, a) => s + a.avg, 0);
+  avgLoad   = items.reduce((s, a) => s + a.watts * a.hrs / 24, 0);
   const needWh  = Math.ceil(avgLoad * hours / INVERTER_EFFICIENCY / 100) * 100;
   const biggest = Math.max(...ALL_DATA.filter(b => b.category === 'power_station').map(b => b.capacity_wh));
   const durLabel = DURATIONS.find(d => d.hours === hours).label.toLowerCase();
@@ -1263,7 +1284,7 @@ function renderTop5(data) {
       const rt = runtimeHours(b);
       highlight = rt
         ? `Runs your stuff for <b>${fmtHours(rt)}</b>`
-        : `Runs a fridge for <b>${fmtHours(b.capacity_wh * INVERTER_EFFICIENCY / 50)}</b>`;
+        : `Runs a fridge for <b>${fmtHours(b.capacity_wh * INVERTER_EFFICIENCY / FRIDGE_AVG_W)}</b>`;
       stats = [
         ['Battery size', `${b.capacity_wh.toLocaleString()} Wh`],
         ['Max power', `${b.peak_power_w.toLocaleString()} W`],
