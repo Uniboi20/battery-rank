@@ -172,7 +172,7 @@ async function loadData() {
   if (!res.ok) { document.getElementById('progress').textContent = 'Load failed.'; return; }
   ROWS = await res.json();
   render();
-  document.getElementById('progress').textContent = `${ROWS.length} batteries loaded, oldest-checked first.`;
+  document.getElementById('progress').textContent = `${ROWS.length} batteries loaded, sorted by brand then model.`;
 }
 
 // ── Full-field editor ──
@@ -403,6 +403,9 @@ async function saveDetails(id) {
   }
 }
 
+const byName = (a, b) => String(a ?? '').localeCompare(String(b ?? ''), undefined, { sensitivity: 'base', numeric: true });
+const byBrandModel = (a, b) => byName(a.brand, b.brand) || byName(a.model, b.model);
+
 function render() {
   const groups = [
     { key: 'power_station', label: 'Power Stations' },
@@ -410,18 +413,20 @@ function render() {
   ];
   const container = document.getElementById('tables');
   container.innerHTML = groups.map(g => {
-    const rows = ROWS.filter(b => b.category === g.key);
+    const rows = ROWS.filter(b => b.category === g.key).sort(byBrandModel);
     if (!rows.length) return '';
     return `
       <div class="group-label">${g.label} (${rows.length})</div>
       <table>
-        <thead><tr><th>Brand · Model</th><th>ASIN</th><th>Current price</th><th>Checked</th><th>New price</th><th></th><th></th><th></th><th></th></tr></thead>
+        <thead><tr><th>Brand</th><th>Model</th><th>ASIN</th><th>Current price</th><th>Checked</th><th>New price</th><th></th><th></th><th></th><th></th></tr></thead>
         <tbody>
           ${rows.map(b => {
             const age = ageInfo(b.price_updated_at);
             return `<tr id="row-${b.id}">
               <td><div class="name-cell">
                 <input class="text-input brand-input" id="brand-${b.id}" value="${esc(b.brand)}" aria-label="Brand" oninput="markDirty(this)">
+              </div></td>
+              <td><div class="name-cell">
                 <input class="text-input model-input" id="model-${b.id}" value="${esc(b.model)}" aria-label="Model" oninput="markDirty(this)">
               </div></td>
               <td><div class="name-cell">
@@ -431,13 +436,14 @@ function render() {
               <td>$${Number(b.price).toLocaleString()}</td>
               <td class="age ${age.cls}">${age.label}</td>
               <td><input class="price-input" id="input-${b.id}" type="number" step="0.01" value="${b.price}"
-                    aria-label="New price" oninput="markDirty(this)"></td>
+                    aria-label="New price" oninput="markDirty(this)"
+                    onkeydown="if (event.key === 'Enter') { event.preventDefault(); saveRow(${b.id}); }"></td>
               <td><button class="row-save" onclick="saveRow(${b.id})">Save</button></td>
               <td><button class="row-details" id="details-btn-${b.id}" aria-expanded="false" onclick="toggleDetails(${b.id})">Details ▾</button></td>
               <td><button class="row-delete" onclick="deleteRow(${b.id})">Delete</button></td>
               <td class="row-status" id="status-${b.id}"></td>
             </tr>
-            <tr class="detail-row" id="detail-${b.id}" hidden><td colspan="9">
+            <tr class="detail-row" id="detail-${b.id}" hidden><td colspan="10">
               <div id="d${b.id}-form"></div>
               <div class="form-actions">
                 <button onclick="saveDetails(${b.id})">Save all fields</button>
