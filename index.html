@@ -292,7 +292,7 @@
                border-radius:999px; padding:0.05rem 0.55rem; white-space:nowrap; }
   .top5-rank { display:flex; justify-content:space-between; align-items:center; gap:0.5rem; }
   .top5-rank .price-tag { font-weight:500; }
-  .td-brand .price-tag { margin-left:0.4rem; font-size:0.75rem; }
+  .td-brand .price-tag { font-size:0.75rem; }
   .top5-empty { grid-column:1 / -1; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg);
                 padding:1.25rem 1.35rem; color:var(--sub); }
   .top5-empty b { color:var(--text); }
@@ -382,12 +382,18 @@
   .mode-row { display:flex; flex-wrap:wrap; align-items:center; gap:0.5rem 1rem; margin:0 0 1.25rem; }
   .setup-tag { display:inline-block; margin-left:0.3rem; padding:0.05rem 0.45rem; border-radius:999px; font-size:0.72rem;
                font-weight:600; border:1px solid var(--border); color:var(--sub); vertical-align:1px; white-space:nowrap; }
-  .bundle-list { display:grid; gap:0.75rem; }
-  .bundle-item { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:0.9rem 1rem; }
-  .bundle-item h3 { font-size:1rem; margin-bottom:0.4rem; }
-  .bundle-ways { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:0.5rem 1rem; font-size:0.9rem; color:var(--sub); }
-  .bundle-ways b { color:var(--text); }
-  .bundle-verdict { margin-top:0.5rem; font-weight:600; font-size:0.9rem; }
+  /* Small Check price links, used wherever a row offers more than one listing. */
+  .buy-links { display:flex; flex-wrap:wrap; gap:0.35rem; margin-top:0.4rem; }
+  .buy-link { display:inline-flex; align-items:center; min-height:32px; padding:0.15rem 0.65rem; border-radius:999px;
+              border:1px solid var(--accent-line); color:var(--accent); font-size:0.8rem; font-weight:600;
+              text-decoration:none; white-space:nowrap; }
+  .buy-link:hover { background:var(--accent-soft); }
+  .way { font-size:0.9rem; line-height:1.35; min-width:12rem; }
+  .way-kind { font-weight:700; color:var(--text); }
+  .way-sub { color:var(--sub); font-size:0.8125rem; }
+  .way-best { color:var(--positive); font-weight:600; }
+  .warn-text { color:var(--negative); }
+  .rank-note { color:var(--sub); font-size:0.875rem; margin:-0.25rem 0 0.75rem; }
   .cell-buy .buy-btn + .buy-btn { margin-top:0.35rem; }
   .bundle-tag { display:inline-block; margin-left:0.3rem; padding:0.05rem 0.45rem; border-radius:999px; font-size:0.72rem; font-weight:600;
                 border:1px solid var(--accent); color:var(--accent); text-decoration:none; vertical-align:1px; }
@@ -466,7 +472,7 @@
   tbody tr:last-child td { border-bottom:none; }
   tbody tr:hover td { background:var(--brand-soft); }
   .td-model { font-weight:600; font-size:1rem; }
-  .td-brand { color:var(--sub); font-size:0.875rem; }
+  .td-brand { color:var(--sub); font-size:0.875rem; display:flex; flex-wrap:wrap; align-items:center; gap:0.2rem 0.4rem; }
   .td-extras { color:var(--sub); font-size:0.875rem; margin-top:2px; }
   .td-num { text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
   .td-sub { display:block; color:var(--sub); font-size:0.8125rem; }
@@ -547,7 +553,7 @@
     #resultsTable td.cell-value { align-self:end; }
     #resultsTable td.cell-value::before { display:none; }
     #resultsTable td.cell-value .value { white-space:normal; }
-    #resultsTable td.cell-buy { grid-column:1 / -1; }
+    #resultsTable td.cell-buy, #resultsTable td.cell-way { grid-column:1 / -1; }
     #resultsTable td.cell-buy .buy-btn { width:100%; justify-content:center; }
     #resultsTable td.status-cell { text-align:center; padding:1rem; }
   }
@@ -672,14 +678,6 @@
     <div class="top5-grid" id="top5Grid"></div>
   </section>
 
-  <section aria-labelledby="bundleLabel" id="bundleSection" hidden>
-    <div class="section-head">
-      <h2 class="section-title" id="bundleLabel"></h2>
-      <span class="section-note">Each official bundle next to the best way to buy the same battery and its solar separately.</span>
-    </div>
-    <div class="bundle-list" id="bundleList"></div>
-  </section>
-
   <section aria-labelledby="allLabel">
     <div class="section-head">
       <h2 class="section-title" id="allLabel">Compare them all</h2>
@@ -702,6 +700,7 @@
       </label>
       <div class="result-count" id="resultCount" aria-live="polite"></div>
     </div>
+    <p class="rank-note" id="rankNote"></p>
 
     <div class="table-wrap">
       <table id="resultsTable">
@@ -1336,11 +1335,12 @@ function tableHeaders() {
       ? { label: 'Runs your stuff', sort: 'capacity', num: true, title: 'Estimated run time for the items you picked' }
       : { label: 'Battery size', sort: 'capacity', num: true, title: 'Capacity in watt-hours' },
     ...(isSolarView()
-      ? [{ label: 'Solar setup' }, { label: 'Full in', num: true, title: 'Hours of good sun from empty to full' }]
+      ? [{ label: 'Best way to buy', title: 'The better value of an official bundle or buying the battery and panels separately' },
+         { label: 'Other way', title: 'The other way to buy, and how it compares' }]
       : [{ label: 'Max power', sort: 'peak_power_w', num: true, title: 'Most watts it can supply at once' },
          { label: 'Outlets', num: true }]),
     { label: 'Value', sort: 'score' },
-    { label: '' },
+    ...(isSolarView() ? [] : [{ label: '' }]),
   ];
 }
 
@@ -1493,7 +1493,7 @@ function renderTop5(data) {
       </div>
       <div class="top5-value">${valueHtml(VALUE_BY_ID.get(b.id))}</div>
       ${b.opt ? compareLine(b.opt) : ''}
-      <div class="top5-cta${b.opt ? ' stack' : ''}">${b.opt ? setupButtons(b, b.opt.best) : buyButton(b)}</div>
+      ${b.opt ? `<div class="top5-cta">${setupLinks(b, b.opt.best)}</div>` : `<div class="top5-cta">${buyButton(b)}</div>`}
     </article>`;
   }).join('');
 }
@@ -1541,6 +1541,61 @@ function setupTag(cfg) {
     : '<span class="setup-tag" title="Buy the battery and panels as separate listings">Bought separately</span>';
 }
 
+// Small links: one for a bundle, one each for the battery and the panels otherwise.
+function buyLink(b, label) {
+  const link = amazonUrl(b);
+  if (!link) return '';
+  return `<a class="buy-link" href="${esc(link)}" target="_blank" rel="sponsored noopener"
+            aria-label="${esc(label)}: ${esc(b.brand)} ${esc(b.model)} (opens Amazon in a new tab)">${esc(label)} ↗</a>`;
+}
+function setupLinks(b, cfg) {
+  return `<div class="buy-links">${cfg.bundle
+    ? buyLink({ ...cfg.bundle, brand: b.brand, model: `${b.model} + solar bundle` }, 'Bundle')
+    : buyLink(b, 'Battery') + buyLink(cfg.panel, 'Panels')}</div>`;
+}
+
+// The station's best official bundle: the cheapest one that refills it in about a day,
+// otherwise the one with the most solar.
+function bestBundleFor(b) {
+  let pick = null;
+  for (const x of SOLAR_BUNDLES) {
+    if (x.battery_id !== b.id) continue;
+    const cfg = bundleSetup(b, x, SOLAR_PANELS);
+    if (!cfg) continue;
+    if (!pick || (cfg.reaches && !pick.reaches) ||
+        (cfg.reaches === pick.reaches && (cfg.reaches ? cfg.cost < pick.cost : cfg.usable > pick.usable))) pick = cfg;
+  }
+  return pick;
+}
+
+// The way to buy that isn't the best one: the best bundle when buying separately wins,
+// or the separate setup when a bundle wins.
+function otherWay(b) {
+  const o = b.opt;
+  return o.best.bundle ? o.separate : bestBundleFor(b);
+}
+
+// How the other way compares with the best way, in words (no prices on the site).
+function otherVerdict(other, best) {
+  const gap = setupTotal(other) - setupTotal(best);
+  const pct = Math.abs(gap) / Math.max(setupTotal(other), setupTotal(best));
+  if (!other.reaches) return gap < 0
+    ? '<span class="warn-text">Costs less, but too small to refill in a day</span>'
+    : '<span class="warn-text">Costs more and too small to refill in a day</span>';
+  if (pct < 0.03) return 'Costs about the same';
+  return pct < 0.10 ? 'Costs a little more' : pct < 0.25 ? 'Costs more' : 'Costs a lot more';
+}
+
+// One way to buy, for a table cell: what it is, how fast it refills, and its links.
+function wayHtml(b, cfg, note) {
+  const kind = cfg.bundle ? 'Bundle' : 'Separately';
+  return `<div class="way"><span class="way-kind">${kind}:</span> ${setupText(cfg)}
+    <div class="way-sub">${cfg.reaches ? `Full in ${fmtSunHours(refillHours(b, cfg))} of sun`
+      : `<span class="warn-text">Full in ${fmtSunHours(refillHours(b, cfg))} of sun</span>`}</div>
+    ${note ? `<div class="way-sub">${note}</div>` : ''}
+    ${setupLinks(b, cfg)}</div>`;
+}
+
 // One button for a bundle, one each for the battery and the panels otherwise.
 function setupButtons(b, cfg, short = false) {
   return cfg.bundle
@@ -1560,33 +1615,6 @@ function setupText(cfg) {
 
 function brandKey(s) { return String(s || '').trim().toLowerCase(); }
 
-function renderBundles(data) {
-  const section = document.getElementById('bundleSection');
-  const brand = document.getElementById('brandFilter').value;
-  const ids = new Set(data.map(b => b.id));
-  const items = isSolarView() && brand ? SOLAR_BUNDLES.map(x => {
-    const b = ALL_DATA.find(s => s.id === x.battery_id);
-    if (!b || brandKey(b.brand) !== brandKey(brand) || !ids.has(b.id)) return null;
-    const cfg = bundleSetup(b, x, SOLAR_PANELS);
-    return cfg ? { b, cfg, sep: (SOLAR_OPT.get(b.id) || {}).separate } : null;
-  }).filter(Boolean) : [];
-  section.hidden = !items.length;
-  if (!items.length) return;
-  items.sort((x, y) => x.b.model.localeCompare(y.b.model, undefined, { numeric: true }) || (x.cfg.cost - y.cfg.cost));
-  document.getElementById('bundleLabel').textContent = `${brand} bundles vs buying separately`;
-  const way = (label, b, cfg) => `<div>${label}: <b>${setupText(cfg)}</b><br>
-    Full in ${fmtSunHours(refillHours(b, cfg))} of sun${cfg.reaches ? '' : ' <span class="warn-text">(slower than ideal)</span>'}</div>`;
-  document.getElementById('bundleList').innerHTML = items.map(({ b, cfg, sep }) => `
-    <article class="bundle-item">
-      <h3>${esc(b.brand)} ${esc(b.model)}</h3>
-      <div class="bundle-ways">
-        ${way('Bundle', b, cfg)}
-        ${sep ? way('Best separately', b, sep) : '<div>No separately sold panels fit this battery well.</div>'}
-      </div>
-      ${sep ? `<div class="bundle-verdict">${compareText(cfg, sep)}.</div>` : ''}
-      <div class="top5-cta stack">${setupButtons(b, cfg)}${sep ? setupButtons(b, sep) : ''}</div>
-    </article>`).join('');
-}
 
 // The full list is long, especially as cards on phones, so start with the top rows.
 const ROW_LIMIT = 10;
@@ -1599,6 +1627,12 @@ function renderTable(data) {
   const total  = ALL_DATA.filter(b => b.category === activeTab).length;
 
   document.getElementById('resultCount').textContent = `${data.length} of ${total} match`;
+  const sortName = (document.getElementById('sortCol').selectedOptions[0] || {}).text || 'Best value';
+  document.getElementById('rankNote').textContent = sortKey === 'score'
+    ? (isSolarView()
+        ? 'Ranked by value: what the battery offers for the total cost of the battery and its solar, whichever way you buy it.'
+        : 'Ranked by value: what each battery offers for its usual price.')
+    : `Sorted by ${sortName.toLowerCase()}.`;
 
   const more = document.getElementById('showMore');
   more.hidden = showAllRows || data.length <= ROW_LIMIT;
@@ -1628,8 +1662,10 @@ function renderTable(data) {
           ? `<span class="td-runtime">${fmtHours(rt)}</span><span class="td-sub">${b.capacity_wh.toLocaleString()} Wh</span>`
           : `${b.capacity_wh.toLocaleString()} Wh`}</td>
         ${b.opt
-          ? `<td data-label="Solar setup">${setupText(b.opt.best)}${setupTag(b.opt.best)}${compareLine(b.opt)}</td>
-             <td class="td-num" data-label="Full in">${fmtSunHours(refillHours(b, b.opt.best))} of sun</td>`
+          ? `<td class="cell-way" data-label="Best way to buy">${wayHtml(b, b.opt.best, '<span class="way-best">Best value</span>')}</td>
+             <td class="cell-way" data-label="Other way">${(() => { const x = otherWay(b);
+               return x ? wayHtml(b, x, otherVerdict(x, b.opt.best))
+                        : `<span class="dash">${b.opt.best.bundle ? 'No separate panels fit well' : 'No official bundle'}</span>`; })()}</td>`
           : `<td class="td-num" data-label="Max power">${b.peak_power_w.toLocaleString()} W</td>
              <td class="td-num" data-label="Outlets" title="${b.outlets_120v} standard + ${b.l2_outlets} high-power outlets">${outletsText(b)}</td>`}`;
     }
@@ -1640,7 +1676,7 @@ function renderTable(data) {
         ${notes ? `<div class="td-extras">${notes}</div>` : ''}</td>
       ${cells}
       <td class="cell-value" data-label="Value">${valueHtml(VALUE_BY_ID.get(b.id))}</td>
-      <td class="cell-buy">${b.opt ? setupButtons(b, b.opt.best, true) : buyButton(b, 'Check price')}</td>
+      ${b.opt ? '' : `<td class="cell-buy">${buyButton(b, 'Check price')}</td>`}
     </tr>`;
   }).join('');
 }
@@ -1650,7 +1686,6 @@ function renderAll() {
   const data = getFiltered();
   syncSortUI();
   renderTop5(data);
-  renderBundles(data);
   renderTable(sortData(data));
 }
 
