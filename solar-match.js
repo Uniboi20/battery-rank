@@ -110,6 +110,47 @@ function bundleConfig(s, bundle, panels) {
   return cfg;
 }
 
+// A bundle as a setup, whatever the separate price: its solar cost is the bundle price minus
+// the station's own price (plus any adapter the station needs).
+function bundleSetup(s, bundle, panels) {
+  const p = panels.find(x => x.id === bundle.panel_id);
+  if (!p || bundle.battery_id !== s.id) return null;
+  const cfg = configFor(s, p, bundle.panel_count);
+  if (!cfg) return null;
+  const adapter = cfg.cost - bundle.panel_count * (Number(p.price) || 0);
+  cfg.cost = Number(bundle.price) - Number(s.price) + adapter;
+  cfg.bundle = bundle;
+  return cfg;
+}
+
+// Both ways to buy a station's solar, each only if it reaches 85% of the target: the cheapest
+// separately bought setup and the cheapest official bundle. `best` is whichever costs less.
+function solarOptions(s, panels, bundles) {
+  const sep = bestSolarFor(s, panels, 'portable', []);
+  const separate = sep && sep.reaches ? sep : null;
+  let bundle = null;
+  for (const b of bundles) {
+    if (b.battery_id !== s.id) continue;
+    const cfg = bundleSetup(s, b, panels);
+    if (cfg && cfg.reaches && (!bundle || cfg.cost < bundle.cost)) bundle = cfg;
+  }
+  const best = !separate ? bundle : !bundle ? separate : bundle.cost < separate.cost ? bundle : separate;
+  return best ? { separate, bundle, best } : null;
+}
+
+// How a bundle compares with buying separately, in words (prices can't be shown on the site).
+// Both setups are for the same station, so the gap in solar cost is the whole gap.
+function compareText(bundleCfg, separateCfg) {
+  const total = cfg => Number(cfg.station.price) + cfg.cost;
+  const gap = total(separateCfg) - total(bundleCfg);
+  const pct = Math.abs(gap) / Math.max(total(bundleCfg), total(separateCfg));
+  if (pct < 0.03) return 'The bundle costs about the same as buying separately';
+  const size = pct < 0.10 ? 'a little' : pct < 0.25 ? '' : 'a lot';
+  return gap > 0
+    ? `The bundle is ${size ? size + ' ' : ''}cheaper than buying separately`
+    : `Buying separately is ${size ? size + ' ' : ''}cheaper than the bundle`;
+}
+
 // Cheapest panel setup for a station from a list of panels (portable by default), counting
 // any bundles for that station as candidates too.
 function bestSolarFor(s, panels, type = 'portable', bundles = []) {

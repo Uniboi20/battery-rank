@@ -379,6 +379,16 @@
   .solar-teaser .btn { margin-top:0; }
   .solar-line { margin-top:0.6rem; font-size:0.875rem; color:var(--sub); line-height:1.4; }
   .solar-line b { color:var(--text); }
+  .mode-row { display:flex; flex-wrap:wrap; align-items:center; gap:0.5rem 1rem; margin:0 0 1.25rem; }
+  .setup-tag { display:inline-block; margin-left:0.3rem; padding:0.05rem 0.45rem; border-radius:999px; font-size:0.72rem;
+               font-weight:600; border:1px solid var(--border); color:var(--sub); vertical-align:1px; white-space:nowrap; }
+  .bundle-list { display:grid; gap:0.75rem; }
+  .bundle-item { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:0.9rem 1rem; }
+  .bundle-item h3 { font-size:1rem; margin-bottom:0.4rem; }
+  .bundle-ways { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:0.5rem 1rem; font-size:0.9rem; color:var(--sub); }
+  .bundle-ways b { color:var(--text); }
+  .bundle-verdict { margin-top:0.5rem; font-weight:600; font-size:0.9rem; }
+  .cell-buy .buy-btn + .buy-btn { margin-top:0.35rem; }
   .bundle-tag { display:inline-block; margin-left:0.3rem; padding:0.05rem 0.45rem; border-radius:999px; font-size:0.72rem; font-weight:600;
                 border:1px solid var(--accent); color:var(--accent); text-decoration:none; vertical-align:1px; }
   .top5-cta.stack { flex-direction:column; gap:0.5rem; }
@@ -597,6 +607,14 @@
     <p class="hero-sub" id="heroSub">Pick what you need to power. We'll find the best value for you.</p>
   </div>
 
+  <div class="mode-row" id="modeRow" hidden>
+    <div class="seg" role="group" aria-label="What to compare">
+      <button type="button" id="mode-battery" aria-pressed="true" onclick="setSolarMode(false)">Batteries</button>
+      <button type="button" id="mode-solar" aria-pressed="false" onclick="setSolarMode(true)">☀️ Battery + solar</button>
+    </div>
+    <span class="section-note" id="modeNote"></span>
+  </div>
+
   <section class="panel" aria-labelledby="pickerTitle">
     <h2 class="step-title" id="pickerTitle"><span class="step-num">1</span><span id="pickerTitleText"></span></h2>
     <p class="step-sub" id="pickerSub"></p>
@@ -654,12 +672,12 @@
     <div class="top5-grid" id="top5Grid"></div>
   </section>
 
-  <section aria-labelledby="solarLabel" id="solarSection" hidden>
+  <section aria-labelledby="bundleLabel" id="bundleSection" hidden>
     <div class="section-head">
-      <h2 class="section-title" id="solarLabel">☀️ Best value with solar</h2>
-      <span class="section-note">Optional: a battery plus the solar to refill it in about a day of sun.</span>
+      <h2 class="section-title" id="bundleLabel"></h2>
+      <span class="section-note">Each official bundle next to the best way to buy the same battery and its solar separately.</span>
     </div>
-    <div id="solarBody"></div>
+    <div class="bundle-list" id="bundleList"></div>
   </section>
 
   <section aria-labelledby="allLabel">
@@ -1188,7 +1206,8 @@ function setBudget(i) {
 const TIER_SIGNS = ['$', '$$', '$$$'];
 function priceTagHtml(b) {
   const tiers = TAB_CONFIG[activeTab].tiers;
-  const i = tiers.findIndex(t => !t.max || b.price <= t.max);
+  const price = b.setupPrice ?? b.price;
+  const i = tiers.findIndex(t => !t.max || price <= t.max);
   return `<span class="price-tag" title="Usual price range. Tap Check price for today's price on Amazon.">` +
          `${TIER_SIGNS[i]} ${tiers[i].tag || tiers[i].label}</span>`;
 }
@@ -1313,8 +1332,10 @@ function tableHeaders() {
     avgLoad
       ? { label: 'Runs your stuff', sort: 'capacity', num: true, title: 'Estimated run time for the items you picked' }
       : { label: 'Battery size', sort: 'capacity', num: true, title: 'Capacity in watt-hours' },
-    { label: 'Max power', sort: 'peak_power_w', num: true, title: 'Most watts it can supply at once' },
-    { label: 'Outlets', num: true },
+    ...(isSolarView()
+      ? [{ label: 'Solar setup' }, { label: 'Full in', num: true, title: 'Hours of good sun from empty to full' }]
+      : [{ label: 'Max power', sort: 'peak_power_w', num: true, title: 'Most watts it can supply at once' },
+         { label: 'Outlets', num: true }]),
     { label: 'Value', sort: 'score' },
     { label: '' },
   ];
@@ -1347,13 +1368,17 @@ function getFiltered() {
   const isPB   = activeTab === 'power_bank';
   const cfg    = TAB_CONFIG[activeTab];
 
+  const solar = isSolarView();
+  if (solar) buildSolarOptions();
   const scored = ALL_DATA
-    .filter(b => b.category === activeTab)
-    .map(b => ({
-      ...b,
-      score: calcScore(b, maxPower),
-      capacity: isPB ? (b.capacity_mah || 0) : b.capacity_wh,
-    }));
+    .filter(b => b.category === activeTab && (!solar || SOLAR_OPT.has(b.id)))
+    .map(b => {
+      const o = solar ? SOLAR_OPT.get(b.id) : null;
+      // With solar: the station's points minus the battery and panel prices together.
+      const score = calcScore(b, maxPower) - (o ? o.best.cost : 0);
+      return { ...b, score, opt: o, setupPrice: o ? setupTotal(o.best) : b.price,
+               capacity: isPB ? (b.capacity_mah || 0) : b.capacity_wh };
+    });
   const fits = scored.filter(b => fitsNeeds(b, maxPrice));
   // Ratings compare the batteries that can do the job you described. Search and brand are
   // left out so looking up one model doesn't automatically make it "Top value".
@@ -1369,7 +1394,8 @@ function getFiltered() {
 function fitsNeeds(b, priceCap) {
   const cfg = TAB_CONFIG[activeTab];
   const capacity = activeTab === 'power_bank' ? (b.capacity_mah || 0) : b.capacity_wh;
-  if (priceCap < cfg.priceMax && b.price > priceCap) return false;
+  const price = isSolarView() ? (SOLAR_OPT.has(b.id) ? setupTotal(SOLAR_OPT.get(b.id).best) : Infinity) : b.price;
+  if (priceCap < cfg.priceMax && price > priceCap) return false;
   if (capacity < minCapacity) return false;
   if (needWatts && b.peak_power_w < needWatts) return false;
   for (const key of activeChips) { if (!b[key]) return false; }
@@ -1381,7 +1407,7 @@ function fitsNeeds(b, priceCap) {
 function budgetFallback() {
   const cfg = TAB_CONFIG[activeTab];
   if (maxPrice >= cfg.priceMax) return null;
-  const tab = ALL_DATA.filter(b => b.category === activeTab);
+  const tab = ALL_DATA.filter(b => b.category === activeTab && (!isSolarView() || SOLAR_OPT.has(b.id)));
   const i = cfg.tiers.findIndex(t => (t.max || cfg.priceMax) > maxPrice &&
     tab.some(b => fitsNeeds(b, t.max || cfg.priceMax)));
   return i < 0 ? null : i;
@@ -1441,13 +1467,17 @@ function renderTop5(data) {
       ];
     } else {
       const rt = runtimeHours(b);
-      highlight = rt
+      const cfg = b.opt && b.opt.best;
+      highlight = cfg
+        ? `+ <b>${setupText(cfg)}</b>${setupTag(cfg)}<br>Full in <b>${fmtSunHours(refillHours(b, cfg))}</b> of good sun`
+        : rt
         ? `Runs your stuff for <b>${fmtHours(rt)}</b>`
         : `Runs a fridge for <b>${fmtHours(b.capacity_wh * INVERTER_EFFICIENCY / FRIDGE_AVG_W)}</b>`;
       stats = [
         ['Battery size', `${b.capacity_wh.toLocaleString()} Wh`],
-        ['Max power', `${b.peak_power_w.toLocaleString()} W`],
-        ['Outlets', outletsText(b)],
+        cfg ? ['Solar', `${(cfg.count * cfg.panel.rated_w).toLocaleString()} W rated`]
+            : ['Max power', `${b.peak_power_w.toLocaleString()} W`],
+        cfg && rt ? ['Runs your stuff', fmtHours(rt)] : ['Outlets', outletsText(b)],
       ];
     }
     return `<article class="top5-card ${RANK_CLASSES[i]}">
@@ -1459,8 +1489,8 @@ function renderTop5(data) {
         ${stats.map(([l, v]) => `<div class="top5-stat"><span class="top5-stat-label">${l}</span><span class="top5-stat-val">${v}</span></div>`).join('')}
       </div>
       <div class="top5-value">${valueHtml(VALUE_BY_ID.get(b.id))}</div>
-      ${!isPB && showSolar ? solarLineHtml(b) : ''}
-      <div class="top5-cta">${buyButton(b)}</div>
+      ${b.opt ? compareLine(b.opt) : ''}
+      <div class="top5-cta${b.opt ? ' stack' : ''}">${b.opt ? setupButtons(b, b.opt.best) : buyButton(b)}</div>
     </article>`;
   }).join('');
 }
@@ -1468,81 +1498,89 @@ function renderTop5(data) {
 // ── Battery + solar ──
 let SOLAR_PANELS = [];
 let SOLAR_BUNDLES = [];
-let showSolar = false;
-try { showSolar = localStorage.getItem('pr-show-solar') === '1'; } catch {}
+// Battery + solar mode: the whole page compares each station with its best solar setup.
+let solarMode = false;
+try { solarMode = localStorage.getItem('pr-show-solar') === '1'; } catch {}
+let SOLAR_OPT = new Map();   // station id -> { separate, bundle, best } (only stations that can do solar)
+const isSolarView = () => solarMode && activeTab === 'power_station';
 
-function setShowSolar(on) {
-  showSolar = on;
+function setSolarMode(on) {
+  solarMode = on;
   try { localStorage.setItem('pr-show-solar', on ? '1' : '0'); } catch {}
+  showAllRows = false;
   renderAll();
-  if (on) {
-    // Land on the section's top edge, just below the sticky header.
-    const header = document.querySelector('header');
-    const top = document.getElementById('solarSection').getBoundingClientRect().top + window.scrollY
-      - (header ? header.offsetHeight : 0) - 12;
-    window.scrollTo({ top, behavior: 'smooth' });
+}
+
+function syncModeUI() {
+  const row = document.getElementById('modeRow');
+  row.hidden = activeTab !== 'power_station' || !SOLAR_PANELS.length;
+  document.getElementById('mode-battery').setAttribute('aria-pressed', String(!isSolarView()));
+  document.getElementById('mode-solar').setAttribute('aria-pressed', String(isSolarView()));
+  document.getElementById('modeNote').textContent = isSolarView()
+    ? 'Each battery with the folding solar panels to refill it in about a day of sun, as a bundle or bought separately, whichever is the better value.'
+    : '';
+}
+
+function buildSolarOptions() {
+  SOLAR_OPT = new Map();
+  for (const b of ALL_DATA) {
+    if (b.category !== 'power_station') continue;
+    const o = solarOptions(b, SOLAR_PANELS, SOLAR_BUNDLES);
+    if (o) SOLAR_OPT.set(b.id, o);
   }
+}
+const setupTotal = cfg => Number(cfg.station.price) + cfg.cost;
+
+function setupTag(cfg) {
+  return cfg.bundle
+    ? `<a class="bundle-tag" href="${esc(amazonUrl(cfg.bundle))}" target="_blank" rel="sponsored noopener"
+        title="Sold together as one bundle (opens Amazon)">Bundle ↗</a>`
+    : '<span class="setup-tag" title="Buy the battery and panels as separate listings">Bought separately</span>';
+}
+
+// One button for a bundle, one each for the battery and the panels otherwise.
+function setupButtons(b, cfg, short = false) {
+  return cfg.bundle
+    ? buyButton({ ...cfg.bundle, brand: b.brand, model: `${b.model} + solar bundle` }, short ? 'Check price' : 'Check bundle price')
+    : buyButton(b, short ? 'Battery' : 'Check battery price') + buyButton(cfg.panel, short ? 'Panels' : 'Check panel price');
+}
+
+// The other way to buy, when the station has both a bundle and a separate setup.
+function compareLine(o) {
+  return o.bundle && o.separate ? `<div class="td-extras">${compareText(o.bundle, o.separate)}.</div>` : '';
 }
 
 function setupText(cfg) {
   return `${cfg.count} × ${esc(cfg.panel.brand)} ${esc(cfg.panel.model)}` +
-    (cfg.station && cfg.station.solar_adapter ? ` + ${esc(cfg.station.solar_adapter)}` : '') +
-    (cfg.bundle ? ` <a class="bundle-tag" href="${esc(amazonUrl(cfg.bundle))}" target="_blank" rel="sponsored noopener"
-      title="Cheaper bought together as a bundle (opens Amazon)">Bundle ↗</a>` : '');
+    (cfg.station && cfg.station.solar_adapter ? ` + ${esc(cfg.station.solar_adapter)}` : '');
 }
 
-function solarLineHtml(b) {
-  const cfg = bestSolarFor(b, SOLAR_PANELS, 'portable', SOLAR_BUNDLES);
-  if (!cfg) return '';
-  return `<div class="solar-line">☀️ <b>${setupText(cfg)}</b> refills it in ${fmtSunHours(refillHours(b, cfg))} of sun.
-    <a href="/solar.html?station=${b.id}">Other panels</a></div>`;
-}
-
-// Ranks the stations that fit your needs by their own score minus the price of the cheapest
-// solar setup that gets them to at least 85%
-// of its solar target (a bundle when that's cheaper). Stations that can't reach 85% are left out.
-function renderSolar(data) {
-  const section = document.getElementById('solarSection');
-  const body = document.getElementById('solarBody');
-  const portable = SOLAR_PANELS.filter(p => p.panel_type === 'portable' &&
-    (soldAlone(p) || SOLAR_BUNDLES.some(x => x.panel_id === p.id)));
-  if (activeTab !== 'power_station' || !portable.length) { section.hidden = true; return; }
-  section.hidden = false;
-  if (!showSolar) {
-    body.innerHTML = `<div class="panel solar-teaser">
-      <p>Want to recharge from the sun? See which battery and folding solar panels give you the most for your money together.</p>
-      <button class="btn" onclick="setShowSolar(true)">Show battery + solar picks</button></div>`;
-    return;
-  }
-  const combos = data.map(b => {
-    const cfg = bestSolarFor(b, SOLAR_PANELS, 'portable', SOLAR_BUNDLES);
-    return cfg && cfg.reaches ? { b, cfg, combined: b.score - cfg.cost } : null;
-  }).filter(Boolean).sort((x, y) => y.combined - x.combined).slice(0, 3);
-
-  if (!combos.length) {
-    body.innerHTML = `<div class="panel solar-teaser"><p>None of the power stations that fit your needs have a solar
-      setup we can match yet.</p><button class="link-btn" onclick="setShowSolar(false)">Hide solar picks</button></div>`;
-    return;
-  }
-  body.innerHTML = `<div class="top5-grid three">${combos.map(({ b, cfg }, i) => {
-    const rt = runtimeHours(b);
-    return `<article class="top5-card ${RANK_CLASSES[i]}">
-      <div class="top5-rank"><span>#${i + 1} with solar</span></div>
-      <div class="top5-brand">${esc(b.brand)}</div>
-      <h3 class="top5-model">${esc(b.model)}</h3>
-      <div class="top5-highlight">+ <b>${setupText(cfg)}</b><br>Refills in <b>${fmtSunHours(refillHours(b, cfg))}</b> of good sun</div>
-      <div class="top5-stats">
-        <div class="top5-stat"><span class="top5-stat-label">Battery size</span><span class="top5-stat-val">${b.capacity_wh.toLocaleString()} Wh</span></div>
-        <div class="top5-stat"><span class="top5-stat-label">Solar</span><span class="top5-stat-val">${(cfg.count * cfg.panel.rated_w).toLocaleString()} W rated</span></div>
-        ${rt ? `<div class="top5-stat"><span class="top5-stat-label">Runs your stuff</span><span class="top5-stat-val">${fmtHours(rt)}</span></div>` : ''}
+function renderBundles(data) {
+  const section = document.getElementById('bundleSection');
+  const brand = document.getElementById('brandFilter').value;
+  const ids = new Set(data.map(b => b.id));
+  const items = isSolarView() && brand ? SOLAR_BUNDLES.map(x => {
+    const b = ALL_DATA.find(s => s.id === x.battery_id);
+    if (!b || b.brand !== brand || !ids.has(b.id)) return null;
+    const cfg = bundleSetup(b, x, SOLAR_PANELS);
+    return cfg ? { b, cfg, sep: (SOLAR_OPT.get(b.id) || {}).separate } : null;
+  }).filter(Boolean) : [];
+  section.hidden = !items.length;
+  if (!items.length) return;
+  items.sort((x, y) => x.b.model.localeCompare(y.b.model, undefined, { numeric: true }) || (x.cfg.cost - y.cfg.cost));
+  document.getElementById('bundleLabel').textContent = `${brand} bundles vs buying separately`;
+  const way = (label, b, cfg) => `<div>${label}: <b>${setupText(cfg)}</b><br>
+    Full in ${fmtSunHours(refillHours(b, cfg))} of sun${cfg.reaches ? '' : ' <span class="warn-text">(slower than ideal)</span>'}</div>`;
+  document.getElementById('bundleList').innerHTML = items.map(({ b, cfg, sep }) => `
+    <article class="bundle-item">
+      <h3>${esc(b.brand)} ${esc(b.model)}</h3>
+      <div class="bundle-ways">
+        ${way('Bundle', b, cfg)}
+        ${sep ? way('Best separately', b, sep) : '<div>No separately sold panels fit this battery well.</div>'}
       </div>
-      <div class="top5-cta stack">${cfg.bundle
-        ? buyButton({ ...cfg.bundle, brand: b.brand, model: `${b.model} + solar bundle` }, 'Check bundle price')
-        : buyButton(b, 'Check battery price') + buyButton(cfg.panel, 'Check panel price')}</div>
-    </article>`;
-  }).join('')}</div>
-  <div class="solar-more"><a href="/solar.html">Compare all solar panels</a>
-    <button class="link-btn" onclick="setShowSolar(false)">Hide solar picks</button></div>`;
+      ${sep ? `<div class="bundle-verdict">${compareText(cfg, sep)}.</div>` : ''}
+      <div class="top5-cta stack">${setupButtons(b, cfg)}${sep ? setupButtons(b, sep) : ''}</div>
+    </article>`).join('');
 }
 
 // The full list is long, especially as cards on phones, so start with the top rows.
@@ -1584,8 +1622,11 @@ function renderTable(data) {
         <td class="td-num" data-label="${rt ? 'Runs your stuff' : 'Battery size'}">${rt
           ? `<span class="td-runtime">${fmtHours(rt)}</span><span class="td-sub">${b.capacity_wh.toLocaleString()} Wh</span>`
           : `${b.capacity_wh.toLocaleString()} Wh`}</td>
-        <td class="td-num" data-label="Max power">${b.peak_power_w.toLocaleString()} W</td>
-        <td class="td-num" data-label="Outlets" title="${b.outlets_120v} standard + ${b.l2_outlets} high-power outlets">${outletsText(b)}</td>`;
+        ${b.opt
+          ? `<td data-label="Solar setup">${setupText(b.opt.best)}${setupTag(b.opt.best)}${compareLine(b.opt)}</td>
+             <td class="td-num" data-label="Full in">${fmtSunHours(refillHours(b, b.opt.best))} of sun</td>`
+          : `<td class="td-num" data-label="Max power">${b.peak_power_w.toLocaleString()} W</td>
+             <td class="td-num" data-label="Outlets" title="${b.outlets_120v} standard + ${b.l2_outlets} high-power outlets">${outletsText(b)}</td>`}`;
     }
 
     return `<tr>
@@ -1594,16 +1635,17 @@ function renderTable(data) {
         ${notes ? `<div class="td-extras">${notes}</div>` : ''}</td>
       ${cells}
       <td class="cell-value" data-label="Value">${valueHtml(VALUE_BY_ID.get(b.id))}</td>
-      <td class="cell-buy">${buyButton(b, 'Check price')}</td>
+      <td class="cell-buy">${b.opt ? setupButtons(b, b.opt.best, true) : buyButton(b, 'Check price')}</td>
     </tr>`;
   }).join('');
 }
 
 function renderAll() {
+  syncModeUI();
   const data = getFiltered();
   syncSortUI();
   renderTop5(data);
-  renderSolar(data);
+  renderBundles(data);
   renderTable(sortData(data));
 }
 
