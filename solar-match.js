@@ -79,7 +79,7 @@ function configFor(s, p, n) {
   // Some stations (DJI) need a separate solar adapter; its price counts toward the setup.
   const cost = n * (Number(p.price) || 0) + (s.solar_adapter ? Number(s.solar_adapter_price) || 0 : 0);
   return { panel: p, station: s, count: n, strings, layouts, usable, target, cost,
-           reaches: usable >= target * 0.95 };
+           reaches: usable >= target * 0.85 };
 }
 
 function solarConfig(s, p) {
