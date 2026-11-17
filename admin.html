@@ -96,7 +96,7 @@
 <div class="warn">
   This talks to a Netlify function that writes to Supabase with elevated access, gated by a password only
   you know. Open each Amazon link yourself, check the current price, update the field, and save — one row
-  or all of them. Use + Add battery or + Add solar panel for new products, and Details on any row to see and edit every field. You can also fix a product's brand, model, or ASIN (the 10-character Amazon product ID
+  or all of them. Use + Add battery, + Add solar panel or + Add bundle for new products, and Details on any row to see and edit every field. You can also fix a product's brand, model, or ASIN (the 10-character Amazon product ID
   in its link, e.g. B0DG8JQNS4) — edited fields turn orange until saved. Use Delete to permanently remove a
   product that's no longer available. Click ↗ to load a product in a separate Amazon window; after that, type the
   price and press Enter to save and move to the next row, which loads in the same window. Saving a price that hasn't changed still refreshes its "checked" timestamp, so it's fine
@@ -113,6 +113,7 @@
   <div class="toolbar">
     <button onclick="toggleAdd()" id="addBtn">+ Add battery</button>
     <button onclick="toggleSolarAdd()" id="addSolarBtn">+ Add solar panel</button>
+    <button onclick="toggleBundleAdd()" id="addBundleBtn">+ Add bundle</button>
     <button class="secondary" onclick="saveAll()">Save all rows</button>
     <button class="secondary" onclick="loadData()">Reload from database</button>
     <span class="progress" id="progress"></span>
@@ -137,8 +138,25 @@
       <span class="form-msg" id="addSolarMsg"></span>
     </div>
   </section>
+  <section class="panel" id="addBundlePanel" hidden>
+    <h2>Add a battery + solar bundle</h2>
+    <p class="hint">One Amazon listing that sells a power station together with solar panels. The site uses the bundle only when it's cheaper than buying the station and panels separately, and then shows a "Bundle" tag on that pick. Add the station and the panel first if they aren't listed yet.</p>
+    <div class="form-grid">
+      <label class="field">Power station <span class="req">*</span><select id="bnew-battery"></select></label>
+      <label class="field">Solar panel <span class="req">*</span><select id="bnew-panel"></select></label>
+      <label class="field">Number of panels <span class="req">*</span><input class="text-input" id="bnew-count" type="number" min="1" max="8" step="1" value="1"></label>
+      <label class="field">Bundle price ($) <span class="req">*</span><input class="text-input" id="bnew-price" type="number" step="0.01"></label>
+      <label class="field">Bundle ASIN <span class="req">*</span><input class="text-input" id="bnew-asin" maxlength="10"></label>
+    </div>
+    <div class="form-actions">
+      <button onclick="createBundle()" id="createBundleBtn">Create bundle</button>
+      <button class="secondary" onclick="toggleBundleAdd(false)">Cancel</button>
+      <span class="form-msg" id="addBundleMsg"></span>
+    </div>
+  </section>
   <div id="tables"></div>
   <div id="solarTables"></div>
+  <div id="bundleTables"></div>
 </div>
 
 <script>
@@ -148,6 +166,7 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 let SECRET = '';
 let ROWS = [];
 let SOLAR_ROWS = [];
+let BUNDLE_ROWS = [];
 
 function unlock() {
   const val = document.getElementById('secretInput').value.trim();
@@ -191,9 +210,14 @@ async function loadData() {
   });
   SOLAR_ROWS = sres.ok ? await sres.json() : [];
   renderSolar();
+  const bres = await fetch(`${SUPABASE_URL}/rest/v1/solar_bundles?select=*`, {
+    headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` }
+  });
+  BUNDLE_ROWS = bres.ok ? await bres.json() : [];
+  renderBundles();
   document.getElementById('progress').textContent =
-    `${ROWS.length} batteries and ${SOLAR_ROWS.length} solar panels loaded, sorted by brand then model.` +
-    (sres.ok ? '' : ' (Solar panels failed to load.)');
+    `${ROWS.length} batteries, ${SOLAR_ROWS.length} solar panels and ${BUNDLE_ROWS.length} bundles loaded, sorted by brand then model.` +
+    (sres.ok ? '' : ' (Solar panels failed to load.)') + (bres.ok ? '' : ' (Bundles failed to load.)');
 }
 
 // ── Full-field editor ──
@@ -522,6 +546,9 @@ function openAmazon(id) {
 function openSolarAmazon(id) {
   return openAmazonFor(SOLAR_ROWS.find(p => p.id === id), `input-s${id}`);
 }
+function openBundleAmazon(id) {
+  return openAmazonFor(BUNDLE_ROWS.find(x => x.id === id), `input-b${id}`);
+}
 function openAmazonFor(row, inputId) {
   if (!row || !row.asin) return true;
   const url = amazonUrl(row);
@@ -542,18 +569,25 @@ function openAmazonFor(row, inputId) {
 }
 
 // Enter in a price box: save that row, then jump to the next row's price and load it on Amazon.
-// Battery inputs are input-<id>, solar panel inputs are input-s<id>, so the run carries on
-// from the last battery into the solar panels.
+// Battery inputs are input-<id>, solar panel inputs are input-s<id>, bundle inputs are input-b<id>,
+// so the run carries on from the last battery into the solar panels, then the bundles.
 function saveAndNext(key) {
   key = String(key);
-  const inputs = [...document.querySelectorAll('#tables .price-input, #solarTables .price-input')];
+  const inputs = [...document.querySelectorAll('#tables .price-input, #solarTables .price-input, #bundleTables .price-input')];
   const next = inputs[inputs.findIndex(el => el.id === `input-${key}`) + 1];
-  key.startsWith('s') ? saveSolarRow(Number(key.slice(1))) : saveRow(Number(key));
+  saveByKey(key);
   if (next) {
     const nextKey = next.id.slice('input-'.length);
-    nextKey.startsWith('s') ? openSolarAmazon(Number(nextKey.slice(1))) : openAmazon(Number(nextKey));
+    nextKey.startsWith('s') ? openSolarAmazon(Number(nextKey.slice(1)))
+      : nextKey.startsWith('b') ? openBundleAmazon(Number(nextKey.slice(1))) : openAmazon(Number(nextKey));
     next.scrollIntoView({ block: 'center', behavior: 'smooth' });
   }
+}
+
+function saveByKey(key) {
+  key = String(key);
+  return key.startsWith('s') ? saveSolarRow(Number(key.slice(1)))
+    : key.startsWith('b') ? saveBundleRow(Number(key.slice(1))) : saveRow(Number(key));
 }
 
 function markDirty(el) {
@@ -645,13 +679,13 @@ async function deleteRow(id) {
 }
 
 async function saveAll() {
-  const ids = [...ROWS.map(b => b.id), ...SOLAR_ROWS.map(p => `s${p.id}`)];
+  const ids = [...ROWS.map(b => b.id), ...SOLAR_ROWS.map(p => `s${p.id}`), ...BUNDLE_ROWS.map(x => `b${x.id}`)];
   const progress = document.getElementById('progress');
   let failed = 0;
   for (let i = 0; i < ids.length; i++) {
     progress.textContent = `Saving ${i + 1}/${ids.length}…`;
     const k = ids[i];
-    const ok = typeof k === 'string' ? await saveSolarRow(Number(k.slice(1))) : await saveRow(k);
+    const ok = await saveByKey(k);
     if (!ok) failed++;
   }
   progress.textContent = failed
@@ -867,6 +901,163 @@ async function deleteSolarRow(id) {
     SOLAR_ROWS = SOLAR_ROWS.filter(p => p.id !== id);
     renderSolar();
     document.getElementById('progress').textContent = `Deleted ${row.brand} ${row.model}.`;
+  } catch (err) {
+    status.textContent = '✗'; status.style.color = 'var(--negative)'; status.title = String(err);
+    alert(`Delete failed: ${err.message || err}`);
+  }
+}
+// ── Battery + solar bundles ──
+async function postBundle(body) {
+  const res = await fetch('/.netlify/functions/save-bundle', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ secret: SECRET, ...body }),
+  });
+  const text = await res.text();
+  if (!res.ok) throw new Error(text);
+  return JSON.parse(text);
+}
+
+const stationName = id => { const b = ROWS.find(x => x.id === id); return b ? `${b.brand} ${b.model}` : `station ${id} (missing)`; };
+const panelName = id => { const p = SOLAR_ROWS.find(x => x.id === id); return p ? `${p.brand} ${p.model}` : `panel ${id} (missing)`; };
+
+function toggleBundleAdd(show) {
+  const panel = document.getElementById('addBundlePanel');
+  show = show ?? panel.hidden;
+  panel.hidden = !show;
+  document.getElementById('addBundleBtn').hidden = show;
+  if (!show) return;
+  const opt = (id, name) => `<option value="${id}">${esc(name)}</option>`;
+  document.getElementById('bnew-battery').innerHTML = ROWS.filter(b => b.category === 'power_station')
+    .sort(byBrandModel).map(b => opt(b.id, `${b.brand} ${b.model}`)).join('');
+  document.getElementById('bnew-panel').innerHTML = [...SOLAR_ROWS].sort(byBrandModel)
+    .map(p => opt(p.id, `${p.brand} ${p.model}`)).join('');
+  ['bnew-price', 'bnew-asin'].forEach(i => { document.getElementById(i).value = ''; });
+  document.getElementById('bnew-count').value = 1;
+  document.getElementById('addBundleMsg').textContent = '';
+}
+
+async function createBundle() {
+  const msg = document.getElementById('addBundleMsg');
+  const fields = {
+    battery_id: Number(document.getElementById('bnew-battery').value),
+    panel_id: Number(document.getElementById('bnew-panel').value),
+    panel_count: Number(document.getElementById('bnew-count').value),
+    price: parseFloat(document.getElementById('bnew-price').value),
+    asin: document.getElementById('bnew-asin').value.trim().toUpperCase(),
+  };
+  if (!fields.battery_id || !fields.panel_id || !(fields.panel_count >= 1) || !(fields.price > 0) || !ASIN_RE.test(fields.asin)) {
+    msg.className = 'form-msg err';
+    msg.textContent = 'Fill every field (ASIN is 10 letters/digits, 1 to 8 panels).';
+    return;
+  }
+  const btn = document.getElementById('createBundleBtn');
+  btn.disabled = true; msg.className = 'form-msg'; msg.textContent = 'Creating…';
+  try {
+    const { row } = await postBundle({ fields });
+    BUNDLE_ROWS.push(row);
+    renderBundles();
+    toggleBundleAdd(false);
+    document.getElementById('progress').textContent = `Added the ${stationName(row.battery_id)} bundle.`;
+  } catch (err) {
+    msg.className = 'form-msg err';
+    msg.textContent = `Create failed: ${err.message || err}`;
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function renderBundles() {
+  const container = document.getElementById('bundleTables');
+  if (!BUNDLE_ROWS.length) { container.innerHTML = ''; return; }
+  const rows = [...BUNDLE_ROWS].sort((a, b) => byName(stationName(a.battery_id), stationName(b.battery_id)));
+  container.innerHTML = `
+    <div class="group-label">Battery + Solar Bundles (${rows.length})</div>
+    <table>
+      <thead><tr><th>Station</th><th>Panels</th><th>ASIN</th><th>Current price</th><th>Checked</th><th>New price</th><th></th><th></th><th></th></tr></thead>
+      <tbody>
+        ${rows.map(x => {
+          const age = ageInfo(x.price_updated_at);
+          const k = `b${x.id}`;
+          const st = ROWS.find(b => b.id === x.battery_id);
+          const pn = SOLAR_ROWS.find(p => p.id === x.panel_id);
+          const separate = st && pn ? Number(st.price) + x.panel_count * Number(pn.price) : null;
+          return `<tr id="row-${k}">
+            <td>${esc(stationName(x.battery_id))}</td>
+            <td><input class="text-input" id="count-${k}" type="number" min="1" max="8" step="1" value="${x.panel_count}" style="width:3.2rem"
+                  aria-label="Number of panels" oninput="markDirty(this)"> × ${esc(panelName(x.panel_id))}
+                ${separate ? `<div class="brand">Separately $${separate.toLocaleString()}</div>` : ''}</td>
+            <td><div class="name-cell">
+              <input class="text-input asin-input" id="asin-${k}" value="${esc(x.asin)}" maxlength="10" aria-label="ASIN" oninput="markDirty(this)">
+              <a class="open-link" id="link-${k}" href="${esc(amazonUrl(x))}" target="_blank" rel="noopener" title="Open in the Amazon window"
+                 onclick="return openBundleAmazon(${x.id})">↗</a>
+            </div></td>
+            <td>$${Number(x.price).toLocaleString()}</td>
+            <td class="age ${age.cls}">${age.label}</td>
+            <td><input class="price-input" id="input-${k}" type="number" step="0.01" value="${x.price}"
+                  aria-label="New price" oninput="markDirty(this)"
+                  onkeydown="if (event.key === 'Enter') { event.preventDefault(); saveAndNext('${k}'); }"></td>
+            <td><button class="row-save" onclick="saveBundleRow(${x.id})">Save</button></td>
+            <td><button class="row-delete" onclick="deleteBundleRow(${x.id})">Delete</button></td>
+            <td class="row-status" id="status-${k}"></td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>`;
+}
+
+async function saveBundleRow(id) {
+  const k = `b${id}`;
+  const input = document.getElementById(`input-${k}`);
+  const countIn = document.getElementById(`count-${k}`);
+  const asinIn = document.getElementById(`asin-${k}`);
+  const status = document.getElementById(`status-${k}`);
+  const price = parseFloat(input.value);
+  const panel_count = Number(countIn.value);
+  const asin = asinIn.value.trim().toUpperCase();
+  const bad = [!(price > 0) && input, !(Number.isInteger(panel_count) && panel_count >= 1 && panel_count <= 8) && countIn,
+               !ASIN_RE.test(asin) && asinIn].filter(Boolean);
+  if (bad.length) {
+    bad.forEach(el => el.classList.add('invalid'));
+    status.textContent = '✗'; status.style.color = 'var(--negative)';
+    status.title = 'Fix the red fields (ASIN must be 10 letters/digits, 1 to 8 panels).';
+    return false;
+  }
+  status.textContent = '…';
+  try {
+    const { row } = await postBundle({ id, fields: { price, panel_count, asin } });
+    status.textContent = '✓'; status.style.color = 'var(--positive)'; status.title = '';
+    [input, countIn, asinIn].forEach(el => el.classList.remove('dirty', 'invalid'));
+    asinIn.value = asin;
+    const local = BUNDLE_ROWS.find(x => x.id === id);
+    if (local) {
+      Object.assign(local, row);
+      document.getElementById(`link-${k}`).href = amazonUrl(local);
+    }
+    const ageCell = document.querySelector(`#row-${k} .age`);
+    if (ageCell) {
+      const age = ageInfo(new Date().toISOString());
+      ageCell.textContent = age.label;
+      ageCell.className = `age ${age.cls}`;
+    }
+    return true;
+  } catch (err) {
+    status.textContent = '✗'; status.style.color = 'var(--negative)'; status.title = String(err);
+    return false;
+  }
+}
+
+async function deleteBundleRow(id) {
+  const row = BUNDLE_ROWS.find(x => x.id === id);
+  if (!row) return;
+  if (!confirm(`Permanently delete the ${stationName(row.battery_id)} bundle?\n\nThis removes it from the live site and can't be undone.`)) return;
+  const status = document.getElementById(`status-b${id}`);
+  status.textContent = '…';
+  try {
+    await postBundle({ id, delete: true });
+    BUNDLE_ROWS = BUNDLE_ROWS.filter(x => x.id !== id);
+    renderBundles();
+    document.getElementById('progress').textContent = 'Deleted the bundle.';
   } catch (err) {
     status.textContent = '✗'; status.style.color = 'var(--negative)'; status.title = String(err);
     alert(`Delete failed: ${err.message || err}`);

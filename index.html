@@ -379,6 +379,8 @@
   .solar-teaser .btn { margin-top:0; }
   .solar-line { margin-top:0.6rem; font-size:0.875rem; color:var(--sub); line-height:1.4; }
   .solar-line b { color:var(--text); }
+  .bundle-tag { display:inline-block; margin-left:0.3rem; padding:0.05rem 0.45rem; border-radius:999px; font-size:0.72rem; font-weight:600;
+                border:1px solid var(--accent); color:var(--accent); text-decoration:none; vertical-align:1px; }
   .top5-cta.stack { flex-direction:column; gap:0.5rem; }
   .solar-more { margin-top:0.85rem; display:flex; flex-wrap:wrap; gap:0.5rem 1.5rem; align-items:center; }
   .solar-more a { font-weight:600; }
@@ -984,6 +986,9 @@ async function loadData() {
     fetch(`${SUPABASE_URL}/rest/v1/solar_panels?select=*`, {
       headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
     }).then(r => r.ok ? r.json() : []).then(rows => { SOLAR_PANELS = rows; renderAll(); }).catch(() => {});
+    fetch(`${SUPABASE_URL}/rest/v1/solar_bundles?select=*`, {
+      headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
+    }).then(r => r.ok ? r.json() : []).then(rows => { SOLAR_BUNDLES = rows; if (rows.length) renderAll(); }).catch(() => {});
   } catch (err) {
     console.error('Load failed', err);
     setTableStatus('We couldn\'t load the battery list. Check your connection and try again.', true);
@@ -1462,6 +1467,7 @@ function renderTop5(data) {
 
 // ── Battery + solar ──
 let SOLAR_PANELS = [];
+let SOLAR_BUNDLES = [];
 let showSolar = false;
 try { showSolar = localStorage.getItem('pr-show-solar') === '1'; } catch {}
 
@@ -1474,11 +1480,13 @@ function setShowSolar(on) {
 
 function setupText(cfg) {
   return `${cfg.count} × ${esc(cfg.panel.brand)} ${esc(cfg.panel.model)}` +
-    (cfg.station && cfg.station.solar_adapter ? ` + ${esc(cfg.station.solar_adapter)}` : '');
+    (cfg.station && cfg.station.solar_adapter ? ` + ${esc(cfg.station.solar_adapter)}` : '') +
+    (cfg.bundle ? ` <a class="bundle-tag" href="${esc(amazonUrl(cfg.bundle))}" target="_blank" rel="sponsored noopener"
+      title="Cheaper bought together as a bundle (opens Amazon)">Bundle ↗</a>` : '');
 }
 
 function solarLineHtml(b) {
-  const cfg = bestSolarFor(b, SOLAR_PANELS);
+  const cfg = bestSolarFor(b, SOLAR_PANELS, 'portable', SOLAR_BUNDLES);
   if (!cfg) return '';
   return `<div class="solar-line">☀️ <b>${setupText(cfg)}</b> refills it in ${fmtSunHours(refillHours(b, cfg))} of sun.
     <a href="/solar.html?station=${b.id}">Other panels</a></div>`;
@@ -1500,7 +1508,7 @@ function renderSolar(data) {
   }
   const rate = medianDollarsPerWatt(SOLAR_PANELS);
   const combos = data.map(b => {
-    const cfg = bestSolarFor(b, SOLAR_PANELS);
+    const cfg = bestSolarFor(b, SOLAR_PANELS, 'portable', SOLAR_BUNDLES);
     return cfg ? { b, cfg, combined: b.score + solarCredit(cfg, rate) } : null;
   }).filter(Boolean).sort((x, y) => y.combined - x.combined).slice(0, 3);
 
@@ -1521,7 +1529,9 @@ function renderSolar(data) {
         <div class="top5-stat"><span class="top5-stat-label">Solar</span><span class="top5-stat-val">${(cfg.count * cfg.panel.rated_w).toLocaleString()} W rated</span></div>
         ${rt ? `<div class="top5-stat"><span class="top5-stat-label">Runs your stuff</span><span class="top5-stat-val">${fmtHours(rt)}</span></div>` : ''}
       </div>
-      <div class="top5-cta stack">${buyButton(b, 'Check battery price')}${buyButton(cfg.panel, 'Check panel price')}</div>
+      <div class="top5-cta stack">${cfg.bundle
+        ? buyButton({ ...cfg.bundle, brand: b.brand, model: `${b.model} + solar bundle` }, 'Check bundle price')
+        : buyButton(b, 'Check battery price') + buyButton(cfg.panel, 'Check panel price')}</div>
     </article>`;
   }).join('')}</div>
   <div class="solar-more"><a href="/solar.html">Compare all solar panels</a>

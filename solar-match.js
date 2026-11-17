@@ -63,36 +63,62 @@ function portWatts(s, p, count, layout, perPortW) {
 
 // The best way to wire `p` to station `s`: fewest panels that reach the target, otherwise the
 // most solar the station will accept from this panel. Returns null if it can't be wired safely.
-function solarConfig(s, p) {
+// One setup: n of panel p on station s, or null if the panels can't be wired to fit.
+function configFor(s, p, n) {
   const target = solarTarget(s);
   if (!target || !p.rated_w) return null;
   const ports = Math.max(1, s.solar_ports || 1);
   const perPortW = s.solar_input_w / ports;
-  let best = null;
-  for (let n = 1; n <= SOLAR.maxPanels; n++) {
-    const strings = splitStrings(n, ports);
-    const layouts = strings.map(c => portLayout(s, p, c));
-    if (layouts.some(l => !l)) continue;
-    const usable = Math.min(s.solar_input_w,
-      strings.reduce((t, c, i) => t + portWatts(s, p, c, layouts[i], perPortW), 0));
-    // Some stations (DJI) need a separate solar adapter; its price counts toward the setup.
-    const cost = n * p.price + (s.solar_adapter ? Number(s.solar_adapter_price) || 0 : 0);
-    const cfg = { panel: p, station: s, count: n, strings, layouts, usable, target, cost,
-                  reaches: usable >= target * 0.95 };
-    if (cfg.reaches) return cfg;
-    if (!best || usable > best.usable) best = cfg;
-  }
-  // Too little to be worth suggesting (under half the target).
-  return best && best.usable >= target * 0.5 ? best : null;
+  const strings = splitStrings(n, ports);
+  const layouts = strings.map(c => portLayout(s, p, c));
+  if (layouts.some(l => !l)) return null;
+  const usable = Math.min(s.solar_input_w,
+    strings.reduce((t, c, i) => t + portWatts(s, p, c, layouts[i], perPortW), 0));
+  // Some stations (DJI) need a separate solar adapter; its price counts toward the setup.
+  const cost = n * p.price + (s.solar_adapter ? Number(s.solar_adapter_price) || 0 : 0);
+  return { panel: p, station: s, count: n, strings, layouts, usable, target, cost,
+           reaches: usable >= target * 0.95 };
 }
 
-// Cheapest panel setup for a station from a list of panels (portable by default).
-function bestSolarFor(s, panels, type = 'portable') {
-  let pick = null;
+function solarConfig(s, p) {
+  let best = null;
+  for (let n = 1; n <= SOLAR.maxPanels; n++) {
+    const cfg = configFor(s, p, n);
+    if (!cfg) continue;
+    if (cfg.reaches) return cfg;
+    if (!best || cfg.usable > best.usable) best = cfg;
+  }
+  // Too little to be worth suggesting (under half the target).
+  return best && best.usable >= best.target * 0.5 ? best : null;
+}
+
+// A bundle (one listing with the station and its panels) is just another way to buy a setup.
+// Its solar cost is the bundle price minus the station's own price, so if the bundle is
+// cheaper than buying the parts separately, it wins the cheapest-setup comparison below.
+function bundleConfig(s, bundle, panels) {
+  const p = panels.find(x => x.id === bundle.panel_id);
+  if (!p || bundle.battery_id !== s.id) return null;
+  const cfg = configFor(s, p, bundle.panel_count);
+  if (!cfg || cfg.usable < cfg.target * 0.5) return null;
+  const separate = cfg.cost;
+  cfg.cost = Number(bundle.price) - Number(s.price) + (separate - bundle.panel_count * p.price);
+  if (cfg.cost >= separate) return null; // buying separately is as cheap or cheaper
+  cfg.bundle = bundle;
+  return cfg;
+}
+
+// Cheapest panel setup for a station from a list of panels (portable by default), counting
+// any bundles for that station as candidates too.
+function bestSolarFor(s, panels, type = 'portable', bundles = []) {
+  const cands = [];
   for (const p of panels) {
     if (type && p.panel_type !== type) continue;
     if (!p.asin) continue;
-    const cfg = solarConfig(s, p);
+    cands.push(solarConfig(s, p));
+  }
+  for (const b of bundles) cands.push(bundleConfig(s, b, panels));
+  let pick = null;
+  for (const cfg of cands) {
     if (!cfg) continue;
     if (!pick ||
         (cfg.reaches && !pick.reaches) ||
