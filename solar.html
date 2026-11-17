@@ -36,7 +36,7 @@
     { "@type": "Question", "name": "How much solar do I need for my power station?",
       "acceptedAnswer": { "@type": "Answer", "text": "A good target is rated solar watts equal to about a third of the battery's watt-hours, so a 1,000 Wh power station pairs well with about 300-350 W of panels. That refills it from empty in roughly one sunny day. Don't go past the station's own solar input limit, since anything above it is wasted." } },
     { "@type": "Question", "name": "Will any solar panel work with my power station?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Check two things: the panel's open-circuit voltage (Voc) must be inside the station's solar input voltage range, and the plug must fit, though most stations come with or accept a cheap MC4 or XT60 adapter. Wiring panels in series adds their voltages together, so two 30 V panels make 60 V." } },
+      "acceptedAnswer": { "@type": "Answer", "text": "Most of them, with the right adapter cable, but not all. Each power station only accepts solar within a set voltage range: a panel above it can be refused or damage the station, and one below it won't charge. Extra watts are fine, since the station just takes what it can." } },
     { "@type": "Question", "name": "Should I buy a portable or rigid solar panel?",
       "acceptedAnswer": { "@type": "Answer", "text": "Portable folding panels pack into a car and set up on a kickstand, so they suit camping and occasional outages. Rigid glass panels cost far less per watt and last longer outdoors, but they need to be mounted on a roof, rack or frame." } },
     { "@type": "Question", "name": "Do solar panels really make their rated watts?",
@@ -584,10 +584,10 @@
       </details>
       <details>
         <summary>Will any solar panel work with my power station?</summary>
-        <p>Check two things. The panel's open-circuit voltage (<strong>Voc</strong>) has to be inside the station's
-        solar input voltage range, and the plug has to fit. Most stations take MC4 or XT60 plugs, and adapters are
-        cheap. Wiring panels in series adds their voltages together, so two 30 V panels make 60 V. Pick your station
-        above and we'll do this check for you.</p>
+        <p>Most of them, with the right adapter cable, but not all. Each station only accepts solar within a set voltage
+        range: a panel above it can be refused or damage the station, and one below it won't charge. Extra watts are
+        fine, since the station just takes what it can. Pick your station above and we'll only show panels that work
+        with it.</p>
       </details>
       <details>
         <summary>Should I buy a portable or rigid panel?</summary>
@@ -609,8 +609,8 @@
       <p>Solar panels are simpler to compare than batteries: what you're buying is watts. So we rank by
       <strong>price per rated watt</strong>, lowest first, with portable and rigid panels ranked separately.
       Size, weight and brand don't change the score. No brand pays to be listed or ranked.</p>
-      <p>When you pick a power station, we only show panels whose voltage works with its solar input, and we work
-      out how many to wire in series on each solar port to reach about a third of the battery's watt-hours,
+      <p>When you pick a power station, we only show panels that work with its solar input, and we work
+      out how many you need to reach about a third of the battery's watt-hours,
       without going over the station's input limit.</p>
     </div>
   </section>
@@ -730,12 +730,10 @@ function onStation() {
   if (!station) { box.hidden = true; }
   else {
     const target = solarTarget(station);
-    const v = station.solar_v_max
-      ? ` at ${station.solar_v_min ? `${station.solar_v_min}–` : 'up to '}${station.solar_v_max} V` : '';
     box.hidden = false;
     box.innerHTML = `<div class="need-figs">
         <div class="need-fig"><b>${Math.round(target / 10) * 10} W</b><span>solar to aim for</span></div>
-        <div class="need-fig"><b>${station.solar_input_w.toLocaleString()} W</b><span>most it can take${esc(v)}</span></div>
+        <div class="need-fig"><b>${station.solar_input_w.toLocaleString()} W</b><span>most it can take</span></div>
       </div>
       <p>About a third of its ${Math.round(station.capacity_wh).toLocaleString()} Wh battery, which refills it in about a day of good sun.</p>`;
   }
@@ -755,8 +753,8 @@ function matchLine(p) {
   if (!p.cfg) return '';
   const c = p.cfg;
   const wiring = wiringText(c);
-  const short = c.reaches ? '' : ` <span class="warn-text">(short of the target; it's the most this station takes from this panel)</span>`;
-  return `<b>${wiring}</b> · ${Math.round(c.usable).toLocaleString()} W usable · full in ${fmtSunHours(refillHours(station, c))} of sun${short}`;
+  const short = c.reaches ? '' : ` <span class="warn-text">(slower than ideal)</span>`;
+  return `<b>${wiring}</b> · full in ${fmtSunHours(refillHours(station, c))} of sun${short}`;
 }
 
 function render() {
@@ -784,7 +782,6 @@ function render() {
       <div class="top5-highlight">${p.cfg ? matchLine(p) : `<b>${p.rated_w} W</b> ${p.panel_type === 'portable' ? 'folding panel' : 'rigid panel'}`}</div>
       <div class="top5-stats">
         <div class="top5-stat"><span class="top5-stat-label">Rated power</span><span class="top5-stat-val">${p.rated_w} W</span></div>
-        <div class="top5-stat"><span class="top5-stat-label">Voltage (Voc)</span><span class="top5-stat-val">${p.voc_v ? `${p.voc_v} V` : '—'}</span></div>
         <div class="top5-stat"><span class="top5-stat-label">Plug</span><span class="top5-stat-val">${esc(p.connector || '—')}</span></div>
       </div>
       <div class="top5-value">${valueHtml(levels.get(p.id))}</div>
@@ -795,8 +792,7 @@ function render() {
     '<th scope="col" class="rank-num"><span>#</span></th>',
     '<th scope="col"><span>Solar panel</span></th>',
     '<th scope="col" class="td-num"><span>Rated power</span></th>',
-    '<th scope="col" class="td-num"><span>Voltage (Voc)</span></th>',
-    `<th scope="col"><span>${station ? 'With your station' : 'Plug · water rating'}</span></th>`,
+    `<th scope="col"><span>${station ? 'With your station' : 'Plug'}</span></th>`,
     '<th scope="col"><span>Value</span></th>',
     '<th scope="col"><span class="sr-only">Link</span></th>',
   ].join('');
@@ -804,17 +800,13 @@ function render() {
   const tbody = document.getElementById('tableBody');
   document.getElementById('emptyState').hidden = !!list.length;
   tbody.innerHTML = list.map((p, i) => {
-    const extras = [p.bifacial && 'bifacial', p.efficiency_pct && `${p.efficiency_pct}% cells`].filter(Boolean);
-    const notes = [...extras, p.notes].filter(Boolean).map(esc).join(' · ');
     return `<tr>
       <td class="rank-num">#${i + 1}</td>
-      <td class="cell-model"><div class="td-model">${esc(p.model)}</div><div class="td-brand">${esc(p.brand)}</div>
-        ${notes ? `<div class="td-extras">${notes}</div>` : ''}</td>
+      <td class="cell-model"><div class="td-model">${esc(p.model)}</div><div class="td-brand">${esc(p.brand)}</div></td>
       <td class="td-num" data-label="Rated power">${p.rated_w} W</td>
-      <td class="td-num" data-label="Voltage (Voc)">${p.voc_v ? `${p.voc_v} V` : '—'}</td>
-      <td data-label="${station ? 'With your station' : 'Plug · water rating'}">${station
+      <td data-label="${station ? 'With your station' : 'Plug'}">${station
         ? `<span class="match-line">${matchLine(p)}</span>`
-        : [p.connector, p.ip_rating].filter(Boolean).map(esc).join(' · ') || '—'}</td>
+        : esc(p.connector || '—')}</td>
       <td class="cell-value" data-label="Value">${valueHtml(levels.get(p.id))}</td>
       <td class="cell-buy">${buyButton(p, 'Check price')}</td>
     </tr>`;
