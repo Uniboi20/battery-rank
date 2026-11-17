@@ -20,6 +20,14 @@ Site: https://powerrank.netlify.app/
 - A typical selling price is subtracted. The value rating reflects where the result ranks within its category.
 - It is one opinionated formula, not an objective truth; visitors can change the inputs with filters.
 
+## Solar panels
+
+- Panels are ranked by price per rated watt, lowest first, with portable (folding) and rigid panels ranked separately. Weight and brand don't change the score.
+- Pairing rule: aim for rated solar watts of about one third of the battery's watt-hours (roughly a full refill in one sunny day), never more than the station's solar input limit.
+- A panel works with a station only if its open-circuit voltage (Voc), times the number of panels wired in series, stays inside the station's solar input voltage range.
+- Real-world output in good sun is about 70-80% of a panel's rating.
+- On the power stations page, an optional "Best value with solar" view ranks stations together with the cheapest matching solar setup.
+
 ## Quick sizing guide
 
 - Charge phones and run a few lights or a fan for a night: about 300–500 Wh.
@@ -34,6 +42,7 @@ Site: https://powerrank.netlify.app/
 ## Pages
 
 - [Power station and power bank rankings](https://powerrank.netlify.app/): the interactive ranking, FAQ and full methodology
+- [Solar panel rankings](https://powerrank.netlify.app/solar.html): portable and rigid solar panels ranked by price per rated watt, with a check of which panels work with a chosen power station and how many to wire together
 - [How we decide what's a good value](https://powerrank.netlify.app/#methodology): the scoring formula
 - [Questions people ask](https://powerrank.netlify.app/#guide): sizing, W vs Wh, mAh, air travel, battery chemistry
 - [About PowerRank and affiliate disclosure](https://powerrank.netlify.app/about.html)

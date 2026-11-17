@@ -371,6 +371,19 @@
   .top5-value .value { white-space:normal; }
   .top5-cta { margin-top:auto; padding-top:0.9rem; display:flex; }
   .top5-cta .buy-btn { flex:1; min-width:0; justify-content:center; text-align:center; white-space:normal; }
+  a.tab-btn { display:flex; align-items:center; text-decoration:none; }
+
+  /* ── Battery + solar insight ── */
+  .solar-teaser { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:0.75rem 1.5rem; }
+  .solar-teaser p { color:var(--sub); max-width:62ch; }
+  .solar-teaser .btn { margin-top:0; }
+  .solar-line { margin-top:0.6rem; font-size:0.875rem; color:var(--sub); line-height:1.4; }
+  .solar-line b { color:var(--text); }
+  .top5-cta.stack { flex-direction:column; gap:0.5rem; }
+  .solar-more { margin-top:0.85rem; display:flex; flex-wrap:wrap; gap:0.5rem 1.5rem; align-items:center; }
+  .solar-more a { font-weight:600; }
+  .top5-grid.three { grid-template-columns:repeat(3,minmax(0,1fr)); }
+  @media(max-width:900px) { .top5-grid.three { grid-template-columns:repeat(2,minmax(0,1fr)); } }
 
   /* ── Value rating (replaces the old "+312" score, which read like a price) ── */
   .value { display:inline-flex; align-items:center; gap:0.5rem; white-space:nowrap; }
@@ -563,6 +576,7 @@
   <nav class="tab-bar" role="tablist" aria-label="Product category">
     <button class="tab-btn" role="tab" id="tab-power_station" aria-selected="true" aria-controls="main" onclick="switchTab('power_station')">⚡ Power Stations</button>
     <button class="tab-btn" role="tab" id="tab-power_bank" aria-selected="false" aria-controls="main" onclick="switchTab('power_bank')">🔋 Power Banks</button>
+    <a class="tab-btn" href="/solar.html">☀️ Solar Panels</a>
   </nav>
   <div class="header-meta" id="headerMeta"></div>
 </header>
@@ -636,6 +650,14 @@
       <h2 class="section-title" id="top5Label"><span class="step-num">3</span>Our top picks for you</h2>
     </div>
     <div class="top5-grid" id="top5Grid"></div>
+  </section>
+
+  <section aria-labelledby="solarLabel" id="solarSection" hidden>
+    <div class="section-head">
+      <h2 class="section-title" id="solarLabel">☀️ Best value with solar</h2>
+      <span class="section-note">Optional: a battery plus the solar to refill it in about a day of sun.</span>
+    </div>
+    <div id="solarBody"></div>
   </section>
 
   <section aria-labelledby="allLabel">
@@ -788,6 +810,7 @@
 </footer>
 
 <script src="/config.js"></script>
+<script src="/solar-match.js"></script>
 <script>
 const SUPABASE_URL = 'https://qeeotzunkyzivxjydiuw.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFlZW90enVua3l6aXZ4anlkaXV3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyNDcwOTYsImV4cCI6MjA5NzgyMzA5Nn0.YCcolPgRexsRm2rHR0vcWXNnF7eIbSMCmI8PCwhf2D4';
@@ -957,6 +980,10 @@ async function loadData() {
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     ALL_DATA = await res.json();
+    // Solar panels are an optional extra, so a failed load just hides the solar picks.
+    fetch(`${SUPABASE_URL}/rest/v1/solar_panels?select=*`, {
+      headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
+    }).then(r => r.ok ? r.json() : []).then(rows => { SOLAR_PANELS = rows; renderAll(); }).catch(() => {});
   } catch (err) {
     console.error('Load failed', err);
     setTableStatus('We couldn\'t load the battery list. Check your connection and try again.', true);
@@ -1056,7 +1083,7 @@ function runtimeHours(b) { return avgLoad ? b.capacity_wh * INVERTER_EFFICIENCY 
 // ── Tab switch ──
 function switchTab(tab) {
   activeTab = tab;
-  document.querySelectorAll('.tab-btn').forEach(b =>
+  document.querySelectorAll('.tab-btn[role="tab"]').forEach(b =>
     b.setAttribute('aria-selected', String(b.id === `tab-${tab}`)));
   history.replaceState(null, '', tab === 'power_bank' ? '#power-banks' : location.pathname);
 
@@ -1427,9 +1454,77 @@ function renderTop5(data) {
         ${stats.map(([l, v]) => `<div class="top5-stat"><span class="top5-stat-label">${l}</span><span class="top5-stat-val">${v}</span></div>`).join('')}
       </div>
       <div class="top5-value">${valueHtml(VALUE_BY_ID.get(b.id))}</div>
+      ${!isPB && showSolar ? solarLineHtml(b) : ''}
       <div class="top5-cta">${buyButton(b)}</div>
     </article>`;
   }).join('');
+}
+
+// ── Battery + solar ──
+let SOLAR_PANELS = [];
+let showSolar = false;
+try { showSolar = localStorage.getItem('pr-show-solar') === '1'; } catch {}
+
+function setShowSolar(on) {
+  showSolar = on;
+  try { localStorage.setItem('pr-show-solar', on ? '1' : '0'); } catch {}
+  renderAll();
+  if (on) document.getElementById('solarSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function setupText(cfg) {
+  return `${cfg.count} × ${esc(cfg.panel.brand)} ${esc(cfg.panel.model)}`;
+}
+
+function solarLineHtml(b) {
+  const cfg = bestSolarFor(b, SOLAR_PANELS);
+  if (!cfg) return '';
+  return `<div class="solar-line">☀️ <b>${setupText(cfg)}</b> refills it in ${fmtSunHours(refillHours(b, cfg))} of sun.
+    <a href="/solar.html?station=${b.id}">Other panels</a></div>`;
+}
+
+// Ranks the stations that fit your needs by their own score plus what a matching solar setup
+// adds (see solarCredit in solar-match.js), and shows the best three.
+function renderSolar(data) {
+  const section = document.getElementById('solarSection');
+  const body = document.getElementById('solarBody');
+  const portable = SOLAR_PANELS.filter(p => p.panel_type === 'portable' && p.asin);
+  if (activeTab !== 'power_station' || !portable.length) { section.hidden = true; return; }
+  section.hidden = false;
+  if (!showSolar) {
+    body.innerHTML = `<div class="panel solar-teaser">
+      <p>Want to recharge from the sun? See which battery and folding solar panels give you the most for your money together.</p>
+      <button class="btn" onclick="setShowSolar(true)">Show battery + solar picks</button></div>`;
+    return;
+  }
+  const rate = medianDollarsPerWatt(SOLAR_PANELS);
+  const combos = data.map(b => {
+    const cfg = bestSolarFor(b, SOLAR_PANELS);
+    return cfg ? { b, cfg, combined: b.score + solarCredit(cfg, rate) } : null;
+  }).filter(Boolean).sort((x, y) => y.combined - x.combined).slice(0, 3);
+
+  if (!combos.length) {
+    body.innerHTML = `<div class="panel solar-teaser"><p>None of the power stations that fit your needs have a solar
+      setup we can match yet.</p><button class="link-btn" onclick="setShowSolar(false)">Hide solar picks</button></div>`;
+    return;
+  }
+  body.innerHTML = `<div class="top5-grid three">${combos.map(({ b, cfg }, i) => {
+    const rt = runtimeHours(b);
+    return `<article class="top5-card ${RANK_CLASSES[i]}">
+      <div class="top5-rank"><span>#${i + 1} with solar</span></div>
+      <div class="top5-brand">${esc(b.brand)}</div>
+      <h3 class="top5-model">${esc(b.model)}</h3>
+      <div class="top5-highlight">+ <b>${setupText(cfg)}</b><br>Refills in <b>${fmtSunHours(refillHours(b, cfg))}</b> of good sun</div>
+      <div class="top5-stats">
+        <div class="top5-stat"><span class="top5-stat-label">Battery size</span><span class="top5-stat-val">${b.capacity_wh.toLocaleString()} Wh</span></div>
+        <div class="top5-stat"><span class="top5-stat-label">Solar</span><span class="top5-stat-val">${(cfg.count * cfg.panel.rated_w).toLocaleString()} W rated</span></div>
+        ${rt ? `<div class="top5-stat"><span class="top5-stat-label">Runs your stuff</span><span class="top5-stat-val">${fmtHours(rt)}</span></div>` : ''}
+      </div>
+      <div class="top5-cta stack">${buyButton(b, 'Check battery price')}${buyButton(cfg.panel, 'Check panel price')}</div>
+    </article>`;
+  }).join('')}</div>
+  <div class="solar-more"><a href="/solar.html">Compare all solar panels</a>
+    <button class="link-btn" onclick="setShowSolar(false)">Hide solar picks</button></div>`;
 }
 
 // The full list is long, especially as cards on phones, so start with the top rows.
@@ -1490,6 +1585,7 @@ function renderAll() {
   const data = getFiltered();
   syncSortUI();
   renderTop5(data);
+  renderSolar(data);
   renderTable(sortData(data));
 }
 

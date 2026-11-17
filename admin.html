@@ -96,7 +96,7 @@
 <div class="warn">
   This talks to a Netlify function that writes to Supabase with elevated access, gated by a password only
   you know. Open each Amazon link yourself, check the current price, update the field, and save — one row
-  or all of them. Use + Add battery for new products, and Details on any row to see and edit every field. You can also fix a product's brand, model, or ASIN (the 10-character Amazon product ID
+  or all of them. Use + Add battery or + Add solar panel for new products, and Details on any row to see and edit every field. You can also fix a product's brand, model, or ASIN (the 10-character Amazon product ID
   in its link, e.g. B0DG8JQNS4) — edited fields turn orange until saved. Use Delete to permanently remove a
   product that's no longer available. Click ↗ to load a product in a separate Amazon window; after that, type the
   price and press Enter to save and move to the next row, which loads in the same window. Saving a price that hasn't changed still refreshes its "checked" timestamp, so it's fine
@@ -112,6 +112,7 @@
 <div id="app">
   <div class="toolbar">
     <button onclick="toggleAdd()" id="addBtn">+ Add battery</button>
+    <button onclick="toggleSolarAdd()" id="addSolarBtn">+ Add solar panel</button>
     <button class="secondary" onclick="saveAll()">Save all rows</button>
     <button class="secondary" onclick="loadData()">Reload from database</button>
     <span class="progress" id="progress"></span>
@@ -126,7 +127,18 @@
       <span class="form-msg" id="addMsg"></span>
     </div>
   </section>
+  <section class="panel" id="addSolarPanel" hidden>
+    <h2>Add a solar panel</h2>
+    <p class="hint">Fields marked <span style="color:var(--accent)">*</span> are required. Use the cheapest configuration on Amazon. Open-circuit voltage (Voc) is needed to match a panel to power stations.</p>
+    <div id="addSolarForm"></div>
+    <div class="form-actions">
+      <button onclick="createSolar()" id="createSolarBtn">Create solar panel</button>
+      <button class="secondary" onclick="toggleSolarAdd(false)">Cancel</button>
+      <span class="form-msg" id="addSolarMsg"></span>
+    </div>
+  </section>
   <div id="tables"></div>
+  <div id="solarTables"></div>
 </div>
 
 <script>
@@ -135,6 +147,7 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 
 let SECRET = '';
 let ROWS = [];
+let SOLAR_ROWS = [];
 
 function unlock() {
   const val = document.getElementById('secretInput').value.trim();
@@ -173,7 +186,14 @@ async function loadData() {
   if (!res.ok) { document.getElementById('progress').textContent = 'Load failed.'; return; }
   ROWS = await res.json();
   render();
-  document.getElementById('progress').textContent = `${ROWS.length} batteries loaded, sorted by brand then model.`;
+  const sres = await fetch(`${SUPABASE_URL}/rest/v1/solar_panels?select=*`, {
+    headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` }
+  });
+  SOLAR_ROWS = sres.ok ? await sres.json() : [];
+  renderSolar();
+  document.getElementById('progress').textContent =
+    `${ROWS.length} batteries and ${SOLAR_ROWS.length} solar panels loaded, sorted by brand then model.` +
+    (sres.ok ? '' : ' (Solar panels failed to load.)');
 }
 
 // ── Full-field editor ──
@@ -203,8 +223,37 @@ const FIELDS = [
   { key: 'has_display', label: 'Display', type: 'bool', section: 'Features', cats: ['power_bank'] },
   { key: 'has_wall_plug', label: 'Wall plug', type: 'bool', section: 'Features', cats: ['power_bank'] },
 
+  { key: 'solar_input_w', label: 'Max solar input (W, total)', type: 'int', section: 'Solar input', cats: ['power_station'], optional: true },
+  { key: 'solar_ports', label: 'Solar input ports', type: 'int', section: 'Solar input', cats: ['power_station'], optional: true },
+  { key: 'solar_v_min', label: 'Lowest solar voltage (V)', type: 'dec', section: 'Solar input', cats: ['power_station'] },
+  { key: 'solar_v_max', label: 'Highest solar voltage, Voc max (V)', type: 'dec', section: 'Solar input', cats: ['power_station'] },
+  { key: 'solar_max_a', label: 'Max solar current per port (A)', type: 'dec', section: 'Solar input', cats: ['power_station'] },
+
   { key: 'notes', label: 'Notes (shown on the public site)', type: 'textarea', section: 'Notes', wide: true },
 ];
+
+// Solar panels live in their own table, so they get their own field list.
+const SOLAR_FIELDS = [
+  { key: 'brand', label: 'Brand', type: 'text', section: 'Basics', required: true },
+  { key: 'model', label: 'Model', type: 'text', section: 'Basics', required: true },
+  { key: 'asin', label: 'ASIN', type: 'asin', section: 'Basics', required: true },
+  { key: 'price', label: 'Price ($)', type: 'num', section: 'Basics', required: true },
+  { key: 'panel_type', label: 'Type', type: 'select', section: 'Basics', required: true,
+    options: [['portable', 'Portable (folding)'], ['rigid', 'Rigid']] },
+
+  { key: 'rated_w', label: 'Rated power (W)', type: 'int', section: 'Specs', required: true },
+  { key: 'voc_v', label: 'Open-circuit voltage, Voc (V)', type: 'dec', section: 'Specs' },
+  { key: 'isc_a', label: 'Short-circuit current, Isc (A)', type: 'dec', section: 'Specs' },
+  { key: 'weight_lb', label: 'Weight (lb)', type: 'dec', section: 'Specs' },
+  { key: 'efficiency_pct', label: 'Cell efficiency (%)', type: 'dec', section: 'Specs' },
+  { key: 'ip_rating', label: 'Water rating (e.g. IP67)', type: 'text', section: 'Specs' },
+  { key: 'connector', label: 'Connector (e.g. MC4, XT60)', type: 'text', section: 'Specs' },
+
+  { key: 'bifacial', label: 'Bifacial', type: 'bool', section: 'Features' },
+
+  { key: 'notes', label: 'Notes (shown on the public site)', type: 'textarea', section: 'Notes', wide: true },
+];
+const SOLAR_FIELD_KEYS = new Set(SOLAR_FIELDS.map(f => f.key));
 const FIELD_KEYS = new Set(FIELDS.map(f => f.key));
 // Shown read-only in the editor; everything else unknown is listed there too.
 const SYSTEM_KEYS = ['id', 'price_updated_at', 'updated_at', 'created_at'];
@@ -221,11 +270,11 @@ function fieldsFor(category) {
     (!cols || cols.has(f.key) || f.key === 'category'));
 }
 
-function formHtml(prefix, values) {
+function formHtml(prefix, values, fieldList = null) {
   const cat = values.category || 'power_station';
   let html = '', section = null;
   const close = () => { html += '</div>'; };
-  for (const f of fieldsFor(cat)) {
+  for (const f of fieldList || fieldsFor(cat)) {
     if (f.section !== section) {
       if (section !== null) close();
       section = f.section;
@@ -238,15 +287,16 @@ function formHtml(prefix, values) {
     if (f.type === 'bool') {
       html += `<label class="check"><input type="checkbox" id="${id}" ${v ? 'checked' : ''} ${onch}>${f.label}</label>`;
     } else if (f.type === 'select') {
+      const cur = fieldList ? v : cat;
       html += `<label class="field"><span>${f.label}${star}</span><select id="${id}"
-                 onchange="markDirty(this); switchFormCategory('${prefix}')">` +
-        f.options.map(([val, lab]) => `<option value="${val}" ${val === cat ? 'selected' : ''}>${lab}</option>`).join('') +
+                 onchange="markDirty(this)${fieldList ? '' : `; switchFormCategory('${prefix}')`}">` +
+        f.options.map(([val, lab]) => `<option value="${val}" ${val === cur ? 'selected' : ''}>${lab}</option>`).join('') +
         `</select></label>`;
     } else if (f.type === 'textarea') {
       html += `<label class="field wide"><span>${f.label}${star}</span><textarea id="${id}" maxlength="500" ${onch}>${esc(v)}</textarea></label>`;
     } else {
-      const num = f.type === 'num' || f.type === 'int';
-      const attrs = num ? `type="number" min="0" step="${f.type === 'num' ? '0.01' : '1'}"` : 'type="text"';
+      const num = f.type === 'num' || f.type === 'int' || f.type === 'dec';
+      const attrs = num ? `type="number" min="0" step="${f.type === 'int' ? '1' : f.type === 'dec' ? '0.1' : '0.01'}"` : 'type="text"';
       const cls = f.type === 'asin' ? 'text-input asin-input' : 'text-input';
       html += `<label class="field${f.wide ? ' wide' : ''}"><span>${f.label}${star}</span>
                <input class="${cls}" id="${id}" ${attrs} value="${esc(v)}" ${f.type === 'asin' ? 'maxlength="10"' : ''} ${onch}></label>`;
@@ -257,17 +307,17 @@ function formHtml(prefix, values) {
 }
 
 // Read the form. Returns { values, errors: [inputEl…] }.
-function readForm(prefix) {
-  const cat = document.getElementById(`${prefix}-f-category`).value;
+function readForm(prefix, fieldList = null) {
+  const cat = fieldList ? null : document.getElementById(`${prefix}-f-category`).value;
   const values = {}, errors = [];
-  for (const f of fieldsFor(cat)) {
+  for (const f of fieldList || fieldsFor(cat)) {
     const el = document.getElementById(`${prefix}-f-${f.key}`);
     if (!el) continue;
     let v;
     if (f.type === 'bool') v = el.checked;
     // Blank optional counts save as 0 so the public table never shows "null".
-    else if (f.type === 'int' && !f.required && el.value === '') v = 0;
-    else if (f.type === 'num' || f.type === 'int') v = el.value === '' ? null : Number(el.value);
+    else if (f.type === 'int' && !f.required && !f.optional && el.value === '') v = 0;
+    else if (f.type === 'num' || f.type === 'int' || f.type === 'dec') v = el.value === '' ? null : Number(el.value);
     else v = el.value.trim() === '' ? null : el.value.trim();
     if (f.type === 'asin' && v) v = v.toUpperCase();
 
@@ -275,7 +325,8 @@ function readForm(prefix) {
       (f.required && (v === null || v === '')) ||
       (f.type === 'asin' && v && !ASIN_RE.test(v)) ||
       (f.type === 'int' && v !== null && !(Number.isInteger(v) && v >= 0)) ||
-      (f.type === 'num' && v !== null && !(v > 0));
+      (f.type === 'num' && v !== null && !(v > 0)) ||
+      (f.type === 'dec' && v !== null && !(v >= 0));
     if (bad) { el.classList.add('invalid'); errors.push(el); }
     values[f.key] = v;
   }
@@ -466,7 +517,12 @@ function render() {
 let amazonWin = null;
 
 function openAmazon(id) {
-  const row = ROWS.find(b => b.id === id);
+  return openAmazonFor(ROWS.find(b => b.id === id), `input-${id}`);
+}
+function openSolarAmazon(id) {
+  return openAmazonFor(SOLAR_ROWS.find(p => p.id === id), `input-s${id}`);
+}
+function openAmazonFor(row, inputId) {
   if (!row || !row.asin) return true;
   const url = amazonUrl(row);
   if (amazonWin && !amazonWin.closed) {
@@ -480,19 +536,22 @@ function openAmazon(id) {
     amazonWin.opener = null; // Amazon can't reach back into this page
     amazonWin.location.href = url;
   }
-  const input = document.getElementById(`input-${id}`);
+  const input = document.getElementById(inputId);
   if (input) { input.focus(); input.select(); }
   return false;
 }
 
 // Enter in a price box: save that row, then jump to the next row's price and load it on Amazon.
-function saveAndNext(id) {
-  const inputs = [...document.querySelectorAll('#tables .price-input')];
-  const next = inputs[inputs.findIndex(el => el.id === `input-${id}`) + 1];
-  saveRow(id);
+// Battery inputs are input-<id>, solar panel inputs are input-s<id>, so the run carries on
+// from the last battery into the solar panels.
+function saveAndNext(key) {
+  key = String(key);
+  const inputs = [...document.querySelectorAll('#tables .price-input, #solarTables .price-input')];
+  const next = inputs[inputs.findIndex(el => el.id === `input-${key}`) + 1];
+  key.startsWith('s') ? saveSolarRow(Number(key.slice(1))) : saveRow(Number(key));
   if (next) {
-    const nextId = Number(next.id.slice('input-'.length));
-    openAmazon(nextId);
+    const nextKey = next.id.slice('input-'.length);
+    nextKey.startsWith('s') ? openSolarAmazon(Number(nextKey.slice(1))) : openAmazon(Number(nextKey));
     next.scrollIntoView({ block: 'center', behavior: 'smooth' });
   }
 }
@@ -586,16 +645,233 @@ async function deleteRow(id) {
 }
 
 async function saveAll() {
-  const ids = ROWS.map(b => b.id);
+  const ids = [...ROWS.map(b => b.id), ...SOLAR_ROWS.map(p => `s${p.id}`)];
   const progress = document.getElementById('progress');
   let failed = 0;
   for (let i = 0; i < ids.length; i++) {
     progress.textContent = `Saving ${i + 1}/${ids.length}…`;
-    if (!(await saveRow(ids[i]))) failed++;
+    const k = ids[i];
+    const ok = typeof k === 'string' ? await saveSolarRow(Number(k.slice(1))) : await saveRow(k);
+    if (!ok) failed++;
   }
   progress.textContent = failed
     ? `Saved ${ids.length - failed} rows — ${failed} failed (marked ✗, hover for details).`
     : `Done — saved ${ids.length} rows.`;
+}
+
+// ── Solar panels ──
+async function postSolar(body) {
+  const res = await fetch('/.netlify/functions/save-solar', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ secret: SECRET, ...body }),
+  });
+  const text = await res.text();
+  if (!res.ok) throw new Error(text);
+  return JSON.parse(text);
+}
+
+function toggleSolarAdd(show) {
+  const panel = document.getElementById('addSolarPanel');
+  show = show ?? panel.hidden;
+  panel.hidden = !show;
+  document.getElementById('addSolarBtn').hidden = show;
+  if (show) {
+    document.getElementById('addSolarForm').innerHTML = formHtml('snew', { panel_type: 'portable' }, SOLAR_FIELDS);
+    document.getElementById('addSolarMsg').textContent = '';
+    document.getElementById('snew-f-brand').focus();
+  }
+}
+
+async function createSolar() {
+  const msg = document.getElementById('addSolarMsg');
+  const { values, errors } = readForm('snew', SOLAR_FIELDS);
+  if (errors.length) {
+    msg.className = 'form-msg err';
+    msg.textContent = 'Fix the red fields (ASIN is required — 10 letters/digits).';
+    errors[0].focus();
+    return;
+  }
+  const btn = document.getElementById('createSolarBtn');
+  btn.disabled = true; msg.className = 'form-msg'; msg.textContent = 'Creating…';
+  try {
+    const { row } = await postSolar({ fields: values });
+    SOLAR_ROWS.push(row);
+    renderSolar();
+    toggleSolarAdd(false);
+    document.getElementById('progress').textContent = `Added ${row.brand} ${row.model}.`;
+    document.getElementById(`row-s${row.id}`)?.scrollIntoView({ block: 'center' });
+  } catch (err) {
+    msg.className = 'form-msg err';
+    msg.textContent = `Create failed: ${err.message || err}`;
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function toggleSolarDetails(id) {
+  const detail = document.getElementById(`detail-s${id}`);
+  const btn = document.getElementById(`details-btn-s${id}`);
+  const open = detail.hidden;
+  detail.hidden = !open;
+  btn.setAttribute('aria-expanded', String(open));
+  btn.textContent = open ? 'Details ▴' : 'Details ▾';
+  if (open) {
+    const row = SOLAR_ROWS.find(p => p.id === id);
+    document.getElementById(`ds${id}-form`).innerHTML = formHtml(`ds${id}`, row, SOLAR_FIELDS);
+    document.getElementById(`ds${id}-msg`).textContent = '';
+  }
+}
+
+async function saveSolarDetails(id) {
+  const row = SOLAR_ROWS.find(p => p.id === id);
+  const msg = document.getElementById(`ds${id}-msg`);
+  const { values, errors } = readForm(`ds${id}`, SOLAR_FIELDS);
+  if (errors.length) {
+    msg.className = 'form-msg err';
+    msg.textContent = 'Fix the red fields (ASIN is required — 10 letters/digits).';
+    errors[0].focus();
+    return;
+  }
+  const norm = v => (v === undefined || v === '' ? null : v);
+  const same = (v, old) => typeof v === 'boolean' ? v === !!old
+    : typeof v === 'number' ? old !== null && old !== undefined && v === Number(old)
+    : norm(v) === norm(old);
+  const changed = Object.fromEntries(Object.entries(values).filter(([k, v]) => !same(v, row[k])));
+  if (!Object.keys(changed).length) { msg.className = 'form-msg'; msg.textContent = 'No changes to save.'; return; }
+  msg.className = 'form-msg'; msg.textContent = 'Saving…';
+  try {
+    const { row: updated } = await postSolar({ id, fields: changed });
+    Object.assign(row, updated);
+    renderSolar();
+    toggleSolarDetails(id);
+    const m = document.getElementById(`ds${id}-msg`);
+    m.className = 'form-msg ok'; m.textContent = 'Saved.';
+  } catch (err) {
+    msg.className = 'form-msg err';
+    msg.textContent = `Save failed: ${err.message || err}`;
+  }
+}
+
+function solarMetaHtml(p) {
+  const extra = Object.keys(p).filter(k => !SOLAR_FIELD_KEYS.has(k) && !SYSTEM_KEYS.includes(k));
+  return [
+    `id ${p.id}`,
+    p.rated_w && p.price && `$${(p.price / p.rated_w).toFixed(2)}/W`,
+    p.price_updated_at && `price checked ${new Date(p.price_updated_at).toLocaleString()}`,
+    p.updated_at && `updated ${new Date(p.updated_at).toLocaleString()}`,
+    ...extra.map(k => `${k}: ${esc(p[k])}`),
+  ].filter(Boolean).join(' · ');
+}
+
+function renderSolar() {
+  const container = document.getElementById('solarTables');
+  const groups = [
+    { key: 'portable', label: 'Solar Panels — Portable' },
+    { key: 'rigid', label: 'Solar Panels — Rigid' },
+  ];
+  container.innerHTML = groups.map(g => {
+    const rows = SOLAR_ROWS.filter(p => p.panel_type === g.key).sort(byBrandModel);
+    if (!rows.length) return '';
+    return `
+      <div class="group-label">${g.label} (${rows.length})</div>
+      <table>
+        <thead><tr><th>Brand</th><th>Model</th><th>ASIN</th><th>Current price</th><th>Checked</th><th>New price</th><th></th><th></th><th></th><th></th></tr></thead>
+        <tbody>
+          ${rows.map(p => {
+            const age = ageInfo(p.price_updated_at);
+            const k = `s${p.id}`;
+            return `<tr id="row-${k}">
+              <td><input class="text-input brand-input" id="brand-${k}" value="${esc(p.brand)}" aria-label="Brand" oninput="markDirty(this)"></td>
+              <td><input class="text-input model-input" id="model-${k}" value="${esc(p.model)}" aria-label="Model" oninput="markDirty(this)">
+                  <div class="brand">${p.rated_w} W${p.voc_v ? ` · Voc ${p.voc_v} V` : ' · Voc missing'}</div></td>
+              <td><div class="name-cell">
+                <input class="text-input asin-input" id="asin-${k}" value="${esc(p.asin)}" maxlength="10" aria-label="ASIN" oninput="markDirty(this)">
+                <a class="open-link" id="link-${k}" href="${esc(amazonUrl(p))}" target="_blank" rel="noopener" title="Open in the Amazon window"
+                   onclick="return openSolarAmazon(${p.id})">↗</a>
+              </div></td>
+              <td>$${Number(p.price).toLocaleString()}</td>
+              <td class="age ${age.cls}">${age.label}</td>
+              <td><input class="price-input" id="input-${k}" type="number" step="0.01" value="${p.price}"
+                    aria-label="New price" oninput="markDirty(this)"
+                    onkeydown="if (event.key === 'Enter') { event.preventDefault(); saveAndNext('${k}'); }"></td>
+              <td><button class="row-save" onclick="saveSolarRow(${p.id})">Save</button></td>
+              <td><button class="row-details" id="details-btn-${k}" aria-expanded="false" onclick="toggleSolarDetails(${p.id})">Details ▾</button></td>
+              <td><button class="row-delete" onclick="deleteSolarRow(${p.id})">Delete</button></td>
+              <td class="row-status" id="status-${k}"></td>
+            </tr>
+            <tr class="detail-row" id="detail-${k}" hidden><td colspan="10">
+              <div id="ds${p.id}-form"></div>
+              <div class="form-actions">
+                <button onclick="saveSolarDetails(${p.id})">Save all fields</button>
+                <button class="secondary" onclick="toggleSolarDetails(${p.id})">Close</button>
+                <span class="form-msg" id="ds${p.id}-msg"></span>
+              </div>
+              <div class="meta">${solarMetaHtml(p)}</div>
+            </td></tr>`;
+          }).join('')}
+        </tbody>
+      </table>`;
+  }).join('');
+}
+
+async function saveSolarRow(id) {
+  const k = `s${id}`;
+  const input = document.getElementById(`input-${k}`);
+  const brandIn = document.getElementById(`brand-${k}`);
+  const modelIn = document.getElementById(`model-${k}`);
+  const asinIn = document.getElementById(`asin-${k}`);
+  const status = document.getElementById(`status-${k}`);
+  const price = parseFloat(input.value);
+  const brand = brandIn.value.trim();
+  const model = modelIn.value.trim();
+  const asin = asinIn.value.trim().toUpperCase();
+  const bad = [!(price > 0) && input, !brand && brandIn, !model && modelIn, !ASIN_RE.test(asin) && asinIn].filter(Boolean);
+  if (bad.length) {
+    bad.forEach(el => el.classList.add('invalid'));
+    status.textContent = '✗'; status.style.color = 'var(--negative)';
+    status.title = 'Fix the red fields (ASIN must be 10 letters/digits).';
+    return false;
+  }
+  status.textContent = '…';
+  try {
+    const { row } = await postSolar({ id, fields: { price, brand, model, asin } });
+    status.textContent = '✓'; status.style.color = 'var(--positive)'; status.title = '';
+    [input, brandIn, modelIn, asinIn].forEach(el => el.classList.remove('dirty'));
+    asinIn.value = asin;
+    const local = SOLAR_ROWS.find(p => p.id === id);
+    if (local) {
+      Object.assign(local, row);
+      document.getElementById(`link-${k}`).href = amazonUrl(local);
+    }
+    const ageCell = document.querySelector(`#row-${k} .age`);
+    if (ageCell) {
+      const age = ageInfo(new Date().toISOString());
+      ageCell.textContent = age.label;
+      ageCell.className = `age ${age.cls}`;
+    }
+    return true;
+  } catch (err) {
+    status.textContent = '✗'; status.style.color = 'var(--negative)'; status.title = String(err);
+    return false;
+  }
+}
+
+async function deleteSolarRow(id) {
+  const row = SOLAR_ROWS.find(p => p.id === id);
+  if (!row) return;
+  if (!confirm(`Permanently delete ${row.brand} ${row.model}?\n\nThis removes it from the live site and can't be undone.`)) return;
+  const status = document.getElementById(`status-s${id}`);
+  status.textContent = '…';
+  try {
+    await postSolar({ id, delete: true });
+    SOLAR_ROWS = SOLAR_ROWS.filter(p => p.id !== id);
+    renderSolar();
+    document.getElementById('progress').textContent = `Deleted ${row.brand} ${row.model}.`;
+  } catch (err) {
+    status.textContent = '✗'; status.style.color = 'var(--negative)'; status.title = String(err);
+    alert(`Delete failed: ${err.message || err}`);
+  }
 }
 </script>
 </body>

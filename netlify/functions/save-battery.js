@@ -27,6 +27,8 @@ const COLUMNS = {
   outlets_120v: 'int', l2_outlets: 'int', usb_outlets: 'int', builtin_cables: 'int',
   expandable: 'bool', app_support: 'bool', jump_starter: 'bool',
   has_magsafe: 'bool', has_builtin_cable: 'bool', has_display: 'bool', has_wall_plug: 'bool',
+  // Solar input (power stations), used to pair solar panels.
+  solar_input_w: 'int', solar_v_min: 'dec', solar_v_max: 'dec', solar_max_a: 'dec', solar_ports: 'int',
 };
 
 // Fields the public site needs to render a row without breaking.
@@ -57,6 +59,10 @@ function clean(key, type, val) {
     case 'num': {
       const n = Number(val);
       return n > 0 && n < 10000 ? { value: Math.round(n * 100) / 100 } : { error: `${key} out of range` };
+    }
+    case 'dec': {
+      const n = Number(val);
+      return n >= 0 && n < 1000 ? { value: Math.round(n * 10) / 10 } : { error: `${key} out of range` };
     }
     case 'int': {
       const n = Number(val);
