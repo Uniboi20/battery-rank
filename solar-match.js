@@ -17,6 +17,8 @@ const SOLAR = {
 };
 
 function dollarsPerWatt(p) { return p.price / p.rated_w; }
+// A panel with no price of its own is sold only in bundles.
+const soldAlone = p => Number(p.price) > 0 && !!p.asin;
 
 // Target rated solar watts for a station.
 function solarTarget(s) {
@@ -75,7 +77,7 @@ function configFor(s, p, n) {
   const usable = Math.min(s.solar_input_w,
     strings.reduce((t, c, i) => t + portWatts(s, p, c, layouts[i], perPortW), 0));
   // Some stations (DJI) need a separate solar adapter; its price counts toward the setup.
-  const cost = n * p.price + (s.solar_adapter ? Number(s.solar_adapter_price) || 0 : 0);
+  const cost = n * (Number(p.price) || 0) + (s.solar_adapter ? Number(s.solar_adapter_price) || 0 : 0);
   return { panel: p, station: s, count: n, strings, layouts, usable, target, cost,
            reaches: usable >= target * 0.95 };
 }
@@ -100,8 +102,9 @@ function bundleConfig(s, bundle, panels) {
   if (!p || bundle.battery_id !== s.id) return null;
   const cfg = configFor(s, p, bundle.panel_count);
   if (!cfg || cfg.usable < cfg.target * 0.5) return null;
-  const separate = cfg.cost;
-  cfg.cost = Number(bundle.price) - Number(s.price) + (separate - bundle.panel_count * p.price);
+  const adapter = cfg.cost - bundle.panel_count * (Number(p.price) || 0);
+  const separate = soldAlone(p) ? cfg.cost : Infinity; // bundle-only panels can't be bought separately
+  cfg.cost = Number(bundle.price) - Number(s.price) + adapter;
   if (cfg.cost >= separate) return null; // buying separately is as cheap or cheaper
   cfg.bundle = bundle;
   return cfg;
@@ -113,7 +116,7 @@ function bestSolarFor(s, panels, type = 'portable', bundles = []) {
   const cands = [];
   for (const p of panels) {
     if (type && p.panel_type !== type) continue;
-    if (!p.asin) continue;
+    if (!soldAlone(p)) continue;
     cands.push(solarConfig(s, p));
   }
   for (const b of bundles) cands.push(bundleConfig(s, b, panels));
@@ -136,7 +139,7 @@ function refillHours(s, cfg) {
 
 // The going rate for portable solar ($/W), used to judge whether a pairing is a bargain.
 function medianDollarsPerWatt(panels, type = 'portable') {
-  const v = panels.filter(p => p.panel_type === type).map(dollarsPerWatt).sort((a, b) => a - b);
+  const v = panels.filter(p => p.panel_type === type && soldAlone(p)).map(dollarsPerWatt).sort((a, b) => a - b);
   if (!v.length) return 0;
   const m = Math.floor(v.length / 2);
   return v.length % 2 ? v[m] : (v[m - 1] + v[m]) / 2;

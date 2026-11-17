@@ -262,8 +262,8 @@ const FIELDS = [
 const SOLAR_FIELDS = [
   { key: 'brand', label: 'Brand', type: 'text', section: 'Basics', required: true },
   { key: 'model', label: 'Model', type: 'text', section: 'Basics', required: true },
-  { key: 'asin', label: 'ASIN', type: 'asin', section: 'Basics', required: true },
-  { key: 'price', label: 'Price ($)', type: 'num', section: 'Basics', required: true },
+  { key: 'asin', label: 'ASIN (blank if only sold in bundles)', type: 'asin', section: 'Basics' },
+  { key: 'price', label: 'Price ($, blank if only sold in bundles)', type: 'num', section: 'Basics' },
 
   { key: 'rated_w', label: 'Rated power (W)', type: 'int', section: 'Specs', required: true },
   { key: 'voc_v', label: 'Open-circuit voltage, Voc (V)', type: 'dec', section: 'Specs' },
@@ -722,7 +722,7 @@ async function createSolar() {
   const { values, errors } = readForm('snew', SOLAR_FIELDS);
   if (errors.length) {
     msg.className = 'form-msg err';
-    msg.textContent = 'Fix the red fields (ASIN is required — 10 letters/digits).';
+    msg.textContent = 'Fix the red fields (ASIN must be 10 letters/digits, and is needed once there is a price).';
     errors[0].focus();
     return;
   }
@@ -763,7 +763,7 @@ async function saveSolarDetails(id) {
   const { values, errors } = readForm(`ds${id}`, SOLAR_FIELDS);
   if (errors.length) {
     msg.className = 'form-msg err';
-    msg.textContent = 'Fix the red fields (ASIN is required — 10 letters/digits).';
+    msg.textContent = 'Fix the red fields (ASIN must be 10 letters/digits, and is needed once there is a price).';
     errors[0].focus();
     return;
   }
@@ -823,9 +823,9 @@ function renderSolar() {
                 <a class="open-link" id="link-${k}" href="${esc(amazonUrl(p))}" target="_blank" rel="noopener" title="Open in the Amazon window"
                    onclick="return openSolarAmazon(${p.id})">↗</a>
               </div></td>
-              <td>$${Number(p.price).toLocaleString()}</td>
-              <td class="age ${age.cls}">${age.label}</td>
-              <td><input class="price-input" id="input-${k}" type="number" step="0.01" value="${p.price}"
+              <td>${p.price == null ? 'Bundles only' : `$${Number(p.price).toLocaleString()}`}</td>
+              <td class="age ${age.cls}">${p.price == null ? '' : age.label}</td>
+              <td><input class="price-input" id="input-${k}" type="number" step="0.01" value="${p.price ?? ''}"
                     aria-label="New price" oninput="markDirty(this)"
                     onkeydown="if (event.key === 'Enter') { event.preventDefault(); saveAndNext('${k}'); }"></td>
               <td><button class="row-save" onclick="saveSolarRow(${p.id})">Save</button></td>
@@ -855,11 +855,13 @@ async function saveSolarRow(id) {
   const modelIn = document.getElementById(`model-${k}`);
   const asinIn = document.getElementById(`asin-${k}`);
   const status = document.getElementById(`status-${k}`);
-  const price = parseFloat(input.value);
+  // A blank price means the panel is sold only in bundles; then the ASIN may be blank too.
+  const price = input.value.trim() === '' ? null : parseFloat(input.value);
   const brand = brandIn.value.trim();
   const model = modelIn.value.trim();
-  const asin = asinIn.value.trim().toUpperCase();
-  const bad = [!(price > 0) && input, !brand && brandIn, !model && modelIn, !ASIN_RE.test(asin) && asinIn].filter(Boolean);
+  const asin = asinIn.value.trim().toUpperCase() || null;
+  const bad = [price !== null && !(price > 0) && input, !brand && brandIn, !model && modelIn,
+               ((price !== null && !asin) || (asin && !ASIN_RE.test(asin))) && asinIn].filter(Boolean);
   if (bad.length) {
     bad.forEach(el => el.classList.add('invalid'));
     status.textContent = '✗'; status.style.color = 'var(--negative)';
@@ -871,7 +873,7 @@ async function saveSolarRow(id) {
     const { row } = await postSolar({ id, fields: { price, brand, model, asin } });
     status.textContent = '✓'; status.style.color = 'var(--positive)'; status.title = '';
     [input, brandIn, modelIn, asinIn].forEach(el => el.classList.remove('dirty'));
-    asinIn.value = asin;
+    asinIn.value = asin || '';
     const local = SOLAR_ROWS.find(p => p.id === id);
     if (local) {
       Object.assign(local, row);

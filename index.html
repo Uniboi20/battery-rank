@@ -1475,7 +1475,13 @@ function setShowSolar(on) {
   showSolar = on;
   try { localStorage.setItem('pr-show-solar', on ? '1' : '0'); } catch {}
   renderAll();
-  if (on) document.getElementById('solarSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  if (on) {
+    // Land on the section's top edge, just below the sticky header.
+    const header = document.querySelector('header');
+    const top = document.getElementById('solarSection').getBoundingClientRect().top + window.scrollY
+      - (header ? header.offsetHeight : 0) - 12;
+    window.scrollTo({ top, behavior: 'smooth' });
+  }
 }
 
 function setupText(cfg) {
@@ -1497,7 +1503,8 @@ function solarLineHtml(b) {
 function renderSolar(data) {
   const section = document.getElementById('solarSection');
   const body = document.getElementById('solarBody');
-  const portable = SOLAR_PANELS.filter(p => p.panel_type === 'portable' && p.asin);
+  const portable = SOLAR_PANELS.filter(p => p.panel_type === 'portable' &&
+    (soldAlone(p) || SOLAR_BUNDLES.some(x => x.panel_id === p.id)));
   if (activeTab !== 'power_station' || !portable.length) { section.hidden = true; return; }
   section.hidden = false;
   if (!showSolar) {

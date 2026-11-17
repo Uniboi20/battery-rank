@@ -678,7 +678,8 @@ async function getJson(path) {
 async function loadData() {
   try {
     [PANELS, STATIONS] = await Promise.all([
-      getJson('solar_panels?select=*'),
+      // Panels with no price of their own are sold only in bundles, so they aren't listed here.
+      getJson('solar_panels?select=*&price=not.is.null'),
       getJson('batteries?select=*&category=eq.power_station'),
     ]);
   } catch (err) {

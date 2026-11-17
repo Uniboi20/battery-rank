@@ -28,7 +28,8 @@ const COLUMNS = {
   ip_rating: 'short', connector: 'short', bifacial: 'bool', notes: 'longtext',
 };
 // Folding panels only for now: new panels default to 'portable'.
-const REQUIRED = ['brand', 'model', 'asin', 'price', 'rated_w'];
+// Price is optional: a panel with no price is sold only in bundles. ASIN is needed once it has a price.
+const REQUIRED = ['brand', 'model', 'rated_w'];
 
 function clean(key, type, val) {
   if (val === null || val === '' || val === undefined) {
@@ -110,6 +111,7 @@ exports.handler = async function (event) {
 
   if (isCreate) {
     const missing = REQUIRED.filter(k => isMissing(row[k]));
+    if (!isMissing(row.price) && isMissing(row.asin)) missing.push('asin');
     if (missing.length) return reply(400, `Missing required: ${missing.join(', ')}`);
     const { data, error } = await supabase.from('solar_panels')
       .insert({ panel_type: 'portable', ...row, price_updated_at: now, updated_at: now }).select().single();
