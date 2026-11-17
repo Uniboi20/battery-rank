@@ -391,7 +391,6 @@
   .way { font-size:0.9rem; line-height:1.35; min-width:12rem; }
   .way-kind { font-weight:700; color:var(--text); }
   .way-sub { color:var(--sub); font-size:0.8125rem; }
-  .way-best { color:var(--positive); font-weight:600; }
   .warn-text { color:var(--negative); }
   .rank-note { color:var(--sub); font-size:0.875rem; margin:-0.25rem 0 0.75rem; }
   .cell-buy .buy-btn + .buy-btn { margin-top:0.35rem; }
@@ -1590,8 +1589,7 @@ function otherVerdict(other, best) {
 function wayHtml(b, cfg, note) {
   const kind = cfg.bundle ? 'Bundle' : 'Separately';
   return `<div class="way"><span class="way-kind">${kind}:</span> ${setupText(cfg)}
-    <div class="way-sub">${cfg.reaches ? `Full in ${fmtSunHours(refillHours(b, cfg))} of sun`
-      : `<span class="warn-text">Full in ${fmtSunHours(refillHours(b, cfg))} of sun</span>`}</div>
+    <div class="way-sub">Full in ${fmtSunHours(refillHours(b, cfg))} of sun</div>
     ${note ? `<div class="way-sub">${note}</div>` : ''}
     ${setupLinks(b, cfg)}</div>`;
 }
@@ -1662,7 +1660,7 @@ function renderTable(data) {
           ? `<span class="td-runtime">${fmtHours(rt)}</span><span class="td-sub">${b.capacity_wh.toLocaleString()} Wh</span>`
           : `${b.capacity_wh.toLocaleString()} Wh`}</td>
         ${b.opt
-          ? `<td class="cell-way" data-label="Best way to buy">${wayHtml(b, b.opt.best, '<span class="way-best">Best value</span>')}</td>
+          ? `<td class="cell-way" data-label="Best way to buy">${wayHtml(b, b.opt.best)}</td>
              <td class="cell-way" data-label="Other way">${(() => { const x = otherWay(b);
                return x ? wayHtml(b, x, otherVerdict(x, b.opt.best))
                         : `<span class="dash">${b.opt.best.bundle ? 'No separate panels fit well' : 'No official bundle'}</span>`; })()}</td>`
