@@ -1,0 +1,44 @@
+# PowerRank
+
+> PowerRank is an independent buying guide that ranks portable power stations and power banks by value: what you get for your money. Every model is scored with one published formula (capacity, outlets, power output and useful extras, compared against a typical selling price). No brand pays to be listed or ranked.
+
+Site: https://powerrank.netlify.app/
+
+## What the site does
+
+- Visitors pick the devices they want to run or charge (for example a fridge, CPAP, laptop or phone) and how long they need power. PowerRank estimates the power and battery size needed, filters out models that can't handle it, and ranks the rest by value.
+- Two categories: portable power stations (large batteries with wall outlets, rated in watt-hours) and power banks (pocket chargers, rated in mAh).
+- Product specs come from manufacturer listings and are entered by hand. Specs and prices change, so confirm details on the product page before buying.
+- Prices are not shown on the site. Each product links to Amazon for its current price ("Check price").
+
+## How the value score works
+
+- Capacity is weighted on a curve (capacity^0.585), so going from 500 Wh to 1,000 Wh counts for more than going from 2,000 Wh to 2,500 Wh.
+- Each wall outlet, 240 V / high-amp outlet and USB port adds a fixed amount.
+- Power output is scored against the power the visitor says they need; extra power beyond that adds nothing.
+- Extras (expandable capacity, app support, jump-starting, MagSafe, built-in cables, a display, a built-in wall plug) each add a small fixed bonus.
+- A typical selling price is subtracted. The value rating reflects where the result ranks within its category.
+- It is one opinionated formula, not an objective truth; visitors can change the inputs with filters.
+
+## Quick sizing guide
+
+- Charge phones and run a few lights or a fan for a night: about 300–500 Wh.
+- Run a CPAP machine every night while camping: 500 Wh or more.
+- Keep a fridge, lights and Wi-Fi going through a one-day outage: about 2,500–3,000 Wh.
+- Get through a multi-day outage, or run bigger things like a space heater: 3,000 Wh or more.
+- A 1,000 Wh battery runs a 100 W device for roughly 8–9 hours.
+- A 10,000 mAh power bank charges a typical phone about twice; 20,000 mAh about four times.
+- Power banks up to about 26,800 mAh (100 Wh) are generally allowed in carry-on bags, never in checked bags.
+- LiFePO4 (LFP) batteries last thousands of charge cycles and are very safe.
+
+## Pages
+
+- [Power station and power bank rankings](https://powerrank.netlify.app/): the interactive ranking, FAQ and full methodology
+- [How we decide what's a good value](https://powerrank.netlify.app/#methodology): the scoring formula
+- [Questions people ask](https://powerrank.netlify.app/#guide): sizing, W vs Wh, mAh, air travel, battery chemistry
+- [About PowerRank and affiliate disclosure](https://powerrank.netlify.app/about.html)
+- [Privacy policy](https://powerrank.netlify.app/privacy.html)
+
+## Disclosure
+
+As an Amazon Associate, PowerRank earns from qualifying purchases. This does not affect rankings, which come only from the formula above.
