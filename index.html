@@ -1160,7 +1160,10 @@ function switchTab(tab) {
     `<button type="button" aria-pressed="false" data-hours="${d.hours}" onclick="setHours(${d.hours})">${d.label}</button>`).join('');
 
   const tabData = ALL_DATA.filter(b => b.category === tab);
-  const brands  = [...new Set(tabData.map(b => b.brand))].sort((a, b) => a.localeCompare(b));
+  // One option per brand however its capitalization was typed (first spelling seen wins).
+  const byKey = new Map();
+  for (const b of tabData) if (b.brand && !byKey.has(brandKey(b.brand))) byKey.set(brandKey(b.brand), b.brand);
+  const brands  = [...byKey.values()].sort((a, b) => a.localeCompare(b));
   document.getElementById('brandFilter').innerHTML =
     '<option value="">All</option>' + brands.map(br => `<option value="${esc(br)}">${esc(br)}</option>`).join('');
 
@@ -1386,7 +1389,7 @@ function getFiltered() {
 
   return fits.filter(b => {
     if (search && !`${b.brand} ${b.model}`.toLowerCase().includes(search)) return false;
-    if (brand && b.brand !== brand) return false;
+    if (brand && brandKey(b.brand) !== brandKey(brand)) return false;
     return true;
   });
 }
@@ -1555,13 +1558,15 @@ function setupText(cfg) {
     (cfg.station && cfg.station.solar_adapter ? ` + ${esc(cfg.station.solar_adapter)}` : '');
 }
 
+function brandKey(s) { return String(s || '').trim().toLowerCase(); }
+
 function renderBundles(data) {
   const section = document.getElementById('bundleSection');
   const brand = document.getElementById('brandFilter').value;
   const ids = new Set(data.map(b => b.id));
   const items = isSolarView() && brand ? SOLAR_BUNDLES.map(x => {
     const b = ALL_DATA.find(s => s.id === x.battery_id);
-    if (!b || b.brand !== brand || !ids.has(b.id)) return null;
+    if (!b || brandKey(b.brand) !== brandKey(brand) || !ids.has(b.id)) return null;
     const cfg = bundleSetup(b, x, SOLAR_PANELS);
     return cfg ? { b, cfg, sep: (SOLAR_OPT.get(b.id) || {}).separate } : null;
   }).filter(Boolean) : [];
