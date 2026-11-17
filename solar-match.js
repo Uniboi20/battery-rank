@@ -144,8 +144,14 @@ function compareText(bundleCfg, separateCfg) {
   const total = cfg => Number(cfg.station.price) + cfg.cost;
   const gap = total(separateCfg) - total(bundleCfg);
   const pct = Math.abs(gap) / Math.max(total(bundleCfg), total(separateCfg));
-  if (pct < 0.03) return 'The bundle costs about the same as buying separately';
   const size = pct < 0.10 ? 'a little' : pct < 0.25 ? '' : 'a lot';
+  // A bundle with less solar than the battery needs isn't a like-for-like saving: say so.
+  if (!bundleCfg.reaches && separateCfg.reaches) {
+    return gap > 0
+      ? 'The bundle costs less, but its solar is too small to refill the battery in a day'
+      : 'Buying separately costs less and refills faster than the bundle';
+  }
+  if (pct < 0.03) return 'The bundle costs about the same as buying separately';
   return gap > 0
     ? `The bundle is ${size ? size + ' ' : ''}cheaper than buying separately`
     : `Buying separately is ${size ? size + ' ' : ''}cheaper than the bundle`;
