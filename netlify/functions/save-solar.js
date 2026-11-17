@@ -27,7 +27,8 @@ const COLUMNS = {
   voc_v: 'dec', isc_a: 'dec', weight_lb: 'dec', efficiency_pct: 'dec',
   ip_rating: 'short', connector: 'short', bifacial: 'bool', notes: 'longtext',
 };
-const REQUIRED = ['brand', 'model', 'asin', 'price', 'panel_type', 'rated_w'];
+// Folding panels only for now: new panels default to 'portable'.
+const REQUIRED = ['brand', 'model', 'asin', 'price', 'rated_w'];
 
 function clean(key, type, val) {
   if (val === null || val === '' || val === undefined) {
@@ -111,7 +112,7 @@ exports.handler = async function (event) {
     const missing = REQUIRED.filter(k => isMissing(row[k]));
     if (missing.length) return reply(400, `Missing required: ${missing.join(', ')}`);
     const { data, error } = await supabase.from('solar_panels')
-      .insert({ ...row, price_updated_at: now, updated_at: now }).select().single();
+      .insert({ panel_type: 'portable', ...row, price_updated_at: now, updated_at: now }).select().single();
     if (error) return reply(500, { error: error.message });
     return reply(200, { ok: true, row: data });
   }

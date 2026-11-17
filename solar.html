@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Best Value Solar Panels for Power Stations — PowerRank</title>
-<meta name="description" content="PowerRank ranks portable and rigid solar panels by watts for your money, and shows which ones work with your power station, how many you need and how fast they refill it.">
+<meta name="description" content="PowerRank ranks folding solar panels by watts for your money, and shows which ones work with your power station, how many you need and how fast they refill it.">
 <meta name="robots" content="index, follow">
 <meta name="theme-color" content="#0f1117" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f6f6f9" media="(prefers-color-scheme: light)">
@@ -37,8 +37,6 @@
       "acceptedAnswer": { "@type": "Answer", "text": "A good target is rated solar watts equal to about a third of the battery's watt-hours, so a 1,000 Wh power station pairs well with about 300-350 W of panels. That refills it from empty in roughly one sunny day. Don't go past the station's own solar input limit, since anything above it is wasted." } },
     { "@type": "Question", "name": "Will any solar panel work with my power station?",
       "acceptedAnswer": { "@type": "Answer", "text": "Most of them, with the right adapter cable, but not all. Each power station only accepts solar within a set voltage range: a panel above it can be refused or damage the station, and one below it won't charge. Extra watts are fine, since the station just takes what it can." } },
-    { "@type": "Question", "name": "Should I buy a portable or rigid solar panel?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Portable folding panels pack into a car and set up on a kickstand, so they suit camping and occasional outages. Rigid glass panels cost far less per watt and last longer outdoors, but they need to be mounted on a roof, rack or frame." } },
     { "@type": "Question", "name": "Do solar panels really make their rated watts?",
       "acceptedAnswer": { "@type": "Answer", "text": "Rarely. Ratings are measured in lab conditions. In good real-world sun, expect about 70-80% of the rating, and much less in clouds, shade or winter." } }
    ]
@@ -538,13 +536,6 @@
       </label>
     </div>
     <div class="need-summary" id="needSummary" aria-live="polite" hidden></div>
-    <div class="type-row">
-      <span class="duration-label" id="typeLabel">Panel type</span>
-      <div class="seg" role="group" aria-labelledby="typeLabel" id="typeSeg">
-        <button type="button" data-type="portable" aria-pressed="true" onclick="setType('portable')">Portable (folding)</button>
-        <button type="button" data-type="rigid" aria-pressed="false" onclick="setType('rigid')">Rigid (mounted)</button>
-      </div>
-    </div>
   </section>
 
   <section aria-labelledby="topLabel" id="topSection">
@@ -590,12 +581,6 @@
         with it.</p>
       </details>
       <details>
-        <summary>Should I buy a portable or rigid panel?</summary>
-        <p><strong>Portable</strong> folding panels pack into a car and stand on a kickstand, so they suit camping and
-        occasional outages. <strong>Rigid</strong> glass panels cost far less per watt and last longer outdoors, but
-        they need to be mounted on a roof, rack or frame. That's why we rank the two separately.</p>
-      </details>
-      <details>
         <summary>Do panels really make their rated watts?</summary>
         <p>Rarely. Ratings are measured in lab conditions. In good real-world sun, expect about 70–80% of the rating,
         and much less in clouds, shade or winter. Our refill times assume 75%.</p>
@@ -607,7 +592,7 @@
     <div class="section-head"><h2 class="section-title" id="methodLabel">How we rank solar panels</h2></div>
     <div class="panel info-card">
       <p>Solar panels are simpler to compare than batteries: what you're buying is watts. So we rank by
-      <strong>price per rated watt</strong>, lowest first, with portable and rigid panels ranked separately.
+      <strong>price per rated watt</strong>, lowest first.
       Size, weight and brand don't change the score. No brand pays to be listed or ranked.</p>
       <p>When you pick a power station, we only show panels that work with its solar input, and we work
       out how many you need to reach about a third of the battery's watt-hours,
@@ -711,15 +696,12 @@ async function loadData() {
 
   const want = new URLSearchParams(location.search).get('station');
   if (want && withSolar.some(s => String(s.id) === want)) document.getElementById('stationSelect').value = want;
-  const t = new URLSearchParams(location.search).get('type');
-  if (t === 'rigid' || t === 'portable') panelType = t;
   onStation();
 }
 
 function syncUrl() {
   const q = new URLSearchParams();
   if (station) q.set('station', station.id);
-  if (panelType !== 'portable') q.set('type', panelType);
   history.replaceState(null, '', location.pathname + (q.toString() ? `?${q}` : ''));
 }
 
@@ -740,7 +722,6 @@ function onStation() {
   render();
 }
 
-function setType(t) { panelType = t; render(); }
 
 // Panels to show, each with its pairing when a station is picked.
 function rows() {
@@ -760,7 +741,6 @@ function matchLine(p) {
 
 function render() {
   syncUrl();
-  document.querySelectorAll('#typeSeg button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.type === panelType)));
   let list = rows();
   // With a station, rank by what the whole setup costs to reach the target; otherwise by $/W.
   const rankKey = station
@@ -780,7 +760,7 @@ function render() {
       <div class="top5-rank"><span>#${i + 1} pick</span></div>
       <div class="top5-brand">${esc(p.brand)}</div>
       <h3 class="top5-model">${esc(p.model)}</h3>
-      <div class="top5-highlight">${p.cfg ? matchLine(p) : `<b>${p.rated_w} W</b> ${p.panel_type === 'portable' ? 'folding panel' : 'rigid panel'}`}</div>
+      <div class="top5-highlight">${p.cfg ? matchLine(p) : `<b>${p.rated_w} W</b> folding panel`}</div>
       <div class="top5-stats">
         <div class="top5-stat"><span class="top5-stat-label">Rated power</span><span class="top5-stat-val">${p.rated_w} W</span></div>
         <div class="top5-stat"><span class="top5-stat-label">Plug</span><span class="top5-stat-val">${esc(p.connector || '—')}</span></div>

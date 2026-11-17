@@ -240,8 +240,6 @@ const SOLAR_FIELDS = [
   { key: 'model', label: 'Model', type: 'text', section: 'Basics', required: true },
   { key: 'asin', label: 'ASIN', type: 'asin', section: 'Basics', required: true },
   { key: 'price', label: 'Price ($)', type: 'num', section: 'Basics', required: true },
-  { key: 'panel_type', label: 'Type', type: 'select', section: 'Basics', required: true,
-    options: [['portable', 'Portable (folding)'], ['rigid', 'Rigid']] },
 
   { key: 'rated_w', label: 'Rated power (W)', type: 'int', section: 'Specs', required: true },
   { key: 'voc_v', label: 'Open-circuit voltage, Voc (V)', type: 'dec', section: 'Specs' },
@@ -769,8 +767,7 @@ function solarMetaHtml(p) {
 function renderSolar() {
   const container = document.getElementById('solarTables');
   const groups = [
-    { key: 'portable', label: 'Solar Panels — Portable' },
-    { key: 'rigid', label: 'Solar Panels — Rigid' },
+    { key: 'portable', label: 'Solar Panels (folding)' },
   ];
   container.innerHTML = groups.map(g => {
     const rows = SOLAR_ROWS.filter(p => p.panel_type === g.key).sort(byBrandModel);

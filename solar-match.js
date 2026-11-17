@@ -1,9 +1,8 @@
 // ============================================================
 // Shared solar logic for solar.html and the power stations page (index.html).
 //
-// Panel value: lowest price per rated watt wins, ranked separately for portable (folding) and
-// rigid panels, since rigid panels are far cheaper per watt but need mounting and aren't
-// something you carry to a campsite. Weight is deliberately left out.
+// Panel value: lowest price per rated watt wins. Folding (portable) panels only; weight is
+// deliberately left out.
 //
 // Pairing: aim for rated solar of about a third of the battery's Wh (roughly a full refill in
 // one good sunny day), capped by the station's own solar input limit. Panels are wired in
