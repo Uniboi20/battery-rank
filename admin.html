@@ -228,6 +228,8 @@ const FIELDS = [
   { key: 'solar_v_min', label: 'Lowest solar voltage (V)', type: 'dec', section: 'Solar input', cats: ['power_station'] },
   { key: 'solar_v_max', label: 'Highest solar voltage, Voc max (V)', type: 'dec', section: 'Solar input', cats: ['power_station'] },
   { key: 'solar_max_a', label: 'Max solar current per port (A)', type: 'dec', section: 'Solar input', cats: ['power_station'] },
+  { key: 'solar_adapter', label: 'Solar adapter needed (name, blank if none)', type: 'text', section: 'Solar input', cats: ['power_station'] },
+  { key: 'solar_adapter_price', label: 'Solar adapter price ($)', type: 'num', section: 'Solar input', cats: ['power_station'] },
 
   { key: 'notes', label: 'Notes (shown on the public site)', type: 'textarea', section: 'Notes', wide: true },
 ];

@@ -43,17 +43,23 @@ function stringFits(s, p, count) {
 }
 
 // How to wire `count` panels on one port: `series` panels per string, `parallel` strings.
-// Parallel strings add current, so they're only used when both the panel's short-circuit
-// current and the port's current limit are known and the total stays under it.
+// Voltage is a hard limit. Current isn't: a station only draws up to its own current limit, so
+// extra parallel strings just get clipped (see portWatts). Longest strings first, for less current.
 function portLayout(s, p, count) {
   for (let series = count; series >= 1; series--) {
     if (count % series) continue;
-    const parallel = count / series;
     if (!stringFits(s, p, series)) continue;
-    if (parallel > 1 && !(p.isc_a && s.solar_max_a && p.isc_a * parallel <= s.solar_max_a)) continue;
-    return { series, parallel };
+    return { series, parallel: count / series };
   }
   return null;
+}
+
+// Watts one port actually takes: the panels' rating, capped by the port's share of the station's
+// solar limit and by its current limit at the string's operating voltage.
+function portWatts(s, p, count, layout, perPortW) {
+  const ampCap = s.solar_max_a && p.voc_v
+    ? s.solar_max_a * SOLAR.vmpRatio * p.voc_v * layout.series : Infinity;
+  return Math.min(count * p.rated_w, perPortW, ampCap);
 }
 
 // The best way to wire `p` to station `s`: fewest panels that reach the target, otherwise the
@@ -69,8 +75,10 @@ function solarConfig(s, p) {
     const layouts = strings.map(c => portLayout(s, p, c));
     if (layouts.some(l => !l)) continue;
     const usable = Math.min(s.solar_input_w,
-      strings.reduce((t, c) => t + Math.min(c * p.rated_w, perPortW), 0));
-    const cfg = { panel: p, count: n, strings, layouts, usable, target, cost: n * p.price,
+      strings.reduce((t, c, i) => t + portWatts(s, p, c, layouts[i], perPortW), 0));
+    // Some stations (DJI) need a separate solar adapter; its price counts toward the setup.
+    const cost = n * p.price + (s.solar_adapter ? Number(s.solar_adapter_price) || 0 : 0);
+    const cfg = { panel: p, station: s, count: n, strings, layouts, usable, target, cost,
                   reaches: usable >= target * 0.95 };
     if (cfg.reaches) return cfg;
     if (!best || usable > best.usable) best = cfg;

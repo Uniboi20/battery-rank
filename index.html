@@ -1473,7 +1473,8 @@ function setShowSolar(on) {
 }
 
 function setupText(cfg) {
-  return `${cfg.count} × ${esc(cfg.panel.brand)} ${esc(cfg.panel.model)}`;
+  return `${cfg.count} × ${esc(cfg.panel.brand)} ${esc(cfg.panel.model)}` +
+    (cfg.station && cfg.station.solar_adapter ? ` + ${esc(cfg.station.solar_adapter)}` : '');
 }
 
 function solarLineHtml(b) {

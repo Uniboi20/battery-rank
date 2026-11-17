@@ -29,6 +29,7 @@ const COLUMNS = {
   has_magsafe: 'bool', has_builtin_cable: 'bool', has_display: 'bool', has_wall_plug: 'bool',
   // Solar input (power stations), used to pair solar panels.
   solar_input_w: 'int', solar_v_min: 'dec', solar_v_max: 'dec', solar_max_a: 'dec', solar_ports: 'int',
+  solar_adapter: 'text', solar_adapter_price: 'num',
 };
 
 // Fields the public site needs to render a row without breaking.

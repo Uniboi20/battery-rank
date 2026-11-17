@@ -754,7 +754,8 @@ function matchLine(p) {
   const c = p.cfg;
   const wiring = wiringText(c);
   const short = c.reaches ? '' : ` <span class="warn-text">(slower than ideal)</span>`;
-  return `<b>${wiring}</b> · full in ${fmtSunHours(refillHours(station, c))} of sun${short}`;
+  const adapter = station.solar_adapter ? ` · needs the ${esc(station.solar_adapter)}` : '';
+  return `<b>${wiring}</b>${adapter} · full in ${fmtSunHours(refillHours(station, c))} of sun${short}`;
 }
 
 function render() {
