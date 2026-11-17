@@ -137,21 +137,6 @@ function refillHours(s, cfg) {
   return s.capacity_wh / (cfg.usable * SOLAR.derate);
 }
 
-// The going rate for portable solar ($/W), used to judge whether a pairing is a bargain.
-function medianDollarsPerWatt(panels, type = 'portable') {
-  const v = panels.filter(p => p.panel_type === type && soldAlone(p)).map(dollarsPerWatt).sort((a, b) => a - b);
-  if (!v.length) return 0;
-  const m = Math.floor(v.length / 2);
-  return v.length % 2 ? v[m] : (v[m - 1] + v[m]) / 2;
-}
-
-// Extra value a solar setup adds to a station's score: the solar it actually delivers (up to
-// the target) at the going rate, minus what the panels cost. A typical panel nets about zero;
-// a cheaper-than-usual setup nets a bonus, and a station that can't take much solar gains little.
-function solarCredit(cfg, rate) {
-  return Math.round(Math.min(cfg.usable, cfg.target) * rate - cfg.cost);
-}
-
 function fmtSunHours(h) {
   if (h < 1) return 'under an hour';
   const r = h < 10 ? Math.round(h * 2) / 2 : Math.round(h);

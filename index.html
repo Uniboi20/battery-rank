@@ -1498,8 +1498,9 @@ function solarLineHtml(b) {
     <a href="/solar.html?station=${b.id}">Other panels</a></div>`;
 }
 
-// Ranks the stations that fit your needs by their own score plus what a matching solar setup
-// adds (see solarCredit in solar-match.js), and shows the best three.
+// Ranks the stations that fit your needs by their own score minus the price of the cheapest
+// solar setup that gets them to at least 85%
+// of its solar target (a bundle when that's cheaper). Stations that can't reach 85% are left out.
 function renderSolar(data) {
   const section = document.getElementById('solarSection');
   const body = document.getElementById('solarBody');
@@ -1513,10 +1514,9 @@ function renderSolar(data) {
       <button class="btn" onclick="setShowSolar(true)">Show battery + solar picks</button></div>`;
     return;
   }
-  const rate = medianDollarsPerWatt(SOLAR_PANELS);
   const combos = data.map(b => {
     const cfg = bestSolarFor(b, SOLAR_PANELS, 'portable', SOLAR_BUNDLES);
-    return cfg ? { b, cfg, combined: b.score + solarCredit(cfg, rate) } : null;
+    return cfg && cfg.reaches ? { b, cfg, combined: b.score - cfg.cost } : null;
   }).filter(Boolean).sort((x, y) => y.combined - x.combined).slice(0, 3);
 
   if (!combos.length) {
