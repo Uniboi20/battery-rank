@@ -199,6 +199,7 @@ function amazonUrl(b) {
 
 async function loadData() {
   document.getElementById('progress').textContent = 'Loading…';
+  document.getElementById('progress').style.color = '';
   const res = await fetch(`${SUPABASE_URL}/rest/v1/batteries?select=*&order=price_updated_at.asc.nullsfirst`, {
     headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` }
   });
@@ -455,7 +456,7 @@ async function saveDetails(id) {
     msg.className = 'form-msg err';
     msg.textContent = 'Fix the red fields (ASIN is required — 10 letters/digits).';
     errors[0].focus();
-    return;
+    return false;
   }
   // Send only what changed (category always, so the server can check its required fields).
   const norm = v => (v === undefined || v === '' ? null : v);
@@ -463,19 +464,25 @@ async function saveDetails(id) {
     k === 'category' || norm(v) !== norm(row[k]) && !(typeof v === 'boolean' && v === !!row[k])));
   if (Object.keys(changed).length === 1 && changed.category === row.category) {
     msg.className = 'form-msg'; msg.textContent = 'No changes to save.';
-    return;
+    return true;
   }
   msg.className = 'form-msg'; msg.textContent = 'Saving…';
   try {
     const updated = await postSave({ id, fields: changed });
+    const lost = Object.keys(changed).filter(k => k !== 'category' &&
+      String(updated[k] ?? '') !== String(changed[k] ?? '') && Number(updated[k]) !== Number(changed[k]));
+    if (lost.length) throw new Error(`the database didn't keep ${lost.join(', ')}`);
     Object.assign(row, updated);
     render();
     toggleDetails(id);
     const m = document.getElementById(`d${id}-msg`);
     m.className = 'form-msg ok'; m.textContent = 'Saved.';
+    return true;
   } catch (err) {
     msg.className = 'form-msg err';
     msg.textContent = `Save failed: ${err.message || err}`;
+    showSaveError(`${row.brand} ${row.model}`, err);
+    return false;
   }
 }
 
@@ -590,12 +597,34 @@ function saveByKey(key) {
     : key.startsWith('b') ? saveBundleRow(Number(key.slice(1))) : saveRow(Number(key));
 }
 
+// When a row's Details panel is open, its Save button should save the panel too; otherwise
+// edits made there (like Voc) are silently left unsaved. Copy the row's own boxes into the
+// panel first so neither set of edits is lost, then save the panel.
+function detailsOpenFor(detailId, formPrefix, rowKey) {
+  const detail = document.getElementById(detailId);
+  if (!detail || detail.hidden) return false;
+  for (const f of ['price', 'brand', 'model', 'asin']) {
+    const from = document.getElementById(f === 'price' ? `input-${rowKey}` : `${f}-${rowKey}`);
+    const to = document.getElementById(`${formPrefix}-f-${f}`);
+    if (from && to) to.value = from.value;
+  }
+  return true;
+}
+
+function showSaveError(label, err) {
+  const text = String((err && err.message) || err || 'unknown error').slice(0, 200);
+  const progress = document.getElementById('progress');
+  progress.textContent = `Save failed for ${label}: ${text}`;
+  progress.style.color = 'var(--negative)';
+}
+
 function markDirty(el) {
   el.classList.add('dirty');
   el.classList.remove('invalid');
 }
 
 async function saveRow(id) {
+  if (detailsOpenFor(`detail-${id}`, `d${id}`, id)) return saveDetails(id);
   const input = document.getElementById(`input-${id}`);
   const brandIn = document.getElementById(`brand-${id}`);
   const modelIn = document.getElementById(`model-${id}`);
@@ -648,7 +677,7 @@ async function saveRow(id) {
   } catch (err) {
     status.textContent = '✗';
     status.style.color = 'var(--negative)';
-    status.title = String(err);
+    status.title = String(err); showSaveError('that row', err);
     return false;
   }
 }
@@ -673,7 +702,7 @@ async function deleteRow(id) {
   } catch (err) {
     status.textContent = '✗';
     status.style.color = 'var(--negative)';
-    status.title = String(err);
+    status.title = String(err); showSaveError('that row', err);
     alert(`Delete failed: ${err.message || err}`);
   }
 }
@@ -765,25 +794,31 @@ async function saveSolarDetails(id) {
     msg.className = 'form-msg err';
     msg.textContent = 'Fix the red fields (ASIN must be 10 letters/digits, and is needed once there is a price).';
     errors[0].focus();
-    return;
+    return false;
   }
   const norm = v => (v === undefined || v === '' ? null : v);
   const same = (v, old) => typeof v === 'boolean' ? v === !!old
     : typeof v === 'number' ? old !== null && old !== undefined && v === Number(old)
     : norm(v) === norm(old);
   const changed = Object.fromEntries(Object.entries(values).filter(([k, v]) => !same(v, row[k])));
-  if (!Object.keys(changed).length) { msg.className = 'form-msg'; msg.textContent = 'No changes to save.'; return; }
+  if (!Object.keys(changed).length) { msg.className = 'form-msg'; msg.textContent = 'No changes to save.'; return true; }
   msg.className = 'form-msg'; msg.textContent = 'Saving…';
   try {
     const { row: updated } = await postSolar({ id, fields: changed });
+    const lost = Object.keys(changed).filter(k => k !== 'category' &&
+      String(updated[k] ?? '') !== String(changed[k] ?? '') && Number(updated[k]) !== Number(changed[k]));
+    if (lost.length) throw new Error(`the database didn't keep ${lost.join(', ')}`);
     Object.assign(row, updated);
     renderSolar();
     toggleSolarDetails(id);
     const m = document.getElementById(`ds${id}-msg`);
     m.className = 'form-msg ok'; m.textContent = 'Saved.';
+    return true;
   } catch (err) {
     msg.className = 'form-msg err';
     msg.textContent = `Save failed: ${err.message || err}`;
+    showSaveError(`${row.brand} ${row.model}`, err);
+    return false;
   }
 }
 
@@ -849,6 +884,7 @@ function renderSolar() {
 }
 
 async function saveSolarRow(id) {
+  if (detailsOpenFor(`detail-s${id}`, `ds${id}`, `s${id}`)) return saveSolarDetails(id);
   const k = `s${id}`;
   const input = document.getElementById(`input-${k}`);
   const brandIn = document.getElementById(`brand-${k}`);
@@ -887,7 +923,7 @@ async function saveSolarRow(id) {
     }
     return true;
   } catch (err) {
-    status.textContent = '✗'; status.style.color = 'var(--negative)'; status.title = String(err);
+    status.textContent = '✗'; status.style.color = 'var(--negative)'; status.title = String(err); showSaveError('that row', err);
     return false;
   }
 }
@@ -904,7 +940,7 @@ async function deleteSolarRow(id) {
     renderSolar();
     document.getElementById('progress').textContent = `Deleted ${row.brand} ${row.model}.`;
   } catch (err) {
-    status.textContent = '✗'; status.style.color = 'var(--negative)'; status.title = String(err);
+    status.textContent = '✗'; status.style.color = 'var(--negative)'; status.title = String(err); showSaveError('that row', err);
     alert(`Delete failed: ${err.message || err}`);
   }
 }
@@ -1044,7 +1080,7 @@ async function saveBundleRow(id) {
     }
     return true;
   } catch (err) {
-    status.textContent = '✗'; status.style.color = 'var(--negative)'; status.title = String(err);
+    status.textContent = '✗'; status.style.color = 'var(--negative)'; status.title = String(err); showSaveError('that row', err);
     return false;
   }
 }
@@ -1061,7 +1097,7 @@ async function deleteBundleRow(id) {
     renderBundles();
     document.getElementById('progress').textContent = 'Deleted the bundle.';
   } catch (err) {
-    status.textContent = '✗'; status.style.color = 'var(--negative)'; status.title = String(err);
+    status.textContent = '✗'; status.style.color = 'var(--negative)'; status.title = String(err); showSaveError('that row', err);
     alert(`Delete failed: ${err.message || err}`);
   }
 }
