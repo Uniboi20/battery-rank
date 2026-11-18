@@ -151,6 +151,7 @@
     --accent-line:rgba(245,166,35,0.45);
     --on-accent:  #1a1205;
     --positive:   #45dc95;
+    --best-bg:    rgba(69,220,149,0.13);
     --negative:   #ff8080;
     --brand:      #a49bfa;
     --brand-soft: rgba(139,127,247,0.16);
@@ -179,6 +180,7 @@
       --accent-line:rgba(205,125,0,0.5);
       --on-accent:  #1a1205;
       --positive:   #11804d;
+      --best-bg:    rgba(17,128,77,0.09);
       --negative:   #c23636;
       --brand:      #5144d6;
       --brand-soft: rgba(91,78,224,0.1);
@@ -583,17 +585,117 @@
 
     .need-fig b { font-size:1.25rem; }
   }
+  /* ── Compare ── */
+  .cmp-toggle {
+    display:inline-flex; align-items:center; gap:0.35rem; margin-top:0.45rem;
+    background:none; border:1.5px solid var(--border-strong); color:var(--sub); border-radius:999px;
+    padding:0.2rem 0.75rem; font-size:0.85rem; font-weight:600; font-family:inherit; cursor:pointer; min-height:32px;
+  }
+  .cmp-toggle:hover:not(:disabled) { border-color:var(--brand); color:var(--text); }
+  .cmp-toggle[aria-pressed="true"] { background:var(--brand-solid); border-color:var(--brand-solid); color:#fff; }
+  .cmp-toggle:disabled { opacity:0.45; cursor:not-allowed; }
+  .top5-cta { flex-direction:column; gap:0.5rem; }
+  .top5-cta .cmp-toggle { margin-top:0; justify-content:center; }
+
+  .cmp-tray {
+    position:fixed; left:50%; bottom:1rem; transform:translateX(-50%); z-index:200;
+    width:min(960px, calc(100% - 2rem)); display:flex; align-items:center; gap:0.75rem; flex-wrap:wrap;
+    background:var(--surface); border:1.5px solid var(--brand-solid); border-radius:var(--radius-lg);
+    padding:0.7rem 0.85rem; box-shadow:0 10px 30px rgba(0,0,0,0.35);
+  }
+  .cmp-tray[hidden] { display:none; }
+  .cmp-tray-label { font-weight:700; white-space:nowrap; }
+  .cmp-tray-items { display:flex; gap:0.4rem; flex-wrap:wrap; flex:1; min-width:0; }
+  .cmp-pill {
+    display:inline-flex; align-items:center; gap:0.3rem; max-width:220px;
+    background:var(--brand-soft); border-radius:999px; padding:0.2rem 0.3rem 0.2rem 0.7rem; font-size:0.875rem;
+  }
+  .cmp-pill span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .cmp-pill button {
+    flex:none; width:24px; height:24px; border-radius:50%; border:none; background:none; color:var(--sub);
+    cursor:pointer; font-size:1rem; line-height:1;
+  }
+  .cmp-pill button:hover { color:var(--text); background:var(--surface-2); }
+  .cmp-tray-actions { display:flex; gap:0.6rem; align-items:center; margin-left:auto; }
+  .cmp-go { margin-top:0; min-height:44px; }
+  .cmp-go:disabled { opacity:0.5; cursor:not-allowed; }
+  body.has-tray footer { padding-bottom:7rem; }
+
+  .cmp-dialog {
+    border:1px solid var(--border); border-radius:var(--radius-lg); background:var(--surface); color:var(--text);
+    width:min(1100px, calc(100% - 2rem)); max-height:calc(100% - 2rem); padding:0; margin:auto;
+  }
+  .cmp-dialog::backdrop { background:rgba(5,6,10,0.65); }
+  .cmp-head {
+    position:sticky; top:0; z-index:3; display:flex; align-items:center; gap:1rem;
+    background:var(--surface); border-bottom:1px solid var(--border); padding:1rem 1.25rem;
+  }
+  .cmp-head h2 { font-size:1.25rem; }
+  .cmp-close {
+    margin-left:auto; background:var(--surface-2); border:1px solid var(--border); color:var(--text);
+    border-radius:var(--radius); min-height:40px; padding:0 0.9rem; font:inherit; font-weight:600; cursor:pointer;
+  }
+  .cmp-body { padding:1rem 1.25rem 1.5rem; }
+  .cmp-verdict {
+    background:var(--best-bg); border-left:4px solid var(--positive); border-radius:var(--radius);
+    padding:0.75rem 1rem; margin-bottom:1rem;
+  }
+  .cmp-legend { color:var(--sub); font-size:0.9rem; margin-bottom:0.75rem; }
+  .cmp-legend .best-badge { vertical-align:1px; }
+  .cmp-table { width:100%; border-collapse:separate; border-spacing:0; table-layout:fixed; font-size:0.95rem; }
+  .cmp-table th, .cmp-table td { padding:0.7rem 0.8rem; border-bottom:1px solid var(--border); text-align:left; vertical-align:top; }
+  .cmp-table thead th { background:none; color:var(--text); white-space:normal; border-bottom:2px solid var(--border); }
+  .cmp-table .cmp-label { width:11rem; color:var(--sub); font-weight:600; font-size:0.9rem; background:none; white-space:normal; }
+  .cmp-prod-brand { color:var(--sub); font-size:0.85rem; font-weight:500; }
+  .cmp-prod-model { font-size:1.05rem; font-weight:700; line-height:1.25; overflow-wrap:anywhere; }
+  .cmp-wins { display:block; margin:0.35rem 0 0.15rem; font-size:0.8rem; font-weight:600; color:var(--positive); }
+  .cmp-wins.zero { color:var(--faint); }
+  .cmp-table th .cmp-remove { width:auto; font-size:0.85rem; color:var(--sub); text-decoration:underline; }
+  .cmp-table .price-tag { white-space:normal; border-radius:8px; }
+  .cmp-table td { font-variant-numeric:tabular-nums; overflow-wrap:anywhere; }
+  .cmp-table td.best { background:var(--best-bg); box-shadow:inset 3px 0 0 var(--positive); font-weight:700; }
+  .best-badge {
+    display:inline-block; margin-left:0.35rem; padding:0.05rem 0.45rem; border-radius:999px;
+    background:var(--positive); color:var(--bg); font-size:0.7rem; font-weight:700; letter-spacing:0.02em; text-transform:uppercase;
+  }
+  .cmp-no { color:var(--faint); }
+  .cmp-section th { background:var(--surface-2) !important; color:var(--sub); font-size:0.8rem; text-transform:uppercase; letter-spacing:0.05em; padding:0.45rem 0.8rem; }
+  .cmp-label-row { display:none; }
+  .cmp-table td .buy-btn { white-space:normal; text-align:center; justify-content:center; width:100%; }
+  .cmp-table td .value { white-space:normal; flex-direction:column; align-items:flex-start; gap:0.25rem; }
+  .cmp-note { font-size:0.85rem; color:var(--sub); font-weight:400; }
+
+  /* Phones: drop the label column and put each spec's name on its own line above the values. */
+  @media(max-width:720px) {
+    .cmp-tray { bottom:0.5rem; width:calc(100% - 1rem); padding:0.6rem 0.7rem; }
+    .cmp-tray-items { display:none; }
+    .cmp-tray-actions { flex:1; justify-content:flex-end; }
+    .cmp-dialog { width:100%; max-width:100%; max-height:100%; height:100%; border-radius:0; border:none; }
+    .cmp-head { padding:0.75rem 1rem; }
+    .cmp-body { padding:0.75rem 0.5rem 1.5rem; }
+    .cmp-table { font-size:0.875rem; }
+    .cmp-table .cmp-label { display:none; }
+    .cmp-label-row { display:table-row; }
+    .cmp-label-row th { padding:0.55rem 0.5rem 0.1rem; border-bottom:none; color:var(--sub); font-size:0.8rem; font-weight:600; background:none; }
+    .cmp-table td { padding:0.35rem 0.5rem 0.6rem; }
+    .cmp-table thead th { padding:0.5rem; }
+    .cmp-prod-model { font-size:0.9rem; }
+    .cmp-table .best-badge { display:block; width:max-content; margin:0.25rem 0 0; }
+    .cmp-head h2 { font-size:1.1rem; }
+    .cmp-table td .buy-btn { padding:0.5rem; font-size:0.8rem; }
+    .cmp-table td .value-label { font-size:0.8rem; }
+  }
   @media (prefers-reduced-motion: reduce) { * { transition:none !important; scroll-behavior:auto !important; } }
 </style>
 </head>
 <body>
 
 <header>
-  <a class="logo" href="/">⚡ Power<span>Rank</span></a>
+  <a class="logo" href="/">Power<span>Rank</span></a>
   <nav class="tab-bar" role="tablist" aria-label="Product category">
-    <button class="tab-btn" role="tab" id="tab-power_station" aria-selected="true" aria-controls="main" onclick="switchTab('power_station')">⚡ Power Stations</button>
-    <button class="tab-btn" role="tab" id="tab-power_bank" aria-selected="false" aria-controls="main" onclick="switchTab('power_bank')">🔋 Power Banks</button>
-    <a class="tab-btn" href="/solar.html">☀️ Solar Panels</a>
+    <button class="tab-btn" role="tab" id="tab-power_station" aria-selected="true" aria-controls="main" onclick="switchTab('power_station')">Power Stations</button>
+    <button class="tab-btn" role="tab" id="tab-power_bank" aria-selected="false" aria-controls="main" onclick="switchTab('power_bank')">Power Banks</button>
+    <a class="tab-btn" href="/solar.html">Solar Panels</a>
   </nav>
   <div class="header-meta" id="headerMeta"></div>
 </header>
@@ -826,6 +928,23 @@
   change, so confirm details on the product page before buying.</p>
   <p>© <span id="year">2026</span> PowerRank</p>
 </footer>
+
+<div class="cmp-tray" id="cmpTray" role="region" aria-label="Compare" hidden>
+  <span class="cmp-tray-label" id="cmpTrayLabel" aria-live="polite"></span>
+  <div class="cmp-tray-items" id="cmpTrayItems"></div>
+  <div class="cmp-tray-actions">
+    <button type="button" class="link-btn" onclick="clearCompare()">Clear</button>
+    <button type="button" class="btn cmp-go" id="cmpGo" onclick="openCompare()"></button>
+  </div>
+</div>
+
+<dialog class="cmp-dialog" id="cmpDialog" aria-labelledby="cmpTitle">
+  <div class="cmp-head">
+    <h2 id="cmpTitle">Side by side</h2>
+    <button type="button" class="cmp-close" onclick="document.getElementById('cmpDialog').close()">Close</button>
+  </div>
+  <div class="cmp-body" id="cmpBody"></div>
+</dialog>
 
 <script src="/config.js"></script>
 <script src="/solar-match.js"></script>
@@ -1492,7 +1611,7 @@ function renderTop5(data) {
       </div>
       <div class="top5-value">${valueHtml(VALUE_BY_ID.get(b.id))}</div>
       ${b.opt ? compareLine(b.opt) : ''}
-      ${b.opt ? `<div class="top5-cta">${setupLinks(b, b.opt.best)}</div>` : `<div class="top5-cta">${buyButton(b)}</div>`}
+      ${b.opt ? `<div class="top5-cta">${setupLinks(b, b.opt.best)}${cmpButton(b)}</div>` : `<div class="top5-cta">${buyButton(b)}${cmpButton(b)}</div>`}
     </article>`;
   }).join('');
 }
@@ -1671,7 +1790,7 @@ function renderTable(data) {
     return `<tr>
       <td class="rank-num">#${i + 1}</td>
       <td class="cell-model"><div class="td-model">${esc(b.model)}</div><div class="td-brand">${esc(b.brand)}${priceTagHtml(b)}</div>
-        ${notes ? `<div class="td-extras">${notes}</div>` : ''}</td>
+        ${notes ? `<div class="td-extras">${notes}</div>` : ''}${cmpButton(b)}</td>
       ${cells}
       <td class="cell-value" data-label="Value">${valueHtml(VALUE_BY_ID.get(b.id))}</td>
       ${b.opt ? '' : `<td class="cell-buy">${buyButton(b, 'Check price')}</td>`}
@@ -1685,7 +1804,219 @@ function renderAll() {
   syncSortUI();
   renderTop5(data);
   renderTable(sortData(data));
+  renderTray();
 }
+
+// ── Compare (up to 4 side by side) ──
+// Each tab keeps its own picks, so switching tabs doesn't lose them.
+const MAX_COMPARE = 4;
+const COMPARE = { power_station: [], power_bank: [] };
+
+function cmpButton(b) {
+  const id = String(b.id);
+  const list = COMPARE[activeTab];
+  const on = list.includes(id);
+  const full = !on && list.length >= MAX_COMPARE;
+  return `<button type="button" class="cmp-toggle" data-cmp="${esc(id)}" aria-pressed="${on}"
+            ${full ? `disabled title="You can compare up to ${MAX_COMPARE}. Remove one first."` : ''}
+            aria-label="Compare ${esc(b.brand)} ${esc(b.model)}" onclick="toggleCompare(this.dataset.cmp)">${on ? '✓ Comparing' : '+ Compare'}</button>`;
+}
+
+function toggleCompare(id) {
+  const list = COMPARE[activeTab];
+  const i = list.indexOf(id);
+  if (i >= 0) list.splice(i, 1);
+  else if (list.length < MAX_COMPARE) list.push(id);
+  syncCompareButtons();
+  renderTray();
+}
+
+function clearCompare() {
+  COMPARE[activeTab] = [];
+  syncCompareButtons();
+  renderTray();
+}
+
+// Update buttons in place so keyboard focus stays where it was.
+function syncCompareButtons() {
+  const list = COMPARE[activeTab];
+  document.querySelectorAll('.cmp-toggle').forEach(btn => {
+    const on = list.includes(btn.dataset.cmp);
+    const full = !on && list.length >= MAX_COMPARE;
+    btn.setAttribute('aria-pressed', String(on));
+    btn.textContent = on ? '✓ Comparing' : '+ Compare';
+    btn.disabled = full;
+    btn.title = full ? `You can compare up to ${MAX_COMPARE}. Remove one first.` : '';
+  });
+}
+
+function compareItems() {
+  const isPB = activeTab === 'power_bank';
+  return COMPARE[activeTab]
+    .map(id => ALL_DATA.find(b => String(b.id) === id))
+    .filter(Boolean)
+    .map(b => ({ ...b, score: calcScore(b, maxPower), capacity: isPB ? (b.capacity_mah || 0) : b.capacity_wh }));
+}
+
+function renderTray() {
+  const items = compareItems();
+  const tray = document.getElementById('cmpTray');
+  tray.hidden = !items.length;
+  document.body.classList.toggle('has-tray', items.length > 0);
+  if (!items.length) return;
+  document.getElementById('cmpTrayLabel').textContent = `Compare (${items.length} of ${MAX_COMPARE})`;
+  document.getElementById('cmpTrayItems').innerHTML = items.map(b =>
+    `<span class="cmp-pill"><span>${esc(b.brand)} ${esc(b.model)}</span>` +
+    `<button type="button" aria-label="Remove ${esc(b.brand)} ${esc(b.model)} from compare" onclick="toggleCompare('${esc(String(b.id))}')">×</button></span>`
+  ).join('');
+  const go = document.getElementById('cmpGo');
+  go.disabled = items.length < 2;
+  go.textContent = items.length < 2 ? 'Pick 1 more to compare' : `Compare ${items.length} side by side`;
+}
+
+// Each row: how to read a number (or yes/no) from a battery, how to show it, and which way is
+// better. Rows with `better` get a "Best" badge on the winner(s) unless every item is tied.
+function compareRows() {
+  const isPB = activeTab === 'power_bank';
+  const yesNo = v => v ? 'Yes' : '<span class="cmp-no">No</span>';
+  const tierIndex = b => { const t = TAB_CONFIG[activeTab].tiers; return t.findIndex(x => !x.max || b.price <= x.max); };
+  const rows = [
+    { section: 'At a glance' },
+    { label: 'Value for money', get: b => b.score, better: 'max', fmt: b => valueHtml(b._value) },
+    { label: 'Usual price range', get: tierIndex, better: 'min', fmt: b => priceTagHtml(b) },
+  ];
+  if (isPB) {
+    const devs = pickedDevices();
+    rows.push({ section: picked.size ? 'For what you picked' : 'Charges' });
+    devs.forEach(d => rows.push({
+      label: `${d.name} charges`, get: b => bankWh(b) * PB_EFFICIENCY / d.wh, better: 'max',
+      fmt: b => fmtCharges(bankWh(b) * PB_EFFICIENCY / d.wh),
+    }));
+    if (needWatts) rows.push({
+      label: `Fast enough (${needWatts} W)`, get: b => b.peak_power_w >= needWatts, better: 'max', fmt: b => yesNo(b.peak_power_w >= needWatts),
+    });
+    rows.push(
+      { section: 'Specs' },
+      { label: 'Battery size', get: b => b.capacity_mah || 0, better: 'max', fmt: b => `${(b.capacity_mah || 0).toLocaleString()} mAh` },
+      { label: 'Charging speed', get: b => b.peak_power_w, better: 'max', fmt: b => `${b.peak_power_w} W` },
+      { label: 'USB ports', get: b => b.usb_outlets || 0, better: 'max', fmt: b => `${b.usb_outlets || 0}` },
+      { label: 'Built-in cables', get: b => b.builtin_cables || 0, better: 'max', fmt: b => `${b.builtin_cables || 0}` },
+      { section: 'Features' },
+      { label: 'Sticks to iPhone (MagSafe)', get: b => !!b.has_magsafe, better: 'max', fmt: b => yesNo(b.has_magsafe) },
+      { label: 'Battery display', get: b => !!b.has_display, better: 'max', fmt: b => yesNo(b.has_display) },
+      { label: 'Folding wall plug', get: b => !!b.has_wall_plug, better: 'max', fmt: b => yesNo(b.has_wall_plug) },
+    );
+  } else {
+    rows.push({ section: avgLoad ? 'For what you picked' : 'Run time' });
+    if (avgLoad) {
+      rows.push({ label: 'Runs your stuff for', get: b => runtimeHours(b), better: 'max', fmt: b => fmtHours(runtimeHours(b)) });
+      rows.push({ label: `Can run it all at once (${needWatts.toLocaleString()} W)`, get: b => b.peak_power_w >= needWatts,
+                  better: 'max', fmt: b => yesNo(b.peak_power_w >= needWatts) });
+    } else {
+      rows.push({ label: 'Runs a fridge for', get: b => b.capacity_wh, better: 'max',
+                  fmt: b => fmtHours(b.capacity_wh * INVERTER_EFFICIENCY / FRIDGE_AVG_W) });
+    }
+    rows.push(
+      { section: 'Specs' },
+      { label: 'Battery size', get: b => b.capacity_wh, better: 'max', fmt: b => `${b.capacity_wh.toLocaleString()} Wh` },
+      { label: 'Max power', get: b => b.peak_power_w, better: 'max', fmt: b => `${b.peak_power_w.toLocaleString()} W` },
+      { label: 'Standard wall outlets', get: b => b.outlets_120v || 0, better: 'max', fmt: b => `${b.outlets_120v || 0}` },
+      { label: 'High-power (240V) outlets', get: b => b.l2_outlets || 0, better: 'max', fmt: b => `${b.l2_outlets || 0}` },
+      { label: 'USB ports', get: b => b.usb_outlets || 0, better: 'max', fmt: b => `${b.usb_outlets || 0}` },
+      { section: 'Features' },
+      { label: 'Can add extra batteries', get: b => !!b.expandable, better: 'max', fmt: b => yesNo(b.expandable) },
+      { label: 'Phone app', get: b => !!b.app_support, better: 'max', fmt: b => yesNo(b.app_support) },
+      { label: 'Can jump-start a car', get: b => !!b.jump_starter, better: 'max', fmt: b => yesNo(b.jump_starter) },
+    );
+  }
+  rows.push(
+    { section: 'More' },
+    { label: 'Notes', fmt: b => b.notes ? `<span class="cmp-note">${esc(b.notes)}</span>` : '<span class="dash">—</span>' },
+    { label: '', fmt: b => buyButton(b, 'Check price') },
+  );
+  return rows;
+}
+
+// Indexes of the winning item(s) for a row, or none if they're all the same.
+function bestIndexes(row, items) {
+  if (!row.better) return [];
+  const vals = items.map(b => { const v = row.get(b); return typeof v === 'boolean' ? +v : (v ?? null); });
+  const valid = vals.filter(v => v !== null);
+  if (!valid.length) return [];
+  const target = row.better === 'max' ? Math.max(...valid) : Math.min(...valid);
+  const winners = vals.map((v, i) => v === target ? i : -1).filter(i => i >= 0);
+  return winners.length === items.length ? [] : winners;
+}
+
+function openCompare() {
+  const items = compareItems();
+  if (items.length < 2) return;
+  // Use the same value ratings as the list when we have them; otherwise rate against the whole category.
+  const all = ALL_DATA.filter(b => b.category === activeTab).map(b => ({ ...b, score: calcScore(b, maxPower) }));
+  const fallback = valueLevels(all);
+  items.forEach(b => { b._value = VALUE_BY_ID.get(b.id) || fallback.get(b.id); });
+
+  const rows = compareRows();
+  const n = items.length;
+  const span = CMP_NARROW.matches ? n : n + 1;
+  const wins = new Array(n).fill(0);
+  let scored = 0;
+  const body = rows.map(row => {
+    if (row.section) return `<tr class="cmp-section"><th colspan="${span}" scope="rowgroup">${row.section}</th></tr>`;
+    const best = bestIndexes(row, items);
+    if (best.length) { scored++; best.forEach(i => wins[i]++); }
+    const cells = items.map((b, i) => {
+      const isBest = best.includes(i);
+      return `<td${isBest ? ' class="best"' : ''}>${row.fmt(b)}${isBest ? '<span class="best-badge">Best</span>' : ''}</td>`;
+    }).join('');
+    const label = row.label ? `<tr class="cmp-label-row"><th colspan="${span}" scope="colgroup">${row.label}</th></tr>` : '';
+    return `${label}<tr><th class="cmp-label" scope="row">${row.label}</th>${cells}</tr>`;
+  }).join('');
+
+  const top = Math.max(...wins);
+  const leaders = items.filter((_, i) => wins[i] === top);
+  const bestValue = [...items].sort((a, b) => b.score - a.score)[0];
+  const name = b => `<b>${esc(b.brand)} ${esc(b.model)}</b>`;
+  const verdict = top === 0
+    ? 'These are evenly matched on every spec.'
+    : (leaders.length === 1
+        ? `${name(leaders[0])} wins the most specs (${top} of ${scored}).`
+        : `${leaders.map(name).join(' and ')} tie for the most wins (${top} of ${scored} each).`) +
+      (leaders.includes(bestValue) && leaders.length === 1 ? ' It\'s also the best value.' : ` Best value for your money: ${name(bestValue)}.`);
+
+  const cfg = TAB_CONFIG[activeTab];
+  document.getElementById('cmpTitle').textContent = `Comparing ${n} ${cfg.noun}`;
+  document.getElementById('cmpBody').innerHTML = `
+    <div class="cmp-verdict">${verdict}</div>
+    <p class="cmp-legend">The <span class="best-badge">Best</span> cell in each row is the winner. Rows where they're all the same aren't marked.</p>
+    <table class="cmp-table">
+      <caption class="sr-only">Spec comparison. Columns are products; the best value in each row is marked Best.</caption>
+      <thead><tr><th class="cmp-label" scope="col"><span class="sr-only">Spec</span></th>${items.map((b, i) => `
+        <th scope="col"><div class="cmp-prod-brand">${esc(b.brand)}</div><div class="cmp-prod-model">${esc(b.model)}</div>
+          <div class="cmp-wins${wins[i] ? '' : ' zero'}">${wins[i]} win${wins[i] === 1 ? '' : 's'}</div>
+          <div><button type="button" class="link-btn cmp-remove" onclick="removeFromCompare('${esc(String(b.id))}')">Remove</button></div></th>`).join('')}
+      </tr></thead>
+      <tbody>${body}</tbody>
+    </table>`;
+  const dlg = document.getElementById('cmpDialog');
+  if (!dlg.open) dlg.showModal();
+  dlg.querySelector('.cmp-body').scrollTop = 0;
+}
+
+function removeFromCompare(id) {
+  toggleCompare(id);
+  if (COMPARE[activeTab].length < 2) document.getElementById('cmpDialog').close();
+  else openCompare();
+}
+
+// Phones hide the spec-name column, so redraw if the width crosses that line while open.
+const CMP_NARROW = matchMedia('(max-width:720px)');
+CMP_NARROW.addEventListener('change', () => { if (document.getElementById('cmpDialog').open) openCompare(); });
+
+// Clicking the dimmed area outside the dialog closes it.
+document.getElementById('cmpDialog').addEventListener('click', e => {
+  if (e.target === e.currentTarget) e.currentTarget.close();
+});
 
 loadData();
 </script>
